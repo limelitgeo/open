@@ -104,8 +104,8 @@ Limelit Open takes the other side of it:
 
 | Feature | Status |
 |---|---|
-| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | planned |
-| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | planned |
+| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | **working** |
+| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | **working** |
 | **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | **working** |
 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
@@ -378,6 +378,12 @@ Limelit Cloud and hands back the Cloud MCP configuration. Nothing is retyped.
 - **Citation**: a source an answer engine attributes or links while answering.
 - **Share of voice**: your brand's share of all tracked brand mentions across
   the same set of answers.
+- **Prompt category**: the shape of the question. Discovery prompts ask for a
+  recommendation without naming anyone, comparison prompts name a rival, use
+  case prompts describe a job, brand prompts name you. Visibility is reported
+  per category as well as overall, because an answer to "Rival alternatives"
+  lists rivals by construction and reads as a loss if you score it the same
+  way as "best tools for X".
 - **Query fan-out**: the web searches an engine runs to ground an answer
   before writing it.
 
@@ -440,6 +446,8 @@ internal/promptpack the starter prompt templates
 internal/mentions  the deterministic brand matcher and list ranking
 internal/citations URL normalisation and source classification
 internal/runner    the evaluation runner: fan-out, the ceiling, usage
+internal/metrics   the read models every surface shares: visibility, share of
+                   voice, position, the grid, the answers
 internal/secrets   encryption at rest for pasted provider keys
 internal/ui        the embedded dashboard: templates, CSS, handlers
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
