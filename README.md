@@ -12,7 +12,10 @@ engine ids, same numbers. Moving to the hosted product is one command and
 loses nothing.
 
 Status: pre-release. v0.1 is in progress; see the
-[issues](https://github.com/limelitgeo/open/issues).
+[issues](https://github.com/limelitgeo/open/issues). The binary builds and
+serves `/healthz` today; the wizard, the runner and the MCP server are the
+next issues, and every other verb reports that it is not implemented rather
+than pretending to work.
 
 ## Quick start
 
@@ -104,6 +107,20 @@ Limelit Cloud and hands back the Cloud MCP configuration.
 
 - [docs/tools.md](docs/tools.md): MCP tool catalog
 - [docs/providers.md](docs/providers.md): targets, access modes, provider interface, configuration
+
+## Development
+
+Go 1.25 or newer. No other toolchain: no Node, no Docker, no Postgres.
+
+```bash
+make build   # bin/limelit
+make test    # go test ./...
+make lint    # gofmt + go vet
+make run     # build, then serve on :1515
+```
+
+The database is SQLite at `$LIMELIT_DATA_DIR/limelit.db` (`./data` by
+default), created and migrated on first start.
 
 ## License
 
