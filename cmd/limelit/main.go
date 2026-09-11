@@ -23,7 +23,9 @@ import (
 
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/httpx"
+	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/store"
+	"github.com/limelitgeo/open/internal/target"
 )
 
 // version is stamped at build time with -ldflags; it falls back to the module
@@ -108,6 +110,7 @@ func cmdServe(ctx context.Context, args []string) error {
 	}
 	defer db.Close()
 
+	registry := provider.Default()
 	if cfg.Configured() {
 		log.Info("configuration loaded",
 			"property", cfg.Property.Name,
@@ -115,10 +118,23 @@ func cmdServe(ctx context.Context, args []string) error {
 			"targets", len(cfg.Targets),
 			"runs_per_day", cfg.Limits.RunsPerDay,
 			"schedule", cfg.Schedule)
+		// Targets are checked here, at startup, against the providers that
+		// are actually compiled in. A typo belongs in the log on the line
+		// after "configuration loaded", not three hours later in the middle
+		// of a scheduled run. It is a warning rather than a fatal error
+		// because the dashboard has to come up so the target can be fixed.
+		if targets, err := target.ParseAll(cfg.Targets, registry); err != nil {
+			log.Warn("some targets will not run", "error", err)
+		} else {
+			log.Info("targets resolved", "count", len(targets))
+		}
 	} else {
 		// Not an error. A fresh instance boots into the setup wizard; that is
 		// the whole point of the first-ten-minutes claim in the README.
 		log.Info("not configured yet, the setup wizard will run at the dashboard", "config", *cfgPath)
+	}
+	if len(registry.Names()) == 0 {
+		log.Warn("no providers are compiled in yet, so no target can run")
 	}
 
 	srv := httpx.New(*addr, db, log, buildVersion())
