@@ -1,0 +1,55 @@
+{{define "page"}}
+<div class="page-head">
+  <div>
+    <h1>Settings</h1>
+    <p class="lede">Targets, keys and the run ceiling. Keys never leave this machine and are never returned by the API.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>Targets</h2><span class="badge">{{len .Targets}}</span></div>
+  {{if .Targets}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Target</th><th>Mode</th><th></th></tr></thead>
+      <tbody>
+      {{range .Targets}}
+        <tr>
+          <td><code>{{.Spec}}</code></td>
+          <td><span class="badge badge-{{.Access}}">{{.Access}}</span></td>
+          <td class="num">
+            <form method="post" action="/settings/targets/delete" style="display:inline">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="btn btn-ghost" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <p class="lede" style="margin:0 0 12px">No targets yet.</p>
+  {{end}}
+
+  <form method="post" action="/settings/targets/add" class="btn-row" style="margin-top:14px">
+    <input type="text" name="spec" placeholder="chatgpt:openai:online" style="width:280px" required>
+    <button class="btn" type="submit">Add target</button>
+  </form>
+  <p class="hint">Written <code>engine:provider[:model][:online]</code>. Engines: {{.EngineList}}.
+  {{if .ProviderNames}}Providers in this build: {{.ProviderNames}}.{{else}}No providers are compiled in yet, so any target you add will be rejected.{{end}}</p>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>Run ceiling</h2></div>
+  <form method="post" action="/settings/limits">
+    <div class="field" style="max-width:220px">
+      <label for="runs">Answers per day</label>
+      <input type="number" id="runs" name="runs_per_day" value="{{.RunsPerDay}}" min="1" max="100000">
+      <div class="hint">{{.RunsToday}} used today.</div>
+    </div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn" type="submit">Save</button></div>
+  </form>
+  <p class="hint">A ceiling on surprise, not a budget. Nothing here converts anything to money: you pay your providers directly, at their rates.</p>
+</div>
+{{end}}

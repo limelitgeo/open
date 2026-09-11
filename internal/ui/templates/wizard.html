@@ -1,0 +1,30 @@
+{{define "wizard"}}<!doctype html>
+<html lang="en" data-theme="{{.Theme}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Limelit Open</title>
+<link rel="stylesheet" href="/static/app.css?v={{.Version}}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235a5af0'/><text x='16' y='23' font-size='20' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'>L</text></svg>">
+</head>
+<body>
+<div class="wizard">
+  <div class="wizard-inner">
+    <div class="brandmark" style="padding-left:0">
+      <span class="tile">L</span>
+      <span><span class="name">Limelit Open</span><br><span class="sub">setup</span></span>
+    </div>
+
+    <div class="steps">
+      {{range $i, $s := .Steps}}<div class="step {{if lt $i $.StepIndex}}done{{else if eq $i $.StepIndex}}now{{end}}"></div>{{end}}
+    </div>
+    <div class="step-label">Step {{.StepNumber}} of {{len .Steps}}: {{index .Steps .StepIndex}}</div>
+
+    {{if .Flash}}<div class="notice notice-{{.Flash.Kind}}">{{.Flash.Text}}</div>{{end}}
+    {{template "page" .}}
+
+    <p class="footnote">Nothing is spent until you press Run on the last step.</p>
+  </div>
+</div>
+</body>
+</html>{{end}}

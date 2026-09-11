@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/limelitgeo/open/internal/store"
+	"github.com/limelitgeo/open/internal/ui"
 )
 
 // Server is the HTTP listener and its dependencies.
@@ -24,11 +25,15 @@ type Server struct {
 	http    *http.Server
 }
 
-// New builds a Server bound to addr.
-func New(addr string, db *store.DB, log *slog.Logger, version string) *Server {
+// New builds a Server bound to addr. dash may be nil, which serves the health
+// endpoint alone; that is the shape the tests use.
+func New(addr string, db *store.DB, log *slog.Logger, version string, dash *ui.App) *Server {
 	s := &Server{db: db, log: log, version: version}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.handleHealthz)
+	if dash != nil {
+		dash.Routes(mux)
+	}
 	s.http = &http.Server{
 		Addr:              addr,
 		Handler:           mux,

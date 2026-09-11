@@ -1,0 +1,52 @@
+{{define "page"}}
+<div class="page-head">
+  <div>
+    <h1>Overview</h1>
+    <p class="lede">How the engines answer about {{.Property.Name}}, over the last {{.WindowDays}} days.</p>
+  </div>
+</div>
+
+{{if eq .Counts.Chats 0}}
+  <div class="card empty">
+    <h2>No answers yet</h2>
+    <p>Once an evaluation runs, this is where visibility, share of voice and the sources engines cite will appear, each clicking through to the answers behind it.</p>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn" href="/prompts">Review your prompts</a>
+      <a class="btn" href="/settings">Add a provider key</a>
+    </div>
+  </div>
+{{else}}
+  <div class="grid-4">
+    {{range .Stats}}
+    <div class="card stat">
+      <div class="label">{{.Label}}</div>
+      <div class="value">{{.Value}}</div>
+      <div class="sub">{{.Sub}}</div>
+    </div>
+    {{end}}
+  </div>
+{{end}}
+
+<div class="card">
+  <div class="card-head"><h2>Tracked targets</h2><span class="badge">{{len .Targets}}</span></div>
+  {{if not .Targets}}
+    <p class="lede" style="margin:0">No targets yet. A target is one way of asking one engine, like <code>chatgpt:openai:online</code>. Add one in <a href="/settings">Settings</a>.</p>
+  {{else}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Target</th><th>Engine</th><th>Mode</th><th class="num">Answers</th></tr></thead>
+      <tbody>
+      {{range .Targets}}
+        <tr>
+          <td><code>{{.Spec}}</code></td>
+          <td>{{.EngineLabel}}</td>
+          <td><span class="badge badge-{{.Access}}">{{.Access}}</span></td>
+          <td class="num">{{.Chats}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</div>
+{{end}}

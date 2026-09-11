@@ -54,9 +54,16 @@ metric definitions, so moving to the hosted product is one command.
 **Pre-release. v0.1 is being built in the open.**
 
 What works today: the binary builds and installs with no toolchain beyond Go,
-creates and migrates its SQLite database on first start, and serves
-`GET /healthz`. Every other verb reports that it is not implemented rather
-than pretending to work.
+creates and migrates its SQLite database on first start, and serves the
+dashboard at `localhost:1515`. The setup wizard runs end to end: brand,
+competitors, a starter prompt pack written from your category, and a provider
+step. Prompts, competitors, targets and the run ceiling are all editable.
+
+What does not work yet: nothing fetches an answer. No provider is implemented,
+so the Run button is disabled and every screen that needs answers says so
+rather than showing an empty frame. `limelit mcp`, `run`, `export` and
+`upgrade` report that they are not implemented rather than pretending to
+work.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -93,10 +100,11 @@ Limelit Open takes the other side of it:
 | 🧮 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
 | 🔌 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | planned |
 | 🤖 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
-| 🖥️ | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | planned |
+| 🖥️ | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | ⏱️ | **Scheduler**: daily or cron, with a hard `runs_per_day` ceiling so nothing surprises you | planned |
 | 📤 | **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | planned |
 | ☁️ | **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
+| 🧭 | **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |
 | 💾 | **Single binary, SQLite**: no cgo, no Docker requirement, no Postgres | **working** |
 
 ## Quick start
@@ -405,7 +413,13 @@ Layout:
 ```
 cmd/limelit        the binary and its verbs
 internal/config    limelit.yaml plus credentials from the environment
-internal/store     SQLite, embedded migrations
+internal/store     SQLite, embedded migrations, the repository layer
+internal/engines   the tracked answer engines
+internal/provider  the provider interface, typed errors, the registry
+internal/target    engine:provider[:model][:online]
+internal/promptpack the starter prompt templates
+internal/secrets   encryption at rest for pasted provider keys
+internal/ui        the embedded dashboard: templates, CSS, handlers
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
 docs/              the tool catalog and the provider contract
 ```

@@ -20,7 +20,7 @@ func newTestServer(t *testing.T) *Server {
 		t.Fatalf("store.Open: %v", err)
 	}
 	t.Cleanup(func() { db.Close() })
-	return New(":0", db, slog.New(slog.NewTextHandler(io.Discard, nil)), "test")
+	return New(":0", db, slog.New(slog.NewTextHandler(io.Discard, nil)), "test", nil)
 }
 
 func TestHealthzReportsDatabaseState(t *testing.T) {
@@ -82,7 +82,7 @@ func TestHealthzIsRoutedOnGetOnly(t *testing.T) {
 func TestServeShutsDownOnContextCancel(t *testing.T) {
 	// Graceful shutdown is what keeps a scheduled evaluation from being killed
 	// mid-write when the container is told to stop.
-	s := New("127.0.0.1:0", mustDB(t), slog.New(slog.NewTextHandler(io.Discard, nil)), "test")
+	s := New("127.0.0.1:0", mustDB(t), slog.New(slog.NewTextHandler(io.Discard, nil)), "test", nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	go func() { done <- s.Serve(ctx) }()

@@ -1,0 +1,43 @@
+{{define "page"}}
+<div class="card">
+  <h1>Connect one engine</h1>
+  <p class="lede">One key is enough to see a real number. Add the rest whenever you like, in Settings.</p>
+
+  {{if not .Providers}}
+  <div class="notice notice-warn">
+    No providers are compiled into this build yet, so there is nothing to connect. You can still finish setup and look around; the Run button stays disabled until a provider lands.
+  </div>
+  <form method="post" action="/setup/finish">
+    <div class="btn-row">
+      <button class="btn btn-primary" type="submit">Finish setup</button>
+      <a class="btn btn-ghost" href="/setup/prompts">Back</a>
+    </div>
+  </form>
+  {{else}}
+  <form method="post" action="/setup/provider">
+    <div class="field">
+      <label for="provider">Provider</label>
+      <select id="provider" name="provider">
+        {{range .Providers}}<option value="{{.Name}}">{{.Name}} ({{.Access}}, reaches {{.EngineList}})</option>{{end}}
+      </select>
+    </div>
+    {{range .Credentials}}
+    <div class="field">
+      <label for="{{.}}">{{.}}</label>
+      <input type="password" id="{{.}}" name="cred_{{.}}" placeholder="paste the key" autocomplete="off">
+      <div class="hint">Stored on this machine only. An exported environment variable of the same name always wins.</div>
+    </div>
+    {{end}}
+
+    <div class="notice notice-info" style="margin-top:18px">
+      An answer from a model API with web search on is not the same surface a person sees in the product. Both are worth tracking, so every number here carries an <span class="badge badge-api">api</span> or <span class="badge badge-scraped">scraped</span> badge, and the two are never averaged.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" type="submit">Save and finish</button>
+      <a class="btn btn-ghost" href="/setup/prompts">Back</a>
+    </div>
+  </form>
+  {{end}}
+</div>
+{{end}}

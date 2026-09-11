@@ -1,0 +1,44 @@
+{{define "page"}}
+<div class="page-head">
+  <div>
+    <h1>Prompts</h1>
+    <p class="lede">The questions we ask each engine. Branded prompts are tracked but left out of the headline number.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>{{len .Prompts}} tracked</h2>
+    <form method="post" action="/prompts/add" class="btn-row">
+      <input type="text" name="text" placeholder="Add a prompt" style="width:280px" required>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+
+  {{if not .Prompts}}
+    <p class="lede" style="margin:0">Nothing tracked yet.</p>
+  {{else}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Prompt</th><th>Category</th><th></th><th class="num">Answers</th><th></th></tr></thead>
+      <tbody>
+      {{range .Prompts}}
+        <tr>
+          <td>{{.Text}}</td>
+          <td>{{if .Category}}<span class="badge">{{.Category}}</span>{{end}}</td>
+          <td>{{if .Branded}}<span class="badge badge-branded" title="Names your brand, so it is left out of the headline number">branded</span>{{end}}</td>
+          <td class="num">{{.Chats}}</td>
+          <td class="num">
+            <form method="post" action="/prompts/delete" style="display:inline">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="btn btn-ghost" type="submit" title="Delete this prompt">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</div>
+{{end}}

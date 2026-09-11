@@ -1,0 +1,24 @@
+{{define "page"}}
+<div class="page-head">
+  <div>
+    <h1>Limelit Cloud</h1>
+    <p class="lede">The managed version of this project. Same metric definitions, same tool names, plus the parts that are not in the open core.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>What Cloud adds</h2>
+  <ul style="margin:12px 0 0; padding-left:20px; color:var(--ink-2)">
+    {{range .CloudFeatures}}<li style="margin-bottom:4px">{{.}}</li>{{end}}
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Moving over</h2>
+  <p class="lede" style="margin-bottom:14px"><code>limelit upgrade</code> signs you in, pushes your property, competitors, prompts and answer history, and hands back the Cloud MCP configuration. Nothing is retyped, and your local copy stays where it is.</p>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="https://limelit.co" rel="noreferrer">See Limelit Cloud</a>
+    <span class="badge">the upgrade command is not built yet</span>
+  </div>
+</div>
+{{end}}

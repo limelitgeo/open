@@ -1,0 +1,26 @@
+{{define "page"}}
+<div class="card">
+  <h1>Which brand are we tracking?</h1>
+  <p class="lede">This is the name the mention matcher looks for in every answer, so give it the spellings a model would actually use.</p>
+
+  <form method="post" action="/setup/brand">
+    <div class="field">
+      <label for="name">Brand name</label>
+      <input type="text" id="name" name="name" value="{{.Form.Name}}" placeholder="Acme" required autofocus>
+    </div>
+    <div class="field">
+      <label for="domain">Website domain</label>
+      <input type="text" id="domain" name="domain" value="{{.Form.Domain}}" placeholder="acme.com" required>
+      <div class="hint">No scheme needed. A citation to this domain counts as a mention of you.</div>
+    </div>
+    <div class="field">
+      <label for="aliases">Other names it goes by</label>
+      <input type="text" id="aliases" name="aliases" value="{{.Form.Aliases}}" placeholder="Acme Inc, acme.io">
+      <div class="hint">Comma separated. Optional, and easy to add later.</div>
+    </div>
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-primary" type="submit">Continue</button>
+    </div>
+  </form>
+</div>
+{{end}}

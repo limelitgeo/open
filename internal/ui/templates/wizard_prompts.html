@@ -1,0 +1,34 @@
+{{define "page"}}
+<div class="card">
+  <h1>Your starter prompts</h1>
+  <p class="lede">These are the questions we will ask each engine. Untick anything that does not sound like your buyer, and edit the list any time.</p>
+
+  <form method="post" action="/setup/prompts">
+    {{range $i, $p := .Prompts}}
+    <div class="prompt-row">
+      <input type="checkbox" id="p{{$i}}" name="prompt" value="{{$p.Text}}" checked>
+      <label class="text" for="p{{$i}}" style="font-weight:400;margin:0">{{$p.Text}}</label>
+      <span class="meta">
+        <span class="badge">{{$p.Category}}</span>
+        {{if $p.Branded}}<span class="badge badge-branded" title="Names your brand, so it is left out of the headline number">branded</span>{{end}}
+      </span>
+      <input type="hidden" name="prompt_category" value="{{$p.Category}}">
+    </div>
+    {{end}}
+
+    <div class="field" style="margin-top:18px">
+      <label for="extra">Add your own, one per line</label>
+      <textarea id="extra" name="extra" rows="3" placeholder="Which tool tracks brand mentions in ChatGPT?"></textarea>
+    </div>
+
+    <div class="notice notice-info" style="margin-top:18px">
+      Prompts that name your brand are tagged <strong>branded</strong> and left out of the headline visibility number. Asking an engine about you and counting the answer would only measure the question.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" type="submit">Continue</button>
+      <a class="btn btn-ghost" href="/setup/competitors">Back</a>
+    </div>
+  </form>
+</div>
+{{end}}

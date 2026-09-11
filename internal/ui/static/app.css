@@ -1,0 +1,284 @@
+/* Limelit Open. Tokens mirror the Limelit design system so the open core and
+ * the hosted product look like one product. Every themed token is declared in
+ * both places below: a token defined only in light renders as invisible text
+ * in dark, which is worse than an unstyled page because it looks fine until
+ * someone switches. */
+
+:root {
+  color-scheme: light;
+
+  --brand: #5a5af0;
+  --brand-strong: #3c3cc9;
+  --brand-hover: #4a4ad9;
+  --brand-soft: #eeeefb;
+  --brand-deep: #1a1a46;
+
+  --ink: #14141c;
+  --ink-2: #43474f;
+  --ink-3: #6b7280;
+  --ink-4: #9ca3af;
+  --on-ink: #ffffff;
+
+  --bg: #ffffff;
+  --bg-app: #f4f4f7;
+  --bg-2: #f7f7f9;
+  --surface: #ffffff;
+
+  --rule: #e6e8ec;
+  --rule-2: #d3d6dd;
+
+  --pos-bg: #e9f9f0;
+  --pos-fg: #0b7a43;
+  --neg-bg: #fbe3d8;
+  --neg-fg: #c2410c;
+  --warn-bg: #fef3e2;
+  --warn-fg: #b45309;
+  --info-bg: #e6e8f8;
+  --info-fg: #3c3cc9;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 2px rgb(20 20 28 / 6%), 0 1px 3px rgb(20 20 28 / 4%);
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --brand-strong: #a3a3ff;
+    --brand-soft: #232340;
+
+    --ink: #f2f2f5;
+    --ink-2: #c3c6cd;
+    --ink-3: #9096a1;
+    --ink-4: #7d8492;
+    --on-ink: #0b0b0f;
+
+    --bg: #0e0e12;
+    --bg-app: #0b0b0f;
+    --bg-2: #1f1f27;
+    --surface: #17171d;
+
+    --rule: #26262e;
+    --rule-2: #35353f;
+
+    --pos-bg: #0d2f1e;
+    --pos-fg: #4ade80;
+    --neg-bg: #3a1a10;
+    --neg-fg: #fb923c;
+    --warn-bg: #3a2a0c;
+    --warn-fg: #fbbf24;
+    --info-bg: #1e2040;
+    --info-fg: #a3a3ff;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 1px 3px rgb(0 0 0 / 30%);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--ink); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 22px; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+p { margin: 0 0 12px; }
+a { color: var(--brand-strong); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+
+/* Layout ------------------------------------------------------------------ */
+
+.shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--rule);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brandmark { display: flex; align-items: center; gap: 9px; padding: 6px 8px 14px; }
+.brandmark .tile {
+  width: 26px; height: 26px; border-radius: 7px; flex: none;
+  background: linear-gradient(140deg, var(--brand) 0%, var(--brand-deep) 100%);
+  display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px;
+}
+.brandmark .name { color: var(--ink); font-weight: 600; font-size: 14px; }
+.brandmark .sub { color: var(--ink-4); font-size: 11px; }
+
+.navlink {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  color: var(--ink-2); font-size: 13.5px;
+}
+.navlink:hover { background: var(--bg-2); text-decoration: none; color: var(--ink); }
+.navlink[aria-current="page"] { background: var(--brand-soft); color: var(--brand-strong); font-weight: 600; }
+.navlink .count { color: var(--ink-4); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.navsection { color: var(--ink-4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 14px 10px 6px; }
+
+.main { display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 24px; border-bottom: 1px solid var(--rule);
+  background: var(--surface); position: sticky; top: 0; z-index: 5;
+}
+.topbar .who { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.topbar .who strong { color: var(--ink); font-size: 14px; }
+.topbar .who span { color: var(--ink-4); font-size: 12.5px; }
+
+.content { padding: 24px; max-width: 1180px; width: 100%; }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+.lede { color: var(--ink-3); margin: 4px 0 20px; max-width: 62ch; }
+
+/* Components -------------------------------------------------------------- */
+
+.card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px;
+}
+.card + .card { margin-top: 16px; }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+
+.stat .label { color: var(--ink-3); font-size: 12.5px; }
+.stat .value { color: var(--ink); font-size: 28px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 2px; }
+.stat .sub { color: var(--ink-4); font-size: 11.5px; margin-top: 2px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: var(--radius-sm); border: 1px solid var(--rule-2);
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 500;
+  cursor: pointer;
+}
+.btn:hover { background: var(--bg-2); text-decoration: none; }
+.btn-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); color: #fff; }
+.btn-ghost { border-color: transparent; background: transparent; color: var(--ink-3); }
+.btn-ghost:hover { background: var(--bg-2); color: var(--ink); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: var(--bg-2); color: var(--ink-3); border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.badge-api { background: var(--info-bg); color: var(--info-fg); border-color: transparent; }
+.badge-scraped { background: var(--warn-bg); color: var(--warn-fg); border-color: transparent; }
+.badge-branded { background: var(--bg-2); color: var(--ink-3); }
+.badge-own { background: var(--pos-bg); color: var(--pos-fg); border-color: transparent; }
+.badge-competitor { background: var(--neg-bg); color: var(--neg-fg); border-color: transparent; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; color: var(--ink-3); font-weight: 500; font-size: 12px; padding: 0 10px 8px; border-bottom: 1px solid var(--rule); }
+td { padding: 9px 10px; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+
+label { display: block; color: var(--ink); font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+.hint { color: var(--ink-4); font-size: 12px; font-weight: 400; margin-top: 4px; }
+input[type="text"], input[type="password"], input[type="number"], select, textarea {
+  width: 100%; padding: 8px 10px; font: inherit; font-size: 13.5px;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--rule-2); border-radius: var(--radius-sm);
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; border-color: var(--brand); }
+.field + .field { margin-top: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+fieldset { border: none; margin: 0; padding: 0; }
+
+.notice { padding: 11px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 16px; }
+.notice-info { background: var(--info-bg); color: var(--info-fg); }
+.notice-warn { background: var(--warn-bg); color: var(--warn-fg); }
+.notice-error { background: var(--neg-bg); color: var(--neg-fg); }
+.notice-ok { background: var(--pos-bg); color: var(--pos-fg); }
+
+.empty { text-align: center; padding: 44px 20px; }
+.empty h2 { margin-bottom: 6px; }
+.empty p { color: var(--ink-3); max-width: 46ch; margin: 0 auto 16px; }
+
+/* Wizard ------------------------------------------------------------------ */
+
+.wizard { min-height: 100vh; display: grid; place-items: start center; padding: 48px 20px 64px; }
+.wizard-inner { width: 100%; max-width: 620px; }
+.steps { display: flex; gap: 6px; margin: 20px 0 24px; }
+.step { flex: 1; height: 3px; border-radius: 2px; background: var(--rule); }
+.step.done { background: var(--brand-strong); }
+.step.now { background: var(--brand); }
+.step-label { color: var(--ink-4); font-size: 12px; margin-bottom: 6px; }
+
+.prompt-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.prompt-row:last-child { border-bottom: none; }
+.prompt-row input[type="checkbox"] { margin-top: 4px; flex: none; }
+.prompt-row .text { flex: 1; min-width: 0; color: var(--ink); }
+.prompt-row .meta { display: flex; gap: 6px; align-items: center; flex: none; }
+
+.footnote { color: var(--ink-4); font-size: 12px; margin-top: 18px; }
+
+/* Narrow screens ----------------------------------------------------------
+ * A GTM user opens this on a laptop, but a 232px fixed sidebar squeezes the
+ * content column to nothing on a phone and the top bar's two halves overlap.
+ * Below 860px the sidebar becomes a scrollable strip across the top.
+ * Verified in a browser at 375px: a template test cannot see this. */
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: 1fr; }
+
+  .sidebar {
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 6;
+  }
+  .sidebar .brandmark { padding: 0 12px 0 0; flex: none; }
+  .sidebar .brandmark .sub { display: none; }
+  .navsection { display: none; }
+  .navlink { flex: none; white-space: nowrap; padding: 6px 10px; }
+
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 10px 16px; position: static; }
+  .topbar .who { flex: 1 1 auto; }
+
+  .content { padding: 16px; }
+  .field-row { grid-template-columns: 1fr; }
+  .wizard { padding: 24px 14px 48px; }
+
+  /* A prompt row is a checkbox, the text, and its badges. Side by side that
+   * leaves about ten characters for the text, so the badges wrap under it. */
+  .prompt-row { flex-wrap: wrap; }
+  .prompt-row .text { flex: 1 1 100%; order: 2; }
+  .prompt-row .meta { order: 3; }
+
+  /* A card header is a title and an add form. Side by side on a phone the
+   * form's inputs collapse to a few characters each. */
+  .card-head { flex-direction: column; align-items: stretch; gap: 10px; }
+  .card-head form input[type="text"] { width: 100% !important; }
+
+  /* Tables scroll inside their wrapper rather than squeezing a prompt down
+   * to one word per line. */
+  table { min-width: 540px; }
+}

@@ -1,0 +1,30 @@
+{{define "page"}}
+<div class="card">
+  <h1>Who are you compared against?</h1>
+  <p class="lede">The category phrase is how a buyer describes what you sell. It is used to write your starter prompts, so use their words rather than yours.</p>
+
+  <form method="post" action="/setup/competitors">
+    <div class="field">
+      <label for="category">Category phrase</label>
+      <input type="text" id="category" name="category" value="{{.Form.Category}}" placeholder="AI visibility tracking" required autofocus>
+      <div class="hint">It goes straight into prompts like "What are the best {category} tools?"</div>
+    </div>
+
+    <fieldset style="margin-top:20px">
+      <label>Competitors</label>
+      <div class="hint" style="margin-bottom:10px">Up to five. The domain is required: it is how a competitor is identified in citations, and two spellings of one name would split every count.</div>
+      {{range $i, $c := .Form.Competitors}}
+      <div class="field-row" style="margin-bottom:8px">
+        <input type="text" name="competitor_name" value="{{$c.Name}}" placeholder="Globex">
+        <input type="text" name="competitor_domain" value="{{$c.Domain}}" placeholder="globex.com">
+      </div>
+      {{end}}
+    </fieldset>
+
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-primary" type="submit">Continue</button>
+      <a class="btn btn-ghost" href="/setup">Back</a>
+    </div>
+  </form>
+</div>
+{{end}}

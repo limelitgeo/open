@@ -1,0 +1,45 @@
+{{define "page"}}
+<div class="page-head">
+  <div>
+    <h1>Competitors</h1>
+    <p class="lede">Every answer is searched for these names, and every citation to one of these domains is classified as a competitor source.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>{{len .Competitors}} tracked</h2>
+    <form method="post" action="/competitors/add" class="btn-row">
+      <input type="text" name="name" placeholder="Name" style="width:150px" required>
+      <input type="text" name="domain" placeholder="domain.com" style="width:170px" required>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+
+  {{if not .Competitors}}
+    <p class="lede" style="margin:0">None yet. Share of voice needs at least one.</p>
+  {{else}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Domain</th><th class="num">Mentions</th><th></th></tr></thead>
+      <tbody>
+      {{range .Competitors}}
+        <tr>
+          <td>{{.Name}}</td>
+          <td><code>{{.Domain}}</code></td>
+          <td class="num">{{.Mentions}}</td>
+          <td class="num">
+            <form method="post" action="/competitors/delete" style="display:inline">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="btn btn-ghost" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+  <p class="hint" style="margin-top:12px">Removing a competitor stops future tracking. Answers already recorded keep their mentions.</p>
+</div>
+{{end}}

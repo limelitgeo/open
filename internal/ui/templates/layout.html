@@ -1,0 +1,52 @@
+{{define "layout"}}<!doctype html>
+<html lang="en" data-theme="{{.Theme}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Limelit Open</title>
+<link rel="stylesheet" href="/static/app.css?v={{.Version}}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235a5af0'/><text x='16' y='23' font-size='20' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'>L</text></svg>">
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <a class="brandmark" href="/">
+      <span class="tile">L</span>
+      <span>
+        <span class="name">Limelit Open</span><br>
+        <span class="sub">self-hosted</span>
+      </span>
+    </a>
+
+    {{$nav := .Nav}}
+    {{range $nav}}
+      {{if .Section}}<div class="navsection">{{.Section}}</div>{{end}}
+      <a class="navlink" href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>
+        <span>{{.Label}}</span>
+        {{if .Count}}<span class="count">{{.Count}}</span>{{end}}
+      </a>
+    {{end}}
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="who">
+        <strong>{{if .Property.Name}}{{.Property.Name}}{{else}}Not set up{{end}}</strong>
+        {{if .Property.Domain}}<span>{{.Property.Domain}}</span>{{end}}
+      </div>
+      <div class="btn-row">
+        {{if .LastRun}}<span class="badge">last run {{.LastRun}}</span>{{end}}
+        <form method="post" action="/run" style="display:inline">
+          <button class="btn btn-primary" type="submit"{{if not .CanRun}} disabled title="Add a target and a provider key first"{{end}}>Run now</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="content">
+      {{if .Flash}}<div class="notice notice-{{.Flash.Kind}}">{{.Flash.Text}}</div>{{end}}
+      {{template "page" .}}
+    </main>
+  </div>
+</div>
+</body>
+</html>{{end}}

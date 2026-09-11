@@ -24,8 +24,10 @@ import (
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/httpx"
 	"github.com/limelitgeo/open/internal/provider"
+	"github.com/limelitgeo/open/internal/secrets"
 	"github.com/limelitgeo/open/internal/store"
 	"github.com/limelitgeo/open/internal/target"
+	"github.com/limelitgeo/open/internal/ui"
 )
 
 // version is stamped at build time with -ldflags; it falls back to the module
@@ -137,7 +139,16 @@ func cmdServe(ctx context.Context, args []string) error {
 		log.Warn("no providers are compiled in yet, so no target can run")
 	}
 
-	srv := httpx.New(*addr, db, log, buildVersion())
+	keys, err := secrets.Open(config.DataDir())
+	if err != nil {
+		return err
+	}
+	dash, err := ui.New(db, registry, keys, log, buildVersion(), cfg)
+	if err != nil {
+		return err
+	}
+
+	srv := httpx.New(*addr, db, log, buildVersion(), dash)
 	log.Info("listening", "addr", srv.Addr(), "database", db.Path(), "version", buildVersion())
 	if err := srv.Serve(ctx); err != nil {
 		return err
