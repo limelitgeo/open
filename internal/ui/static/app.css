@@ -282,3 +282,57 @@ fieldset { border: none; margin: 0; padding: 0; }
    * to one word per line. */
   table { min-width: 540px; }
 }
+
+/* Settings: click-select ---------------------------------------------------
+ * A raw "engine:provider[:model][:online]" text box asks a user to learn a
+ * grammar before they can track anything. The engine list below is the same
+ * thing as buttons, with the string kept behind an Advanced disclosure for
+ * whoever wants to pin a model. */
+
+.engine-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+
+.engine {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 13px 14px; background: var(--bg-2);
+}
+.engine-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.engine-head h3 { font-size: 13.5px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--rule-2);
+  border-radius: 999px; padding: 3px 6px 3px 8px; font-size: 12px;
+}
+.chip code { font-size: 11.5px; color: var(--ink-2); }
+.chip form { display: inline-flex; }
+.chip-x {
+  border: none; background: none; cursor: pointer; padding: 0 4px;
+  color: var(--ink-4); font-size: 15px; line-height: 1;
+}
+.chip-x:hover { color: var(--neg-fg); }
+
+.track-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.track-row .btn { font-size: 12.5px; padding: 5px 10px; }
+.track-row .badge { margin-left: 5px; }
+
+.provider { border-top: 1px solid var(--rule); padding: 16px 0; }
+.provider:first-of-type { border-top: none; padding-top: 0; }
+.provider:last-of-type { padding-bottom: 0; }
+.provider-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+.provider-head h3 { font-size: 13.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.provider-head .btn { flex: none; }
+
+.provider-form { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.cred { flex: 1 1 240px; min-width: 0; }
+.cred label { font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+.cred input[disabled] { background: var(--bg-2); color: var(--ink-4); }
+
+details.card > summary { cursor: pointer; color: var(--ink); list-style: revert; }
+details.card > summary:hover { color: var(--brand-strong); }
+
+@media (max-width: 860px) {
+  .engine-list { grid-template-columns: 1fr; }
+  .provider-head { flex-direction: column; }
+  .provider-form { flex-direction: column; align-items: stretch; }
+}

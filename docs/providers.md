@@ -38,6 +38,11 @@ a `scraped` one.
 Targets live in `limelit.yaml` and in Settings. Credentials live in
 environment variables or the settings store, never in the target string.
 
+Most people never write one. Settings lists every engine with a button per
+provider that can reach it, and builds the string for you; the raw field is
+kept behind an Advanced disclosure, because pinning a model is the one thing
+the buttons cannot express.
+
 ## Access modes
 
 | Mode | What it measures | Typical cost shape | Providers |
@@ -132,32 +137,36 @@ Build order. The first group ships before the second is started.
 
 | Provider | Engines | Notes |
 |---|---|---|
-| `openai` | `chatgpt` | Responses API with the `web_search` tool. Citations from `url_citation` annotations |
-| `anthropic` | `claude` | Messages API with the web search tool. Citations from `web_search_result_location` blocks |
-| `perplexity` | `perplexity` | Sonar models. Citations from the `citations` array |
-| `google` | `gemini` | Gemini API with Google Search grounding. Citations from `groundingChunks` |
-| `openrouter` | `chatgpt`, `claude`, `gemini`, `perplexity` | One key, many models. Useful as the single starter key. Citations only where the upstream model returns them |
+| `openai` | `chatgpt` | Responses API with the `web_search` tool. Citations from `url_citation` annotations. Key: <https://platform.openai.com/api-keys> |
+| `anthropic` | `claude` | Messages API with the web search tool. Citations from `web_search_result_location` blocks. Key: <https://console.anthropic.com/settings/keys> |
+| `perplexity` | `perplexity` | Sonar models. Citations from the `citations` array. Key: <https://www.perplexity.ai/account/api/keys> |
+| `google` | `gemini` | Gemini API with Google Search grounding. Citations from `groundingChunks`. Key: <https://aistudio.google.com/apikey> |
+| `openrouter` | `chatgpt`, `claude`, `gemini`, `perplexity` | One key, four engines, so it is what Settings recommends first. Citations only where the upstream model returns them. Key: <https://openrouter.ai/keys> |
 
 ### Scraped, with existing Go adapters to draw from
 
 | Provider | Engines | Notes |
 |---|---|---|
-| `dataforseo` | `ai_overview`, `ai_mode`, `chatgpt`, `gemini`, `perplexity` | SERP endpoints for the two Google surfaces. LLM-scraper endpoints for chatgpt.com and gemini.google.com are a v0.2 candidate |
-| `searchapi` | `ai_overview`, `ai_mode`, `bing_copilot` | |
+| `dataforseo` | `ai_overview`, `ai_mode`, `chatgpt`, `gemini`, `perplexity` | SERP endpoints for the two Google surfaces. LLM-scraper endpoints for chatgpt.com and gemini.google.com are a v0.2 candidate. Key: <https://app.dataforseo.com/api-access> |
+| `searchapi` | `ai_overview`, `ai_mode`, `bing_copilot` | Key: <https://www.searchapi.io/> |
 
 ### Scraped, new adapters to the same interface
 
 | Provider | Engines | Notes |
 |---|---|---|
-| `cloro` | `chatgpt`, `ai_mode`, `perplexity`, `gemini` | Always online |
-| `brightdata` | `chatgpt`, `ai_mode`, `ai_overview`, `perplexity`, `gemini`, `bing_copilot` | |
-| `oxylabs` | `chatgpt`, `ai_mode`, `ai_overview`, `perplexity` | |
-| `olostep` | `chatgpt`, `ai_mode`, `perplexity` | |
+| `cloro` | `chatgpt`, `ai_mode`, `perplexity`, `gemini` | Always online. Key: <https://cloro.ai/> |
+| `brightdata` | `chatgpt`, `ai_mode`, `ai_overview`, `perplexity`, `gemini`, `bing_copilot` | Key: <https://brightdata.com/> |
+| `oxylabs` | `chatgpt`, `ai_mode`, `ai_overview`, `perplexity` | Key: <https://oxylabs.io/> |
+| `olostep` | `chatgpt`, `ai_mode`, `perplexity` | Key: <https://www.olostep.com/> |
 
 These four are about 150 lines each: an HTTP call, a response parse, a
 fixture. They are the intended first contribution for anyone who wants one,
 and each has its own issue. Engine lists above are from public provider
 documentation and will be corrected against fixtures as each adapter lands.
+
+`internal/provider/catalog.go` carries the same table in code, including each
+vendor's key page, which is what Settings renders. A test reads this file to
+keep the two in step.
 
 ## Configuration
 

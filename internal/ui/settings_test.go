@@ -1,0 +1,231 @@
+package ui
+
+import (
+	"context"
+	"net/http"
+	"net/url"
+	"strings"
+	"testing"
+
+	"github.com/limelitgeo/open/internal/provider"
+	"github.com/limelitgeo/open/internal/provider/providertest"
+)
+
+func TestTrackEngineNeedsNoGrammar(t *testing.T) {
+	// The whole point of the click-select path: a user picks an engine and a
+	// provider, and never has to learn engine:provider[:model][:online].
+	_, db, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+
+	rec := post(t, h, "/settings/targets/track", url.Values{
+		"engine": {"chatgpt"}, "provider": {"openrouter"},
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("track = %d, body %s", rec.Code, rec.Body.String())
+	}
+	targets, _ := db.Targets(context.Background(), false)
+	if len(targets) != 1 {
+		t.Fatalf("stored %d targets", len(targets))
+	}
+	if targets[0].Spec != "chatgpt:openrouter:online" {
+		t.Errorf("spec = %q", targets[0].Spec)
+	}
+}
+
+func TestTrackEngineSetsOnlineOnlyWhereItIsASwitch(t *testing.T) {
+	// Web search is a switch on an API provider and implied on a scraped
+	// surface. Asking a user to know which is which is the kind of detail
+	// the click path exists to absorb.
+	_, db, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+
+	post(t, h, "/settings/targets/track", url.Values{"engine": {"chatgpt"}, "provider": {"openai"}})
+	post(t, h, "/settings/targets/track", url.Values{"engine": {"ai_overview"}, "provider": {"dataforseo"}})
+
+	got := map[string]string{}
+	targets, _ := db.Targets(context.Background(), false)
+	for _, tg := range targets {
+		got[tg.Engine] = tg.Spec
+	}
+	if got["chatgpt"] != "chatgpt:openai:online" {
+		t.Errorf("api target = %q, want the online flag", got["chatgpt"])
+	}
+	if got["ai_overview"] != "ai_overview:dataforseo" {
+		t.Errorf("scraped target = %q, want no redundant flag", got["ai_overview"])
+	}
+}
+
+func TestTrackEngineRejectsAnUnknownProvider(t *testing.T) {
+	_, db, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+
+	rec := post(t, h, "/settings/targets/track", url.Values{"engine": {"chatgpt"}, "provider": {"nosuchvendor"}})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("an unknown provider redirected instead of re-rendering: %d", rec.Code)
+	}
+	if targets, _ := db.Targets(context.Background(), false); len(targets) != 0 {
+		t.Errorf("stored %d targets", len(targets))
+	}
+}
+
+func TestSettingsSaysWhereToGetEveryKey(t *testing.T) {
+	// A settings screen that asks for a key and leaves the user to find it
+	// loses them at the step that decides whether the product ever runs.
+	_, _, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+	body := get(t, h, "/settings").Body.String()
+
+	for _, c := range provider.Catalog() {
+		if !strings.Contains(body, c.KeyURL) {
+			t.Errorf("settings does not link %s at %s", c.Label, c.KeyURL)
+		}
+		if !strings.Contains(body, c.Label) {
+			t.Errorf("settings does not name %s", c.Label)
+		}
+		for _, cred := range c.Credentials {
+			if !strings.Contains(body, cred) {
+				t.Errorf("settings does not name the variable %s", cred)
+			}
+		}
+	}
+	if !strings.Contains(body, `rel="noreferrer noopener"`) {
+		t.Error("the vendor links do not carry rel=noreferrer noopener")
+	}
+}
+
+func TestSettingsOffersAButtonPerReachableEngine(t *testing.T) {
+	_, _, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+	body := get(t, h, "/settings").Body.String()
+
+	for _, want := range []string{
+		"Google AI Overview", "Bing Copilot", "Track via OpenRouter", "Track via DataForSEO",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("settings does not offer %q", want)
+		}
+	}
+	// The raw string stays available for pinning a model, but behind a
+	// disclosure rather than as the only way in.
+	if !strings.Contains(body, "Advanced: add a target by hand") {
+		t.Error("the raw target field is gone entirely")
+	}
+}
+
+func TestSettingsNamesUnbuiltProvidersRatherThanHidingThem(t *testing.T) {
+	// An engine with no button and no explanation reads as unreachable. One
+	// muted line per card says the surface exists and the work is pending.
+	_, _, h := newApp(t, provider.NewRegistry())
+	seedProperty(t, h)
+	body := get(t, h, "/settings").Body.String()
+
+	if !strings.Contains(body, "Not built yet: OpenRouter") {
+		t.Error("an unbuilt provider was hidden instead of named")
+	}
+	if strings.Contains(body, "Track via") {
+		t.Error("a track button was offered with no provider built")
+	}
+}
+
+func TestEnvironmentCredentialWinsAndSaysSo(t *testing.T) {
+	// The environment always beats a stored value. A field that silently
+	// cannot take effect is worse than a disabled one.
+	t.Setenv("OPENROUTER_API_KEY", "sk-from-env")
+	_, _, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+	body := get(t, h, "/settings").Body.String()
+
+	if !strings.Contains(body, "set in the environment") {
+		t.Error("settings does not say the environment is providing the key")
+	}
+	i := strings.Index(body, "OPENROUTER_API_KEY")
+	if i < 0 {
+		t.Fatal("the variable is not on the page")
+	}
+	if !strings.Contains(body[i:i+600], "disabled") {
+		t.Error("the field for an environment-provided key is editable")
+	}
+}
+
+func TestSavedKeyIsEncryptedAtRest(t *testing.T) {
+	_, db, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+
+	const key = "sk-or-v1-secret-value"
+	rec := post(t, h, "/settings/keys", url.Values{
+		"provider": {"openrouter"}, "cred_OPENROUTER_API_KEY": {key},
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("saving a key = %d", rec.Code)
+	}
+
+	stored, err := db.Setting(context.Background(), credentialPrefix+"OPENROUTER_API_KEY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored == "" {
+		t.Fatal("nothing was stored")
+	}
+	if strings.Contains(stored, key) {
+		t.Error("the key is stored in plaintext")
+	}
+	// And it is never handed back, on any surface.
+	if strings.Contains(get(t, h, "/settings").Body.String(), key) {
+		t.Error("the saved key was rendered back into the page")
+	}
+	if !strings.Contains(get(t, h, "/settings").Body.String(), "saved here") {
+		t.Error("settings does not report that a key is saved")
+	}
+}
+
+func TestSavingAnEmptyKeySaysNothingHappened(t *testing.T) {
+	// Silently accepting an empty form would leave a user believing the key
+	// was stored.
+	_, _, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+	rec := post(t, h, "/settings/keys", url.Values{"provider": {"openrouter"}, "cred_OPENROUTER_API_KEY": {"   "}})
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "Nothing was saved") {
+		t.Errorf("empty save = %d, body did not explain", rec.Code)
+	}
+}
+
+func TestWizardProviderStepLinksVendorPages(t *testing.T) {
+	// The step that asks for a key is the one most likely to end a first
+	// session, so it carries the link rather than assuming the user knows.
+	_, _, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+	body := get(t, h, "/setup/provider").Body.String()
+
+	if !strings.Contains(body, "https://openrouter.ai/keys") {
+		t.Error("the wizard does not link a vendor key page")
+	}
+	if !strings.Contains(body, "Get a key") {
+		t.Error("the wizard has no way to go and get one")
+	}
+	if !strings.Contains(body, "Skip for now") {
+		t.Error("the wizard cannot be finished without a key")
+	}
+}
+
+func TestConnectingInTheWizardStartsTracking(t *testing.T) {
+	// Finishing setup with a key and no target would leave the Run button
+	// disabled for a reason the user could not see.
+	_, db, h := newApp(t, providertest.Registry())
+	seedProperty(t, h)
+
+	rec := post(t, h, "/setup/provider", url.Values{
+		"provider": {"openrouter"}, "cred_OPENROUTER_API_KEY": {"sk-or-test"},
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("connect = %d", rec.Code)
+	}
+	targets, _ := db.Targets(context.Background(), false)
+	if len(targets) != 4 {
+		t.Fatalf("connecting OpenRouter produced %d targets, want one per engine it reaches", len(targets))
+	}
+	for _, tg := range targets {
+		if tg.Access != string(provider.AccessAPI) {
+			t.Errorf("target %q access = %q", tg.Spec, tg.Access)
+		}
+	}
+}

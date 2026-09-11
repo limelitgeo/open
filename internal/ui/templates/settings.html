@@ -2,42 +2,88 @@
 <div class="page-head">
   <div>
     <h1>Settings</h1>
-    <p class="lede">Targets, keys and the run ceiling. Keys never leave this machine and are never returned by the API.</p>
+    <p class="lede">Pick the engines you want tracked, connect the provider that reaches them, and set a ceiling on how much runs in a day.</p>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-head"><h2>Targets</h2><span class="badge">{{len .Targets}}</span></div>
-  {{if .Targets}}
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Target</th><th>Mode</th><th></th></tr></thead>
-      <tbody>
-      {{range .Targets}}
-        <tr>
-          <td><code>{{.Spec}}</code></td>
-          <td><span class="badge badge-{{.Access}}">{{.Access}}</span></td>
-          <td class="num">
-            <form method="post" action="/settings/targets/delete" style="display:inline">
-              <input type="hidden" name="id" value="{{.ID}}">
-              <button class="btn btn-ghost" type="submit">Remove</button>
-            </form>
-          </td>
-        </tr>
-      {{end}}
-      </tbody>
-    </table>
+  <div class="card-head">
+    <h2>Engines</h2>
+    <span class="badge">{{len .Targets}} tracked</span>
   </div>
-  {{else}}
-  <p class="lede" style="margin:0 0 12px">No targets yet.</p>
-  {{end}}
+  <p class="hint" style="margin:0 0 16px">An <span class="badge badge-api">api</span> target asks the vendor's model with web search on. A <span class="badge badge-scraped">scraped</span> target fetches the answer a person sees in the product. They measure different things, so they are tracked separately and never averaged.</p>
 
-  <form method="post" action="/settings/targets/add" class="btn-row" style="margin-top:14px">
-    <input type="text" name="spec" placeholder="chatgpt:openai:online" style="width:280px" required>
-    <button class="btn" type="submit">Add target</button>
-  </form>
-  <p class="hint">Written <code>engine:provider[:model][:online]</code>. Engines: {{.EngineList}}.
-  {{if .ProviderNames}}Providers in this build: {{.ProviderNames}}.{{else}}No providers are compiled in yet, so any target you add will be rejected.{{end}}</p>
+  <div class="engine-list">
+    {{range $engine := .Engines}}
+    <div class="engine">
+      <div class="engine-head">
+        <div>
+          <h3>{{$engine.Label}}</h3>
+          <span class="hint">{{$engine.Kind}}</span>
+        </div>
+        {{if $engine.Targets}}<span class="badge badge-own">tracked</span>{{end}}
+      </div>
+
+      {{if $engine.Targets}}
+      <div class="chips">
+        {{range $engine.Targets}}
+        <span class="chip">
+          <span class="badge badge-{{.Access}}">{{.Access}}</span>
+          <code>{{.Spec}}</code>
+          <form method="post" action="/settings/targets/delete">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button class="chip-x" type="submit" title="Stop tracking this target" aria-label="Stop tracking {{.Spec}}">&times;</button>
+          </form>
+        </span>
+        {{end}}
+      </div>
+      {{end}}
+
+      <div class="track-row">
+        {{range $engine.Options}}
+        <form method="post" action="/settings/targets/track" style="display:inline">
+          <input type="hidden" name="engine" value="{{$engine.ID}}">
+          <input type="hidden" name="provider" value="{{.Provider}}">
+          <button class="btn" type="submit" title="{{.Note}}">Track via {{.Label}}</button>
+        </form>
+        {{end}}
+      </div>
+      {{if $engine.Pending}}<div class="hint" style="margin-top:8px">Not built yet: {{$engine.Pending}}.</div>{{end}}
+      {{if and (not $engine.Options) (not $engine.Pending)}}<div class="hint">No provider in the catalog reaches this engine.</div>{{end}}
+    </div>
+    {{end}}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>Provider keys</h2></div>
+  <p class="hint" style="margin:0 0 16px">You pay your providers directly, at their rates. Keys are encrypted on this machine and are never returned by the API or the MCP tools. An exported environment variable always wins over a value saved here.</p>
+
+  {{range .Providers}}
+  <div class="provider">
+    <div class="provider-head">
+      <div>
+        <h3>{{.Label}} <span class="badge badge-{{.Access}}">{{.Access}}</span>{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
+        <div class="hint">{{.Note}} Reaches {{.EngineList}}.</div>
+      </div>
+      <a class="btn" href="{{.KeyURL}}" target="_blank" rel="noreferrer noopener">Get a key</a>
+    </div>
+
+    <form method="post" action="/settings/keys" class="provider-form">
+      <input type="hidden" name="provider" value="{{.Name}}">
+      {{range .Credentials}}
+      <div class="cred">
+        <label for="{{.Name}}-field">{{.Name}}</label>
+        <input type="password" id="{{.Name}}-field" name="cred_{{.Name}}" autocomplete="off"
+               placeholder="{{if .FromEnv}}set in the environment{{else if .Saved}}saved, paste to replace{{else}}paste the key{{end}}"
+               {{if .FromEnv}}disabled{{end}}>
+        <span class="hint">{{.Status}}</span>
+      </div>
+      {{end}}
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </div>
+  {{end}}
 </div>
 
 <div class="card">
@@ -50,6 +96,15 @@
     </div>
     <div class="btn-row" style="margin-top:14px"><button class="btn" type="submit">Save</button></div>
   </form>
-  <p class="hint">A ceiling on surprise, not a budget. Nothing here converts anything to money: you pay your providers directly, at their rates.</p>
+  <p class="hint">A ceiling on surprise, not a budget. Nothing here converts anything to money.</p>
 </div>
+
+<details class="card">
+  <summary><strong>Advanced: add a target by hand</strong></summary>
+  <form method="post" action="/settings/targets/add" class="btn-row" style="margin-top:14px">
+    <input type="text" name="spec" placeholder="chatgpt:openai:gpt-5.5:online" style="width:300px" required>
+    <button class="btn" type="submit">Add target</button>
+  </form>
+  <p class="hint">Written <code>engine:provider[:model][:online]</code>, which is the only way to pin a model. Engines: {{.EngineList}}.</p>
+</details>
 {{end}}

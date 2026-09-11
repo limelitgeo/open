@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/secrets"
 	"github.com/limelitgeo/open/internal/store"
-	"github.com/limelitgeo/open/internal/target"
 )
 
 // Settings keys the dashboard writes.
@@ -73,8 +71,10 @@ func (a *App) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /chats", a.chats)
 	mux.HandleFunc("GET /citations", a.citations)
 	mux.HandleFunc("GET /settings", a.settings)
+	mux.HandleFunc("POST /settings/targets/track", a.trackEngine)
 	mux.HandleFunc("POST /settings/targets/add", a.addTarget)
 	mux.HandleFunc("POST /settings/targets/delete", a.deleteTarget)
+	mux.HandleFunc("POST /settings/keys", a.saveKeys)
 	mux.HandleFunc("POST /settings/limits", a.saveLimits)
 	mux.HandleFunc("GET /upgrade", a.upgrade)
 	mux.HandleFunc("POST /run", a.run)
@@ -339,96 +339,6 @@ func (a *App) placeholder(w http.ResponseWriter, r *http.Request, title, current
 	a.write(w, r, "placeholder", PlaceholderPage{Base: base, Lede: lede, Detail: detail, IssueURL: issue})
 }
 
-func (a *App) settings(w http.ResponseWriter, r *http.Request) {
-	if !a.configured(r.Context()) {
-		http.Redirect(w, r, "/setup", http.StatusSeeOther)
-		return
-	}
-	base, _, err := a.base(r, "Settings", "settings")
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	targets, err := a.db.Targets(r.Context(), false)
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	today, err := a.db.RunsToday(r.Context())
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	page := SettingsPage{
-		Base:          base,
-		EngineList:    strings.Join(engines.IDs(), ", "),
-		ProviderNames: strings.Join(a.registry.Names(), ", "),
-		RunsPerDay:    a.runsPerDay(r.Context()),
-		RunsToday:     today,
-	}
-	for _, t := range targets {
-		page.Targets = append(page.Targets, TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access})
-	}
-	a.write(w, r, "settings", page)
-}
-
-func (a *App) runsPerDay(ctx context.Context) int {
-	if v, err := a.db.Setting(ctx, settingRunsPerDay); err == nil && v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			return n
-		}
-	}
-	if a.cfg != nil && a.cfg.Limits.RunsPerDay > 0 {
-		return a.cfg.Limits.RunsPerDay
-	}
-	return config.DefaultRunsPerDay
-}
-
-func (a *App) addTarget(w http.ResponseWriter, r *http.Request) {
-	spec := strings.TrimSpace(r.FormValue("spec"))
-	parsed, err := target.Parse(spec)
-	if err == nil {
-		err = parsed.Validate(a.registry)
-	}
-	if err != nil {
-		// The parser's message names the way out, so it is shown verbatim
-		// rather than replaced with a generic "invalid target".
-		a.rerender(w, r, "/settings", Flash{Kind: "error", Text: err.Error()})
-		return
-	}
-	access, _ := parsed.Access(a.registry)
-	if _, err := a.db.AddTarget(r.Context(), store.Target{
-		Spec: parsed.String(), Engine: parsed.Engine, Provider: parsed.Provider,
-		Model: parsed.Model, Online: parsed.Online, Access: string(access),
-	}); err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	http.Redirect(w, r, "/settings?flash=target-added", http.StatusSeeOther)
-}
-
-func (a *App) deleteTarget(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
-	if err := a.db.DeleteTarget(r.Context(), id); err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	http.Redirect(w, r, "/settings?flash=target-removed", http.StatusSeeOther)
-}
-
-func (a *App) saveLimits(w http.ResponseWriter, r *http.Request) {
-	n, err := strconv.Atoi(strings.TrimSpace(r.FormValue("runs_per_day")))
-	if err != nil || n <= 0 {
-		a.rerender(w, r, "/settings", Flash{Kind: "error", Text: "The run ceiling has to be a positive number."})
-		return
-	}
-	if err := a.db.SetSetting(r.Context(), settingRunsPerDay, strconv.Itoa(n)); err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	http.Redirect(w, r, "/settings?flash=limits-saved", http.StatusSeeOther)
-}
-
 func (a *App) upgrade(w http.ResponseWriter, r *http.Request) {
 	if !a.configured(r.Context()) {
 		http.Redirect(w, r, "/setup", http.StatusSeeOther)
@@ -446,57 +356,12 @@ func (a *App) run(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/overview?flash=run-unbuilt", http.StatusSeeOther)
 }
 
-// providerOptions lists what a user could connect, sorted, with the engines
-// each one reaches spelled out rather than left as a provider name.
-func (a *App) providerOptions() []ProviderOption {
-	var out []ProviderOption
-	for _, name := range a.registry.Names() {
-		reg, _ := a.registry.Lookup(name)
-		labels := make([]string, 0, len(reg.Engines))
-		for id := range reg.Engines {
-			if e, ok := engines.Lookup(id); ok {
-				labels = append(labels, e.Label)
-			}
-		}
-		sort.Strings(labels)
-		out = append(out, ProviderOption{Name: name, Access: string(reg.Access), EngineList: strings.Join(labels, ", ")})
-	}
-	return out
-}
-
 func (a *App) write(w http.ResponseWriter, r *http.Request, page string, data any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := a.views.Render(w, page, data); err != nil {
 		// The response is already partly written, so this cannot become a
 		// clean 500. Log it loudly instead of pretending it rendered.
 		a.log.Error("render failed", "page", page, "error", err)
-	}
-}
-
-// rerender re-renders a page with a flash that is too specific to be a code,
-// such as a parser error quoted back to the user.
-func (a *App) rerender(w http.ResponseWriter, r *http.Request, path string, flash Flash) {
-	switch path {
-	case "/settings":
-		base, _, err := a.base(r, "Settings", "settings")
-		if err != nil {
-			a.fail(w, r, err)
-			return
-		}
-		base.Flash = &flash
-		targets, _ := a.db.Targets(r.Context(), false)
-		today, _ := a.db.RunsToday(r.Context())
-		page := SettingsPage{
-			Base: base, EngineList: strings.Join(engines.IDs(), ", "),
-			ProviderNames: strings.Join(a.registry.Names(), ", "),
-			RunsPerDay:    a.runsPerDay(r.Context()), RunsToday: today,
-		}
-		for _, t := range targets {
-			page.Targets = append(page.Targets, TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access})
-		}
-		a.write(w, r, "settings", page)
-	default:
-		http.Redirect(w, r, path, http.StatusSeeOther)
 	}
 }
 

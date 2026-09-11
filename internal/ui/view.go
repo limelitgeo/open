@@ -105,9 +105,63 @@ type CompetitorsPage struct {
 	Competitors []CompetitorView
 }
 
-// SettingsPage is targets, limits and keys.
+// TrackOption is one provider a user can click to start tracking an engine.
+type TrackOption struct {
+	Provider string
+	Label    string
+	Access   string
+	Note     string
+	// Available is false for a provider that is documented but not built
+	// yet. The button is disabled and Reason says why, which is more use
+	// than hiding it and leaving the engine looking unreachable.
+	Available bool
+	Reason    string
+}
+
+// EngineCard is one tracked answer engine and how to reach it.
+type EngineCard struct {
+	ID      string
+	Label   string
+	Kind    string
+	Targets []TargetView
+	// Options are the providers a user can click today.
+	Options []TrackOption
+	// Pending names the documented providers this build does not implement
+	// yet, collapsed to one line. Seven disabled buttons per engine would
+	// bury the one that works.
+	Pending string
+}
+
+// CredentialView is one environment variable a provider needs, and where its
+// value is coming from.
+type CredentialView struct {
+	Name string
+	// Status is "not set", "set in the environment", or "saved here". The
+	// environment always wins, and saying so stops a user editing a field
+	// that cannot take effect.
+	Status  string
+	FromEnv bool
+	Saved   bool
+}
+
+// ProviderKeyCard is one provider in the keys section.
+type ProviderKeyCard struct {
+	Name        string
+	Label       string
+	Access      string
+	EngineList  string
+	Note        string
+	KeyURL      string
+	Credentials []CredentialView
+	Available   bool
+	Reason      string
+}
+
+// SettingsPage is targets, keys and limits.
 type SettingsPage struct {
 	Base
+	Engines       []EngineCard
+	Providers     []ProviderKeyCard
 	Targets       []TargetView
 	EngineList    string
 	ProviderNames string
@@ -197,6 +251,8 @@ type ProviderOption struct {
 // WizardProviderPage is step four.
 type WizardProviderPage struct {
 	WizardBase
-	Providers   []ProviderOption
-	Credentials []string
+	Providers []ProviderKeyCard
+	// AnyAvailable is false when no provider is built into this binary yet,
+	// which turns the step into an honest exit rather than a dead form.
+	AnyAvailable bool
 }

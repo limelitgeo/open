@@ -28,8 +28,8 @@ func TestCatalogMatchesDocs(t *testing.T) {
 		t.Fatalf("found %d providers in docs/providers.md, expected the full table", len(documented))
 	}
 
-	catalog := make(map[string]Entry, len(Catalog()))
-	for _, e := range Catalog() {
+	catalog := make(map[string]provider.CatalogEntry, len(provider.Catalog()))
+	for _, e := range provider.Catalog() {
 		catalog[e.Name] = e
 	}
 
@@ -73,7 +73,7 @@ func TestDocsScannerActuallyFindsProviders(t *testing.T) {
 }
 
 func TestCatalogIsInternallyConsistent(t *testing.T) {
-	for _, e := range Catalog() {
+	for _, e := range provider.Catalog() {
 		if !e.Access.Valid() {
 			t.Errorf("provider %q: access %q", e.Name, e.Access)
 		}
@@ -96,6 +96,55 @@ func TestCatalogIsInternallyConsistent(t *testing.T) {
 				t.Errorf("api provider %q gives engine %q no default model", e.Name, engine)
 			}
 		}
+	}
+}
+
+// TestEveryProviderSaysWhereToGetAKey is the reason the catalog exists at
+// all. A settings screen that asks for a key and leaves the user to find it
+// loses them at the step that decides whether the product ever runs.
+func TestEveryProviderSaysWhereToGetAKey(t *testing.T) {
+	for _, e := range provider.Catalog() {
+		if e.Label == "" {
+			t.Errorf("provider %q has no vendor label", e.Name)
+		}
+		if e.Note == "" {
+			t.Errorf("provider %q has no note saying why a user would pick it", e.Name)
+		}
+		if !strings.HasPrefix(e.KeyURL, "https://") {
+			t.Errorf("provider %q has key URL %q, want an https link", e.Name, e.KeyURL)
+		}
+	}
+}
+
+// TestCatalogEngineIDsMatchTheEngineRegistry pins the constants the catalog
+// declares locally to avoid an import cycle. A rename in package engines
+// that missed them would silently make every provider unreachable.
+func TestCatalogEngineIDsMatchTheEngineRegistry(t *testing.T) {
+	for id, name := range map[string]string{
+		provider.ChatGPTEngine:     engines.ChatGPT,
+		provider.ClaudeEngine:      engines.Claude,
+		provider.PerplexityEngine:  engines.Perplexity,
+		provider.GeminiEngine:      engines.Gemini,
+		provider.AIOverviewEngine:  engines.AIOverview,
+		provider.AIModeEngine:      engines.AIMode,
+		provider.BingCopilotEngine: engines.BingCopilot,
+	} {
+		if id != name {
+			t.Errorf("catalog engine id %q does not match the registry's %q", id, name)
+		}
+	}
+}
+
+func TestCatalogForOrdersTheRecommendationFirst(t *testing.T) {
+	// OpenRouter reaches four engines with one key, so it is the answer to
+	// "what do I connect first" and has to come first in the list a user
+	// picks from.
+	got := provider.CatalogFor(engines.ChatGPT)
+	if len(got) == 0 {
+		t.Fatal("no provider reaches chatgpt")
+	}
+	if got[0].Name != "openrouter" {
+		t.Errorf("first provider for chatgpt is %q, want openrouter", got[0].Name)
 	}
 }
 

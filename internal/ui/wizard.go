@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/limelitgeo/open/internal/promptpack"
+	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/store"
+	"github.com/limelitgeo/open/internal/target"
 )
 
 // wizardSteps label the progress bar. Four steps, and nothing is spent until
@@ -222,14 +224,16 @@ func (a *App) savePrompts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) wizardProvider(w http.ResponseWriter, r *http.Request) {
-	options := a.providerOptions()
+	cards := a.providerCards(r.Context())
 	page := WizardProviderPage{
 		WizardBase: a.wizardBase(r, "Set up", 3),
-		Providers:  options,
+		Providers:  cards,
 	}
-	if len(options) > 0 {
-		reg, _ := a.registry.Lookup(options[0].Name)
-		page.Credentials = reg.Credentials
+	for _, c := range cards {
+		if c.Available {
+			page.AnyAvailable = true
+			break
+		}
 	}
 	a.write(w, r, "wizard_provider", page)
 }
@@ -240,24 +244,36 @@ func (a *App) saveProvider(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	name := strings.TrimSpace(r.FormValue("provider"))
-	reg, ok := a.registry.Lookup(name)
+	entry, ok := provider.CatalogEntryFor(name)
 	if !ok {
 		http.Redirect(w, r, "/setup/provider", http.StatusSeeOther)
 		return
 	}
-	for _, cred := range reg.Credentials {
-		value := strings.TrimSpace(r.FormValue("cred_" + cred))
-		if value == "" {
-			continue
-		}
-		sealed, err := a.keys.Seal(value)
-		if err != nil {
-			a.fail(w, r, err)
-			return
-		}
-		if err := a.db.SetSetting(r.Context(), credentialPrefix+cred, sealed); err != nil {
-			a.fail(w, r, err)
-			return
+	if _, err := a.storeCredentials(r, entry); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	// Connecting a provider in the wizard means wanting to track what it
+	// reaches. Leaving the user on a finished setup with no target, and a
+	// Run button that stays disabled, would be the obvious next complaint.
+	if _, built := a.registry.Lookup(name); built {
+		for engine := range entry.Engines {
+			spec := engine + ":" + name
+			if entry.Access == provider.AccessAPI {
+				spec += ":online"
+			}
+			parsed, err := target.Parse(spec)
+			if err != nil || parsed.Validate(a.registry) != nil {
+				continue
+			}
+			access, _ := parsed.Access(a.registry)
+			if _, err := a.db.AddTarget(r.Context(), store.Target{
+				Spec: parsed.String(), Engine: parsed.Engine, Provider: parsed.Provider,
+				Model: parsed.Model, Online: parsed.Online, Access: string(access),
+			}); err != nil {
+				a.fail(w, r, err)
+				return
+			}
 		}
 	}
 	a.finish(w, r)

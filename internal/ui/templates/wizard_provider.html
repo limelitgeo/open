@@ -1,43 +1,51 @@
 {{define "page"}}
 <div class="card">
   <h1>Connect one engine</h1>
-  <p class="lede">One key is enough to see a real number. Add the rest whenever you like, in Settings.</p>
+  <p class="lede">One key is enough to see a real number. Pick the provider that reaches what you care about, get a key from them, and paste it here. You pay them directly, at their rates.</p>
 
-  {{if not .Providers}}
+  {{if not .AnyAvailable}}
   <div class="notice notice-warn">
-    No providers are compiled into this build yet, so there is nothing to connect. You can still finish setup and look around; the Run button stays disabled until a provider lands.
+    No provider is implemented in this build yet, so there is nothing to connect. Finish setup and look around: the Run button turns on when the first provider lands.
   </div>
-  <form method="post" action="/setup/finish">
-    <div class="btn-row">
-      <button class="btn btn-primary" type="submit">Finish setup</button>
-      <a class="btn btn-ghost" href="/setup/prompts">Back</a>
-    </div>
-  </form>
-  {{else}}
-  <form method="post" action="/setup/provider">
-    <div class="field">
-      <label for="provider">Provider</label>
-      <select id="provider" name="provider">
-        {{range .Providers}}<option value="{{.Name}}">{{.Name}} ({{.Access}}, reaches {{.EngineList}})</option>{{end}}
-      </select>
-    </div>
-    {{range .Credentials}}
-    <div class="field">
-      <label for="{{.}}">{{.}}</label>
-      <input type="password" id="{{.}}" name="cred_{{.}}" placeholder="paste the key" autocomplete="off">
-      <div class="hint">Stored on this machine only. An exported environment variable of the same name always wins.</div>
-    </div>
-    {{end}}
-
-    <div class="notice notice-info" style="margin-top:18px">
-      An answer from a model API with web search on is not the same surface a person sees in the product. Both are worth tracking, so every number here carries an <span class="badge badge-api">api</span> or <span class="badge badge-scraped">scraped</span> badge, and the two are never averaged.
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" type="submit">Save and finish</button>
-      <a class="btn btn-ghost" href="/setup/prompts">Back</a>
-    </div>
-  </form>
   {{end}}
+
+  {{range .Providers}}
+  <div class="provider">
+    <div class="provider-head">
+      <div>
+        <h3>{{.Label}} <span class="badge badge-{{.Access}}">{{.Access}}</span>{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
+        <div class="hint">{{.Note}} Reaches {{.EngineList}}.</div>
+      </div>
+      <a class="btn" href="{{.KeyURL}}" target="_blank" rel="noreferrer noopener">Get a key</a>
+    </div>
+
+    {{if .Available}}
+    <form method="post" action="/setup/provider" class="provider-form">
+      <input type="hidden" name="provider" value="{{.Name}}">
+      {{range .Credentials}}
+      <div class="cred">
+        <label for="setup-{{.Name}}">{{.Name}}</label>
+        <input type="password" id="setup-{{.Name}}" name="cred_{{.Name}}" autocomplete="off"
+               placeholder="{{if .FromEnv}}set in the environment{{else if .Saved}}saved, paste to replace{{else}}paste the key{{end}}"
+               {{if .FromEnv}}disabled{{end}}>
+        <span class="hint">{{.Status}}</span>
+      </div>
+      {{end}}
+      <button class="btn btn-primary" type="submit">Connect and finish</button>
+    </form>
+    {{end}}
+  </div>
+  {{end}}
+
+  <div class="notice notice-info" style="margin-top:18px">
+    An answer from a model API with web search on is not the same surface a person sees in the product. Both are worth tracking, so every number here carries an <span class="badge badge-api">api</span> or <span class="badge badge-scraped">scraped</span> badge, and the two are never averaged.
+  </div>
+
+  <div class="btn-row">
+    <form method="post" action="/setup/finish" style="display:inline">
+      <button class="btn{{if not .AnyAvailable}} btn-primary{{end}}" type="submit">{{if .AnyAvailable}}Skip for now{{else}}Finish setup{{end}}</button>
+    </form>
+    <a class="btn btn-ghost" href="/setup/prompts">Back</a>
+  </div>
 </div>
 {{end}}

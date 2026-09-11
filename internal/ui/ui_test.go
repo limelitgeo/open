@@ -175,8 +175,13 @@ func TestWizardWalksEndToEnd(t *testing.T) {
 
 	// Step 4 with no providers compiled in offers the honest exit.
 	rec = get(t, h, "/setup/provider")
-	if !strings.Contains(rec.Body.String(), "No providers are compiled into this build yet") {
+	if !strings.Contains(rec.Body.String(), "No provider is implemented in this build yet") {
 		t.Error("step 4 did not say why there is nothing to connect")
+	}
+	// Even with nothing to connect, the step still says where the keys will
+	// come from, so a user can go and get one while they wait.
+	if !strings.Contains(rec.Body.String(), "https://openrouter.ai/keys") {
+		t.Error("step 4 does not link a vendor key page")
 	}
 	if rec := post(t, h, "/setup/finish", nil); !strings.HasPrefix(rec.Header().Get("Location"), "/overview") {
 		t.Errorf("finish went to %q", rec.Header().Get("Location"))
