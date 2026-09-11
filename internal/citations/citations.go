@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package citations turns the sources an engine attributed into classified
 // rows: which host, which site, and whose it is.
 //

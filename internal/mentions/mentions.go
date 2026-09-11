@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package mentions finds, in an answer, the brands we were told to look for.
 //
 // It is a text search, not a model call, and that is the whole design. A

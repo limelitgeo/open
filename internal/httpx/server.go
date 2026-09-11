@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package httpx is the HTTP surface: the dashboard, the JSON API and the MCP
 // endpoint all hang off one mux so a number is served the same way whoever
 // asks for it.

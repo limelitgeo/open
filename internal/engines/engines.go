@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package engines is the single registry of the answer engines this project
 // tracks. Every surface that needs an engine list resolves it here rather
 // than restating one of its own, because a list restated in three places

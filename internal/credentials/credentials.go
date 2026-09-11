@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package credentials resolves a provider credential the one way every part
 // of this program must resolve it: the environment first, then the encrypted
 // settings store.

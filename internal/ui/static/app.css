@@ -1,3 +1,6 @@
+/* Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+   See the LICENSE file in the repository root for the full terms. */
+
 /* Limelit Open. Tokens mirror the Limelit design system so the open core and
  * the hosted product look like one product. Every themed token is declared in
  * both places below: a token defined only in light renders as invisible text
@@ -112,11 +115,10 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
 }
 
 .brandmark { display: flex; align-items: center; gap: 9px; padding: 6px 8px 14px; }
-.brandmark .tile {
-  width: 26px; height: 26px; border-radius: 7px; flex: none;
-  background: linear-gradient(140deg, var(--brand) 0%, var(--brand-deep) 100%);
-  display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px;
-}
+/* The mark is the same file Limelit Cloud serves, so the open core and the
+   hosted product are recognisably one product. It carries its own gradient
+   rather than the theme tokens, which is why it does not invert in dark. */
+.brandmark .tile { width: 26px; height: 26px; flex: none; display: block; }
 .brandmark .name { color: var(--ink); font-weight: 600; font-size: 14px; }
 .brandmark .sub { color: var(--ink-4); font-size: 11px; }
 

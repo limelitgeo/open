@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package store owns the SQLite database: opening it, migrating it to HEAD,
 // and handing out the *sql.DB.
 //

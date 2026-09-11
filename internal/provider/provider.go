@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package provider is the boundary between this project and the services that
 // actually answer a prompt: vendor model APIs and consumer-surface scrapers.
 //

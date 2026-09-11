@@ -465,7 +465,19 @@ Two rules worth knowing before a pull request:
 - Original code only. Do not copy code in from other projects.
 - Every provider ships with recorded fixtures and tests that run with no
   network and no keys.
+- Sign off your commits with `git commit -s`. That is the
+  [Developer Certificate of Origin](https://developercertificate.org/): you
+  are stating that you wrote the patch, or have the right to submit it under
+  this license. There is no CLA and no copyright assignment; you keep the
+  copyright in what you write.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Copyright 2026 Limelit. The license is a grant, not a transfer: Limelit holds
+the copyright in the code it wrote, contributors hold the copyright in theirs,
+and everyone, including Limelit, uses the whole under Apache-2.0. You may run
+it, modify it, self-host it, and ship it inside a commercial product, provided
+you keep the license, the copyright notices, and the NOTICE file, and state
+what you changed.

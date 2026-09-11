@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package target parses and validates a tracked target: one way of asking one
 // engine, written engine:provider[:model][:online].
 //

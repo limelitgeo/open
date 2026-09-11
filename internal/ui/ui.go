@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package ui is the embedded dashboard: Go templates and a stylesheet
 // compiled into the binary, served by `limelit serve`.
 //

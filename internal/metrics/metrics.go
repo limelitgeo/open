@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Package metrics aggregates stored answers into the numbers the dashboard,
 // the MCP tools and the API all show.
 //

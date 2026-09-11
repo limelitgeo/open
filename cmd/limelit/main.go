@@ -1,3 +1,6 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
 // Command limelit is the whole product: the dashboard, the MCP server, the
 // evaluation runner and the export, in one binary with no runtime
 // dependencies.
