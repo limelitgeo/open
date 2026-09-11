@@ -208,20 +208,27 @@ func (s *Service) Overview(ctx context.Context, w Window) (Overview, error) {
 	return out, nil
 }
 
+// Joining mention onto chat fans one answer out into one row per mention, so
+// every count of answers across that join is COUNT(DISTINCT c.id). The
+// property has several name variants, so "Acme (acme.com) leads" is two own
+// mentions in one answer; a plain COUNT(*) reports it as two answers of which
+// one named us, which is 50% visibility on an answer that named us. The same
+// applies in Series and Matrix below.
+//
 // categories breaks visibility down by the prompt's category.
 func (s *Service) categories(ctx context.Context, w Window) ([]CategoryVisibility, error) {
 	filter, args := w.where("c")
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT
 			CASE WHEN p.category = '' THEN 'uncategorised' ELSE p.category END AS category,
-			COUNT(*),
+			COUNT(DISTINCT c.id),
 			COUNT(DISTINCT CASE WHEN m.id IS NOT NULL THEN c.id END)
 		FROM chat c
 		JOIN prompt p ON p.id = c.prompt_id
 		LEFT JOIN mention m ON m.chat_id = c.id AND m.competitor_id IS NULL
 		WHERE `+filter+`
 		GROUP BY category
-		ORDER BY COUNT(*) DESC`, args...)
+		ORDER BY COUNT(DISTINCT c.id) DESC`, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +366,7 @@ func (s *Service) Series(ctx context.Context, w Window) ([]DayPoint, error) {
 	filter, args := w.where("c")
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT date(c.created_at) AS day,
-		       COUNT(*),
+		       COUNT(DISTINCT c.id),
 		       COUNT(DISTINCT CASE WHEN m.id IS NOT NULL THEN c.id END)
 		FROM chat c
 		JOIN prompt p ON p.id = c.prompt_id
@@ -430,7 +437,7 @@ func (s *Service) Matrix(ctx context.Context, w Window) (Matrix, error) {
 
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT c.prompt_id, c.target_id,
-		       COUNT(*),
+		       COUNT(DISTINCT c.id),
 		       COUNT(DISTINCT CASE WHEN m.id IS NOT NULL THEN c.id END),
 		       AVG(m.list_rank)
 		FROM chat c

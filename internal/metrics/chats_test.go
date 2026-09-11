@@ -128,6 +128,18 @@ func TestSourceURLsDrillIntoOneSite(t *testing.T) {
 	f.chat(t, "discovery", store.ChatOK, 0, 0, twice, other)
 	f.chat(t, "use case", store.ChatOK, 0, 0, twice, cite("reddit.com", "social", 2))
 
+	// Both branches: the windowed query mixes ?1 with bare ? placeholders,
+	// so its argument numbering is worth pinning.
+	for _, w := range []Window{{}, {Days: 30}} {
+		urls, err := f.svc.SourceURLs(context.Background(), "g2.com", w, 10)
+		if err != nil {
+			t.Fatalf("window %+v: %v", w, err)
+		}
+		if len(urls) != 2 || urls[0].URL != "https://g2.com/best" || urls[0].Citations != 2 {
+			t.Fatalf("window %+v: urls = %+v", w, urls)
+		}
+	}
+
 	urls, err := f.svc.SourceURLs(context.Background(), "g2.com", Window{}, 10)
 	if err != nil {
 		t.Fatal(err)
