@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/limelitgeo/open/internal/config"
+	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/limelitgeo/open/internal/engines"
 	"github.com/limelitgeo/open/internal/promptpack"
 	"github.com/limelitgeo/open/internal/provider"
+	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
 	"github.com/limelitgeo/open/internal/store"
 )
@@ -19,7 +22,7 @@ import (
 const (
 	settingCategory   = "category"
 	settingRunsPerDay = "runs_per_day"
-	credentialPrefix  = "credential:"
+	credentialPrefix  = credentials.Prefix
 )
 
 // cloudFeatures is the hosted-only list. It is the same list as the README's,
@@ -41,19 +44,21 @@ type App struct {
 	db       *store.DB
 	registry *provider.Registry
 	keys     *secrets.Keyring
+	runner   *runner.Runner
 	views    *Renderer
 	log      *slog.Logger
 	version  string
 	cfg      *config.Config
 }
 
-// New builds the dashboard handler set.
-func New(db *store.DB, registry *provider.Registry, keys *secrets.Keyring, log *slog.Logger, version string, cfg *config.Config) (*App, error) {
+// New builds the dashboard handler set. run may be nil, which leaves the Run
+// button reporting that there is nothing to run it with.
+func New(db *store.DB, registry *provider.Registry, keys *secrets.Keyring, run *runner.Runner, log *slog.Logger, version string, cfg *config.Config) (*App, error) {
 	views, err := NewRenderer()
 	if err != nil {
 		return nil, err
 	}
-	return &App{db: db, registry: registry, keys: keys, views: views, log: log, version: version, cfg: cfg}, nil
+	return &App{db: db, registry: registry, keys: keys, runner: run, views: views, log: log, version: version, cfg: cfg}, nil
 }
 
 // Routes registers every dashboard route on mux.
@@ -107,7 +112,8 @@ var flashes = map[string]Flash{
 	"target-removed":    {Kind: "ok", Text: "Target removed."},
 	"limits-saved":      {Kind: "ok", Text: "Run ceiling saved."},
 	"key-saved":         {Kind: "ok", Text: "Key saved on this machine."},
-	"run-unbuilt":       {Kind: "warn", Text: "The evaluation runner is not built yet. It is the next thing being built."},
+	"run-started":       {Kind: "ok", Text: "Running. Answers appear as each engine replies; refresh to see them."},
+	"run-busy":          {Kind: "warn", Text: "A run is already in progress."},
 }
 
 func (a *App) flash(r *http.Request) *Flash {
@@ -353,8 +359,35 @@ func (a *App) upgrade(w http.ResponseWriter, r *http.Request) {
 	a.write(w, r, "upgrade", UpgradePage{Base: base, CloudFeatures: cloudFeatures})
 }
 
+// run starts one evaluation and returns immediately. A pass takes as long as
+// the slowest engine, which is tens of seconds, so holding the request open
+// would look like a hung browser.
 func (a *App) run(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/overview?flash=run-unbuilt", http.StatusSeeOther)
+	if a.runner == nil {
+		http.Redirect(w, r, "/overview?flash=run-busy", http.StatusSeeOther)
+		return
+	}
+	if a.runner.Running() {
+		http.Redirect(w, r, "/overview?flash=run-busy", http.StatusSeeOther)
+		return
+	}
+
+	opts := runner.Options{RunsPerDay: a.runsPerDay(r.Context())}
+	// The run outlives this request: the user closing the tab must not
+	// abandon answers that are already being paid for.
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+		defer cancel()
+		res, err := a.runner.Run(ctx, opts)
+		if err != nil {
+			a.log.Error("run failed", "error", err)
+			return
+		}
+		a.log.Info("run finished", "evaluation", res.EvaluationID,
+			"completed", res.Completed, "failed", res.Failed, "took", res.Duration.Round(time.Second))
+	}()
+
+	http.Redirect(w, r, "/overview?flash=run-started", http.StatusSeeOther)
 }
 
 func (a *App) write(w http.ResponseWriter, r *http.Request, page string, data any) {

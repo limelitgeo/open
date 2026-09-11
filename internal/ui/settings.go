@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/limelitgeo/open/internal/config"
+	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/limelitgeo/open/internal/engines"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/store"
@@ -269,25 +270,11 @@ func (a *App) storeCredentials(r *http.Request, entry provider.CatalogEntry) (in
 	return saved, nil
 }
 
-// credentials reads a credential the way the runner will: the environment
-// first, then the encrypted settings store. One function, so the Test button
-// proves the same value a run would use rather than a different one.
+// credentials reads a credential the way the runner does: the environment
+// first, then the encrypted settings store. Shared, so the Test button proves
+// the same value a run would use rather than a different one.
 func (a *App) credentials(ctx context.Context) provider.CredentialSource {
-	return func(name string) string {
-		if v := config.Credential(name); v != "" {
-			return v
-		}
-		sealed, err := a.db.Setting(ctx, credentialPrefix+name)
-		if err != nil || sealed == "" {
-			return ""
-		}
-		value, err := a.keys.Unseal(sealed)
-		if err != nil {
-			a.log.Error("stored credential could not be decrypted", "credential", name, "error", err)
-			return ""
-		}
-		return value
-	}
+	return credentials.Source(ctx, a.db, a.keys, a.log)
 }
 
 // testKeys presses the provider's own cheapest authenticated call, so a wrong

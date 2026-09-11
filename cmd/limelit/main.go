@@ -19,11 +19,16 @@ import (
 	"os"
 	"os/signal"
 	"runtime/debug"
+	"strconv"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/limelitgeo/open/internal/config"
+	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/limelitgeo/open/internal/httpx"
 	"github.com/limelitgeo/open/internal/provider"
+	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
 	"github.com/limelitgeo/open/internal/store"
 	"github.com/limelitgeo/open/internal/target"
@@ -143,10 +148,23 @@ func cmdServe(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	dash, err := ui.New(db, registry, keys, log, buildVersion(), cfg)
+
+	// A pass can only be advanced by the process that started it, so one left
+	// running by a crash would show as in flight forever.
+	if n, err := db.SweepOrphanedEvaluations(ctx); err != nil {
+		return err
+	} else if n > 0 {
+		log.Warn("closed evaluations left running by an earlier process", "count", n)
+	}
+
+	run := runner.New(db, registry, credentials.Source(ctx, db, keys, log), log)
+	dash, err := ui.New(db, registry, keys, run, log, buildVersion(), cfg)
 	if err != nil {
 		return err
 	}
+
+	stopSchedule := startSchedule(ctx, cfg, run, db, log)
+	defer stopSchedule()
 
 	srv := httpx.New(*addr, db, log, buildVersion(), dash)
 	log.Info("listening", "addr", srv.Addr(), "database", db.Path(), "version", buildVersion())
@@ -155,6 +173,55 @@ func cmdServe(ctx context.Context, args []string) error {
 	}
 	log.Info("stopped")
 	return nil
+}
+
+// startSchedule runs a pass on an interval.
+//
+// Two intervals rather than a cron expression, because cron would mean a
+// dependency and a syntax to learn for a choice that is really "how often".
+// Anything else is `limelit run` from the system's own cron, which is also
+// the only way to schedule when the dashboard is not running.
+func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, db *store.DB, log *slog.Logger) func() {
+	var every time.Duration
+	switch strings.ToLower(strings.TrimSpace(cfg.Schedule)) {
+	case "daily":
+		every = 24 * time.Hour
+	case "hourly":
+		every = time.Hour
+	case "", "off":
+		return func() {}
+	default:
+		log.Warn("unknown schedule, nothing will run automatically",
+			"schedule", cfg.Schedule, "supported", "daily, hourly, off")
+		return func() {}
+	}
+
+	log.Info("scheduling automatic runs", "every", every)
+	ticker := time.NewTicker(every)
+	go func() {
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				ceiling := cfg.Limits.RunsPerDay
+				if stored, err := db.Setting(ctx, "runs_per_day"); err == nil && stored != "" {
+					if n, err := strconv.Atoi(stored); err == nil && n > 0 {
+						ceiling = n
+					}
+				}
+				res, err := run.Run(ctx, runner.Options{RunsPerDay: ceiling})
+				if err != nil {
+					log.Error("scheduled run failed", "error", err)
+					continue
+				}
+				log.Info("scheduled run finished", "evaluation", res.EvaluationID,
+					"completed", res.Completed, "failed", res.Failed)
+			}
+		}
+	}()
+	return func() { ticker.Stop() }
 }
 
 // cmdMCP will serve the tool catalog in docs/tools.md over stdio.
@@ -171,11 +238,19 @@ func cmdMCP(ctx context.Context, args []string) error {
 	return errNotImplemented("mcp")
 }
 
-// cmdRun will execute one evaluation pass across every enabled target.
+// cmdRun executes one evaluation pass and exits, which is the shape a system
+// cron wants.
 func cmdRun(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
-	fs.String("target", "", "run only this target (engine:provider[:model][:online])")
+	targetSpec := fs.String("target", "", "run only this target (engine:provider[:model][:online])")
+	cfgPath := fs.String("config", "limelit.yaml", "path to limelit.yaml")
 	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	log := newLogger()
+	cfg, err := config.Load(*cfgPath)
+	if err != nil {
 		return err
 	}
 	db, err := store.Open(ctx, config.DatabasePath())
@@ -183,7 +258,34 @@ func cmdRun(ctx context.Context, args []string) error {
 		return err
 	}
 	defer db.Close()
-	return errNotImplemented("run")
+
+	keys, err := secrets.Open(config.DataDir())
+	if err != nil {
+		return err
+	}
+	if _, err := db.SweepOrphanedEvaluations(ctx); err != nil {
+		return err
+	}
+
+	ceiling := cfg.Limits.RunsPerDay
+	if stored, err := db.Setting(ctx, "runs_per_day"); err == nil && stored != "" {
+		if n, err := strconv.Atoi(stored); err == nil && n > 0 {
+			ceiling = n
+		}
+	}
+
+	run := runner.New(db, provider.Default(), credentials.Source(ctx, db, keys, log), log)
+	res, err := run.Run(ctx, runner.Options{TargetSpec: *targetSpec, RunsPerDay: ceiling})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("evaluation %d: %d of %d answers, %d failed, in %s\n",
+		res.EvaluationID, res.Completed, res.Planned, res.Failed, res.Duration.Round(time.Second))
+	if res.Failed > 0 {
+		// A cron job whose provider key expired should not report success.
+		return fmt.Errorf("%d of %d answers failed", res.Failed, res.Planned)
+	}
+	return nil
 }
 
 // cmdExport will write the payload that `upgrade` also sends.

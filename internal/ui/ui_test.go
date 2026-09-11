@@ -10,15 +10,24 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/provider/providertest"
+	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
 	"github.com/limelitgeo/open/internal/store"
 )
 
 func newApp(t *testing.T, reg *provider.Registry) (*App, *store.DB, http.Handler) {
+	t.Helper()
+	return newAppWithRunner(t, reg, nil)
+}
+
+// newAppWithRunner builds the dashboard with a runner attached, for the tests
+// that press Run.
+func newAppWithRunner(t *testing.T, reg *provider.Registry, run *runner.Runner) (*App, *store.DB, http.Handler) {
 	t.Helper()
 	dir := t.TempDir()
 	db, err := store.Open(context.Background(), filepath.Join(dir, "limelit.db"))
@@ -32,7 +41,10 @@ func newApp(t *testing.T, reg *provider.Registry) (*App, *store.DB, http.Handler
 	if err != nil {
 		t.Fatalf("secrets.Open: %v", err)
 	}
-	app, err := New(db, reg, keys, slog.New(slog.NewTextHandler(io.Discard, nil)), "test", &config.Config{})
+	if run == nil {
+		run = runner.New(db, reg, provider.StaticCredentials(nil), slog.New(slog.NewTextHandler(io.Discard, nil)))
+	}
+	app, err := New(db, reg, keys, run, slog.New(slog.NewTextHandler(io.Discard, nil)), "test", &config.Config{})
 	if err != nil {
 		t.Fatalf("ui.New: %v", err)
 	}
@@ -346,14 +358,37 @@ func TestPlaceholderScreensSayWhatIsMissing(t *testing.T) {
 	}
 }
 
-func TestRunSaysTheRunnerIsNotBuilt(t *testing.T) {
-	// Silently doing nothing would read as a broken button.
-	_, _, h := newApp(t, provider.NewRegistry())
+func TestRunStartsAPassAndReturnsImmediately(t *testing.T) {
+	// A pass takes as long as the slowest engine, so holding the request open
+	// would look like a hung browser.
+	reg := provider.NewRegistry()
+	provider.RegisterStub(reg, provider.StubConfig{Answer: "Acme leads."})
+	_, db, h := newApp(t, reg)
 	seedProperty(t, h)
-	rec := post(t, h, "/run", nil)
-	if !strings.Contains(rec.Header().Get("Location"), "run-unbuilt") {
-		t.Errorf("Run redirected to %q", rec.Header().Get("Location"))
+
+	ctx := context.Background()
+	if _, err := db.AddPrompt(ctx, store.Prompt{Text: "best crm", Active: true}); err != nil {
+		t.Fatal(err)
 	}
+	if _, err := db.AddTarget(ctx, store.Target{
+		Spec: "chatgpt:stub", Engine: "chatgpt", Provider: provider.StubName, Access: "api",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	rec := post(t, h, "/run", nil)
+	if !strings.Contains(rec.Header().Get("Location"), "run-started") {
+		t.Fatalf("Run redirected to %q", rec.Header().Get("Location"))
+	}
+
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		if c, _ := db.Counts(ctx); c.Chats > 0 {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Error("pressing Run produced no answer")
 }
 
 func TestStaticStylesheetIsServed(t *testing.T) {

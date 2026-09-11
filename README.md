@@ -59,16 +59,17 @@ dashboard at `localhost:1515`. The setup wizard runs end to end: brand,
 competitors, a starter prompt pack written from your category, and a provider
 step. Prompts, competitors, targets and the run ceiling are all editable.
 
-The OpenAI provider is implemented, so you can connect a key, have it
-verified against the vendor, and track ChatGPT. The remaining ten providers
-are listed in Settings with a link to their key page and a line saying they
-are not built yet.
+It fetches real answers. Connect an OpenAI key, press Run, and the prompts are
+asked of ChatGPT with web search on; the answers, their cited sources and the
+token usage are stored. `limelit run` does the same from cron, and a daily or
+hourly schedule runs it while `limelit serve` is up. The remaining ten
+providers are listed in Settings with a link to their key page and a line
+saying they are not built yet.
 
-What does not work yet: nothing runs the prompts. The evaluation runner is
-next, and until it lands nothing is fetched, so every screen that needs
-answers says so rather than showing an empty frame. `limelit mcp`, `run`,
-`export` and `upgrade` report that they are not implemented rather than
-pretending to work.
+What does not work yet: nothing reads those answers. Mention matching,
+citation classification and the metrics are next, so the dashboard still has
+no numbers on it. `limelit mcp`, `export` and `upgrade` report that they are
+not implemented rather than pretending to work.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -97,20 +98,21 @@ Limelit Open takes the other side of it:
 
 ## Features
 
-| | Feature | Status |
-|---|---|---|
-| 📊 | **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | planned |
-| 🏆 | **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | planned |
-| 🔗 | **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | planned |
-| 🧮 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
-| 🔌 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
-| 🤖 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
-| 🖥️ | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
-| ⏱️ | **Scheduler**: daily or cron, with a hard `runs_per_day` ceiling so nothing surprises you | planned |
-| 📤 | **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | planned |
-| ☁️ | **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
-| 🧭 | **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |
-| 💾 | **Single binary, SQLite**: no cgo, no Docker requirement, no Postgres | **working** |
+| Feature | Status |
+|---|---|
+| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | planned |
+| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | planned |
+| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | planned |
+| **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
+| **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
+| **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
+| **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
+| **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |
+| **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` from your own cron | **working** |
+| **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | planned |
+| **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
+| **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |
+| **Single binary, SQLite**: no cgo, no Docker requirement, no Postgres | **working** |
 
 ## Quick start
 
@@ -236,7 +238,7 @@ targets:
 limits:
   runs_per_day: 200
 
-schedule: daily   # or off, or a cron expression
+schedule: daily   # daily, hourly, or off
 ```
 
 Credentials come from the environment (or the settings store, with the
@@ -250,6 +252,14 @@ OLOSTEP_API_KEY
 ```
 
 `LIMELIT_DATA_DIR` sets where the SQLite database lives (default `./data`).
+`LIMELIT_SECRET` is the key that encrypts credentials pasted into the
+dashboard; leave it unset and one is generated beside the database.
+
+For any schedule more specific than daily or hourly, use your own cron:
+
+```bash
+limelit run --target chatgpt:openai:online
+```
 
 ## How the numbers are computed
 
@@ -423,6 +433,7 @@ internal/engines   the tracked answer engines
 internal/provider  the provider interface, typed errors, the registry, and the providers
 internal/target    engine:provider[:model][:online]
 internal/promptpack the starter prompt templates
+internal/runner    the evaluation runner: fan-out, the ceiling, usage
 internal/secrets   encryption at rest for pasted provider keys
 internal/ui        the embedded dashboard: templates, CSS, handlers
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
