@@ -104,9 +104,9 @@ Limelit Open takes the other side of it:
 
 | Feature | Status |
 |---|---|
-| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | **working** |
-| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | **working** |
-| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | **working** |
+| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | computed, no UI yet |
+| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | computed, no UI yet |
+| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | computed, no UI yet |
 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
