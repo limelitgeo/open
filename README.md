@@ -66,10 +66,14 @@ hourly schedule runs it while `limelit serve` is up. The remaining ten
 providers are listed in Settings with a link to their key page and a line
 saying they are not built yet.
 
-What does not work yet: nothing reads those answers. Mention matching,
-citation classification and the metrics are next, so the dashboard still has
-no numbers on it. `limelit mcp`, `export` and `upgrade` report that they are
-not implemented rather than pretending to work.
+Each answer is searched for your brand and your competitors, with the rank of
+the list item they appear in, and every cited source is classified as your
+own, a competitor's, social, informational or other.
+
+What does not work yet: nothing aggregates those rows. The metrics and the
+dashboard graphs are next, so the screens are still empty. `limelit mcp`,
+`export` and `upgrade` report that they are not implemented rather than
+pretending to work.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -102,7 +106,7 @@ Limelit Open takes the other side of it:
 |---|---|
 | **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | planned |
 | **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | planned |
-| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | planned |
+| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | **working** |
 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
@@ -433,6 +437,8 @@ internal/engines   the tracked answer engines
 internal/provider  the provider interface, typed errors, the registry, and the providers
 internal/target    engine:provider[:model][:online]
 internal/promptpack the starter prompt templates
+internal/mentions  the deterministic brand matcher and list ranking
+internal/citations URL normalisation and source classification
 internal/runner    the evaluation runner: fan-out, the ceiling, usage
 internal/secrets   encryption at rest for pasted provider keys
 internal/ui        the embedded dashboard: templates, CSS, handlers

@@ -158,6 +158,7 @@ func cmdServe(ctx context.Context, args []string) error {
 	}
 
 	run := runner.New(db, registry, credentials.Source(ctx, db, keys, log), log)
+	run.NewAnalyzer = func(c context.Context) (runner.Analyzer, error) { return runner.NewStoreAnalyzer(c, db) }
 	dash, err := ui.New(db, registry, keys, run, log, buildVersion(), cfg)
 	if err != nil {
 		return err
@@ -275,6 +276,7 @@ func cmdRun(ctx context.Context, args []string) error {
 	}
 
 	run := runner.New(db, provider.Default(), credentials.Source(ctx, db, keys, log), log)
+	run.NewAnalyzer = func(c context.Context) (runner.Analyzer, error) { return runner.NewStoreAnalyzer(c, db) }
 	res, err := run.Run(ctx, runner.Options{TargetSpec: *targetSpec, RunsPerDay: ceiling})
 	if err != nil {
 		return err

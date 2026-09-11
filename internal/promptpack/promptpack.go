@@ -49,6 +49,11 @@ const (
 // Build returns the starter prompts. The result is deterministic for the
 // same input, so a user who reruns the wizard sees the same list rather than
 // a reshuffled one.
+//
+// Whether a prompt counts as branded is decided by package mentions, not
+// here. The Branded field below is what the templates know they wrote; a
+// prompt a user types by hand goes through the same matcher that decides
+// whether an answer mentions the brand, so one rule governs both.
 func Build(in Input) []Prompt {
 	category := strings.TrimSpace(in.Category)
 	brand := strings.TrimSpace(in.Brand)
@@ -101,23 +106,6 @@ func Build(in Input) []Prompt {
 	}
 
 	return out
-}
-
-// IsBranded reports whether text names the property or one of its aliases.
-// The wizard uses it on prompts a user typed by hand, so a hand-written
-// branded prompt is tagged the same way a generated one is.
-func IsBranded(text string, names []string) bool {
-	lower := strings.ToLower(text)
-	for _, n := range names {
-		n = strings.ToLower(strings.TrimSpace(n))
-		if n == "" {
-			continue
-		}
-		if strings.Contains(lower, n) {
-			return true
-		}
-	}
-	return false
 }
 
 // indefiniteArticle picks "a" or "an" for a category phrase. A generated

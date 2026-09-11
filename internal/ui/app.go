@@ -11,7 +11,7 @@ import (
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/limelitgeo/open/internal/engines"
-	"github.com/limelitgeo/open/internal/promptpack"
+	"github.com/limelitgeo/open/internal/mentions"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
@@ -166,6 +166,13 @@ func (a *App) base(r *http.Request, title, current string) (Base, store.Counts, 
 	return b, counts, nil
 }
 
+// brandOf turns the stored property into the brand the matcher searches for,
+// so a prompt is tagged branded by the same rule that decides whether an
+// answer mentions the brand.
+func brandOf(p store.Property) mentions.Brand {
+	return mentions.Brand{Name: p.Name, Aliases: p.Aliases, Domain: p.Domain}
+}
+
 func count(n int) string {
 	if n == 0 {
 		return ""
@@ -249,7 +256,7 @@ func (a *App) addPrompt(w http.ResponseWriter, r *http.Request) {
 	prop, _ := a.db.Property(r.Context())
 	_, err := a.db.AddPrompt(r.Context(), store.Prompt{
 		Text:    text,
-		Branded: promptpack.IsBranded(text, prop.Names()),
+		Branded: mentions.IsBranded(text, brandOf(prop)),
 		Active:  true,
 	})
 	if err != nil {

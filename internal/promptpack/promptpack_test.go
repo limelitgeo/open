@@ -113,20 +113,3 @@ func TestBuildWithoutBrandOrCompetitors(t *testing.T) {
 		}
 	}
 }
-
-func TestIsBranded(t *testing.T) {
-	names := []string{"Acme", "Acme Inc", "acme.com"}
-	for _, text := range []string{"What is Acme?", "is ACME any good", "compare acme.com and globex.com"} {
-		if !IsBranded(text, names) {
-			t.Errorf("IsBranded(%q) = false", text)
-		}
-	}
-	for _, text := range []string{"best CRM tools", "Globex alternatives", ""} {
-		if IsBranded(text, names) {
-			t.Errorf("IsBranded(%q) = true", text)
-		}
-	}
-	if IsBranded("anything", []string{"", "   "}) {
-		t.Error("an empty name matched everything")
-	}
-}

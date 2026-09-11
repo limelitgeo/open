@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/limelitgeo/open/internal/mentions"
 	"github.com/limelitgeo/open/internal/promptpack"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/store"
@@ -177,7 +178,7 @@ func (a *App) savePrompts(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/setup", http.StatusSeeOther)
 		return
 	}
-	names := prop.Names()
+	brand := brandOf(prop)
 
 	// Unticked boxes are simply absent from the form, so the categories
 	// submitted alongside cannot be matched by index. Rebuilding the pack and
@@ -202,7 +203,7 @@ func (a *App) savePrompts(w http.ResponseWriter, r *http.Request) {
 		_, err := a.db.AddPrompt(ctx, store.Prompt{
 			Text:     text,
 			Category: cat,
-			Branded:  promptpack.IsBranded(text, names),
+			Branded:  mentions.IsBranded(text, brand),
 			Active:   true,
 		})
 		return err
