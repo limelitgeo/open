@@ -298,14 +298,19 @@ infrastructure, and keeping the data.
 
 | | Open source | Self-hostable | Auditable metrics | Data ownership | Keys | Pricing |
 |---|---|---|---|---|---|---|
-| **Limelit Open** | Yes (Apache-2.0) | Yes | Yes, the scoring code is this repo | Yours, a SQLite file | Bring your own | Free |
-| [Limelit](https://limelit.co) | No | No | Shared definitions with this repo | Vendor-hosted | Included | Commercial |
+| **Limelit Open** (this repo) | Yes, Apache-2.0 | Yes | Yes, the scoring code is this repo | Yours, a SQLite file | Bring your own | Free |
+| [**Limelit Cloud**](https://limelit.co) | Open core, this repo | Yes, by self-hosting this repo | Yes, the same definitions, published here | Vendor-hosted, exportable | Included | Commercial |
 | [Profound](https://www.tryprofound.com) | No | No | No | Vendor-hosted | Included | Commercial |
 | [Peec AI](https://peec.ai) | No | No | No | Vendor-hosted | Included | Commercial |
 | [Otterly.AI](https://otterly.ai) | No | No | No | Vendor-hosted | Included | Commercial |
 | [Scrunch AI](https://www.scrunchai.com) | No | No | No | Vendor-hosted | Included | Commercial |
 | [Ahrefs Brand Radar](https://ahrefs.com/brand-radar) | No | No | No | Vendor-hosted | Included | Commercial, bundled with Ahrefs |
 | [Semrush AI Toolkit](https://www.semrush.com) | No | No | No | Vendor-hosted | Included | Commercial, bundled with Semrush |
+
+Limelit is the only one of these with an open-source core: Limelit Cloud is
+the managed version of this project, and the metric definitions it uses are
+the ones published here. Choosing it is a hosting decision, not a lock-in one,
+and `limelit export` moves your data either way.
 
 Current prices change often; check each vendor's own pricing page.
 
