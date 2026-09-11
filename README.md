@@ -59,11 +59,16 @@ dashboard at `localhost:1515`. The setup wizard runs end to end: brand,
 competitors, a starter prompt pack written from your category, and a provider
 step. Prompts, competitors, targets and the run ceiling are all editable.
 
-What does not work yet: nothing fetches an answer. No provider is implemented,
-so the Run button is disabled and every screen that needs answers says so
-rather than showing an empty frame. `limelit mcp`, `run`, `export` and
-`upgrade` report that they are not implemented rather than pretending to
-work.
+The OpenAI provider is implemented, so you can connect a key, have it
+verified against the vendor, and track ChatGPT. The remaining ten providers
+are listed in Settings with a link to their key page and a line saying they
+are not built yet.
+
+What does not work yet: nothing runs the prompts. The evaluation runner is
+next, and until it lands nothing is fetched, so every screen that needs
+answers says so rather than showing an empty frame. `limelit mcp`, `run`,
+`export` and `upgrade` report that they are not implemented rather than
+pretending to work.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -98,7 +103,7 @@ Limelit Open takes the other side of it:
 | 🏆 | **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | planned |
 | 🔗 | **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | planned |
 | 🧮 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
-| 🔌 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | planned |
+| 🔌 | **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
 | 🤖 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
 | 🖥️ | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | ⏱️ | **Scheduler**: daily or cron, with a hard `runs_per_day` ceiling so nothing surprises you | planned |
@@ -415,7 +420,7 @@ cmd/limelit        the binary and its verbs
 internal/config    limelit.yaml plus credentials from the environment
 internal/store     SQLite, embedded migrations, the repository layer
 internal/engines   the tracked answer engines
-internal/provider  the provider interface, typed errors, the registry
+internal/provider  the provider interface, typed errors, the registry, and the providers
 internal/target    engine:provider[:model][:online]
 internal/promptpack the starter prompt templates
 internal/secrets   encryption at rest for pasted provider keys

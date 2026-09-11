@@ -82,6 +82,12 @@
       {{end}}
       <button class="btn" type="submit">Save</button>
     </form>
+    {{if .Available}}
+    <form method="post" action="/settings/keys/test" style="margin-top:8px">
+      <input type="hidden" name="provider" value="{{.Name}}">
+      <button class="btn btn-ghost" type="submit">Test this key</button>
+    </form>
+    {{end}}
   </div>
   {{end}}
 </div>

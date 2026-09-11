@@ -269,6 +269,54 @@ func (a *App) storeCredentials(r *http.Request, entry provider.CatalogEntry) (in
 	return saved, nil
 }
 
+// credentials reads a credential the way the runner will: the environment
+// first, then the encrypted settings store. One function, so the Test button
+// proves the same value a run would use rather than a different one.
+func (a *App) credentials(ctx context.Context) provider.CredentialSource {
+	return func(name string) string {
+		if v := config.Credential(name); v != "" {
+			return v
+		}
+		sealed, err := a.db.Setting(ctx, credentialPrefix+name)
+		if err != nil || sealed == "" {
+			return ""
+		}
+		value, err := a.keys.Unseal(sealed)
+		if err != nil {
+			a.log.Error("stored credential could not be decrypted", "credential", name, "error", err)
+			return ""
+		}
+		return value
+	}
+}
+
+// testKeys presses the provider's own cheapest authenticated call, so a wrong
+// key is reported at the moment it is pasted rather than at the next run.
+func (a *App) testKeys(w http.ResponseWriter, r *http.Request) {
+	name := strings.TrimSpace(r.FormValue("provider"))
+	entry, ok := provider.CatalogEntryFor(name)
+	if !ok {
+		http.Redirect(w, r, "/settings", http.StatusSeeOther)
+		return
+	}
+	ctx := r.Context()
+
+	if missing := a.registry.MissingCredentials(name, a.credentials(ctx)); len(missing) > 0 {
+		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: strings.Join(missing, " and ") + " is not set yet."})
+		return
+	}
+	p, err := a.registry.New(name, a.credentials(ctx))
+	if err != nil {
+		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: entry.Label + " did not accept the key: " + err.Error()})
+		return
+	}
+	if err := p.Test(ctx); err != nil {
+		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: entry.Label + " did not accept the key: " + err.Error()})
+		return
+	}
+	a.settingsWithFlash(w, r, Flash{Kind: "ok", Text: entry.Label + " accepted the key."})
+}
+
 func (a *App) saveLimits(w http.ResponseWriter, r *http.Request) {
 	n, err := strconv.Atoi(strings.TrimSpace(r.FormValue("runs_per_day")))
 	if err != nil || n <= 0 {

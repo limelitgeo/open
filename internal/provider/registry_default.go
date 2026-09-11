@@ -8,9 +8,20 @@ package provider
 // IS available, which is the honest failure: the alternative is a target that
 // validates and then never produces a row.
 //
-// docs/providers.md is the plan; this function is the truth.
+// Catalog() is the plan, and the settings screen reads it so a user can see
+// and prepare for what is coming. This function is the truth.
 func Default() *Registry {
 	reg := NewRegistry()
-	// Providers register here as they are implemented.
+
+	reg.Register(Registration{
+		Name:        "openai",
+		Access:      AccessAPI,
+		Engines:     map[string]string{ChatGPTEngine: OpenAIDefaultModel},
+		Credentials: []string{"OPENAI_API_KEY"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewOpenAI(src("OPENAI_API_KEY"))
+		},
+	})
+
 	return reg
 }

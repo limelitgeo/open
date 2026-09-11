@@ -229,3 +229,84 @@ func TestConnectingInTheWizardStartsTracking(t *testing.T) {
 		}
 	}
 }
+
+func TestTestButtonReportsABadKey(t *testing.T) {
+	// A wrong key reported at the moment it is pasted, rather than at the
+	// next scheduled run when nobody is watching.
+	_, _, h := newApp(t, provider.Default())
+	seedProperty(t, h)
+
+	post(t, h, "/settings/keys", url.Values{"provider": {"openai"}, "cred_OPENAI_API_KEY": {"sk-not-a-real-key"}})
+	rec := post(t, h, "/settings/keys/test", url.Values{"provider": {"openai"}})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("test = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "did not accept the key") {
+		t.Error("a rejected key was not reported on the page")
+	}
+}
+
+func TestTestButtonSaysWhichVariableIsMissing(t *testing.T) {
+	// "Authentication failed" sends a user hunting. Naming the variable is
+	// the difference between a fix and a support thread.
+	_, _, h := newApp(t, provider.Default())
+	seedProperty(t, h)
+
+	rec := post(t, h, "/settings/keys/test", url.Values{"provider": {"openai"}})
+	if !strings.Contains(rec.Body.String(), "OPENAI_API_KEY is not set yet") {
+		t.Errorf("the missing credential was not named: %s", flashOf(rec.Body.String()))
+	}
+}
+
+func TestCredentialSourcePrefersTheEnvironment(t *testing.T) {
+	// The runner and the Test button must read a credential the same way, or
+	// Test would prove a value a run never uses.
+	t.Setenv("OPENAI_API_KEY", "sk-from-env")
+	app, _, h := newApp(t, provider.Default())
+	seedProperty(t, h)
+	post(t, h, "/settings/keys", url.Values{"provider": {"openai"}, "cred_OPENAI_API_KEY": {"sk-from-store"}})
+
+	if got := app.credentials(context.Background())("OPENAI_API_KEY"); got != "sk-from-env" {
+		t.Errorf("credential = %q, want the environment to win", got)
+	}
+}
+
+func TestCredentialSourceFallsBackToTheStore(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "")
+	app, _, h := newApp(t, provider.Default())
+	seedProperty(t, h)
+	post(t, h, "/settings/keys", url.Values{"provider": {"openai"}, "cred_OPENAI_API_KEY": {"sk-from-store"}})
+
+	if got := app.credentials(context.Background())("OPENAI_API_KEY"); got != "sk-from-store" {
+		t.Errorf("credential = %q, want the stored value decrypted", got)
+	}
+}
+
+func TestOpenAIIsOfferedAsARealButton(t *testing.T) {
+	// The first implemented provider turns its engine card from a pending
+	// line into something a user can click.
+	_, _, h := newApp(t, provider.Default())
+	seedProperty(t, h)
+	body := get(t, h, "/settings").Body.String()
+
+	if !strings.Contains(body, "Track via OpenAI") {
+		t.Error("settings does not offer OpenAI as a track button")
+	}
+	if !strings.Contains(body, "Test this key") {
+		t.Error("settings has no way to check the key")
+	}
+}
+
+// flashOf pulls the notice text out of a rendered page, for error messages
+// that are easier to read than a whole document.
+func flashOf(body string) string {
+	i := strings.Index(body, `class="notice`)
+	if i < 0 {
+		return "(no notice on the page)"
+	}
+	tail := body[i:]
+	if j := strings.Index(tail, "</div>"); j > 0 {
+		return tail[:j]
+	}
+	return tail[:min(len(tail), 200)]
+}

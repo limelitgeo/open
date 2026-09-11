@@ -1,0 +1,53 @@
+{
+  "id": "resp_fixture",
+  "object": "response",
+  "model": "chat-latest",
+  "status": "completed",
+  "usage": {
+    "input_tokens": 10722,
+    "output_tokens": 796
+  },
+  "output": [
+    {
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "AI visibility tracking tools Profound Peec AI Otterly Scrunch official"
+      }
+    },
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "If by \u201cAI visibility tracking\u201d you mean monitoring how often your brand appears, gets recommended, or is cited in ChatGPT, Perplexity, Gemini, Google AI Overviews/AI Mode, Copilot, etc., the market has matured quite a bit in 2026.\n\nThe tools I\u2019d put at the top right now are:\n\n- Profound \u2014 Best for enterprise AI visibility/GEO. Strong for large-scale prompt monitoring, competitive share of voice, citation/source analysis, and understanding what influences LLM recommendations. It\u2019s especially compelling for larger marketing teams that want AI visibility to be its own analytics discipline.\n- Ahrefs Brand Radar \u2014 Best for combining AI visibility with SEO intelligence. It tracks mentions, citations, impressions, and AI share of voice, while tying those results into Ahrefs\u2019 enormous search dataset. Ahrefs says its broader Visibility Index currently covers hundreds of millions of modeled prompts and multiple AI platforms. ([help.ahrefs.com](https://help.ahrefs.com/en/articles/11064852-what-is-brand-radar-and-how-to-use-it?utm_source=openai))\n- Semrush AI Visibility Toolkit / Semrush One \u2014 Best all-in-one SEO + AI-search stack. You can analyze brand visibility, competitors and sources, and track prompts while connecting AI visibility to the traditional SEO workflow. This is particularly attractive if your organization already uses Semrush. ([semrush.com](https://www.semrush.com/kb/1496-getting-started-with-ai-visibility-toolkit?utm_source=openai))\n- Peec AI \u2014 One of the better dedicated AI-search trackers. I\u2019d consider it for agencies, startups, and growth teams that primarily want clean prompt-level brand/competitor monitoring without buying a giant SEO suite.\n- Scrunch AI \u2014 Strong for enterprises thinking beyond pure tracking. Its positioning is more around understanding and improving how AI agents perceive and interact with your brand, so it can be interesting for teams developing a broader AI-search strategy.\n- Otterly.AI \u2014 Best lower-cost/simple option. Good if the basic question is \u201cDo we appear for these 100\u2013500 prompts, who outranks us, and which sources are being cited?\u201d It\u2019s generally easier to get into than enterprise platforms.\n- AthenaHQ \u2014 Worth considering for teams that want GEO/AEO monitoring plus optimization workflows rather than only another reporting dashboard.\n\nIf I were creating a shortlist today, September 11, 2026, I\u2019d narrow it this way:\n\n| Need | I'd evaluate first |\n|---|---|\n| Enterprise / sophisticated GEO | Profound |\n| AI + traditional SEO | Ahrefs Brand Radar |\n| Existing Semrush user | Semrush |\n| Dedicated AI tracking | Peec AI |\n| Enterprise AI optimization | Scrunch AI |\n| SMB / affordable tracking | Otterly |\n| Agency managing many clients | Peec / Profound / Semrush |\n| Competitive AI share-of-voice research | Ahrefs Brand Radar |\n\nOne important caveat: don't put too much faith in a single \u201cAI visibility score.\u201d LLM outputs vary by prompt, model, geography, personalization and time. Tools also differ substantially in which prompts they test and how they estimate visibility. A more useful measurement framework is usually (1) share of voice across a representative prompt set, (2) recommendation/mention rate, (3) citation share, (4) competitor comparison, and ultimately (5) actual AI-referred traffic/conversions.\n\nAhrefs is particularly interesting here because it offers two approaches: tracking exact custom prompts and estimating broader visibility from a very large modeled prompt dataset. That partly addresses the major blind spot of trackers that measure only the prompts you manually give them. ([ahrefs.com](https://ahrefs.com/brand-radar?utm_source=openai))\n\nIf you tell me whether you're choosing this for an agency, SaaS company, ecommerce brand, or enterprise\u2014and roughly wh",
+          "annotations": [
+            {
+              "type": "url_citation",
+              "end_index": 1050,
+              "start_index": 929,
+              "title": "What is Brand Radar, and how to use it? | Help Center - Ahrefs",
+              "url": "https://help.ahrefs.com/en/articles/11064852-what-is-brand-radar-and-how-to-use-it?utm_source=openai"
+            },
+            {
+              "type": "url_citation",
+              "end_index": 1463,
+              "start_index": 1354,
+              "title": "Getting Started with the Semrush AI Visibility Toolkit: A Step-by-Step Guide",
+              "url": "https://www.semrush.com/kb/1496-getting-started-with-ai-visibility-toolkit?utm_source=openai"
+            },
+            {
+              "type": "url_citation",
+              "end_index": 3654,
+              "start_index": 3590,
+              "title": "Ahrefs Brand Radar: See ANY brand\u2019s AI visibility",
+              "url": "https://ahrefs.com/brand-radar?utm_source=openai"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

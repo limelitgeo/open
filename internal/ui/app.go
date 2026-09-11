@@ -75,6 +75,7 @@ func (a *App) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /settings/targets/add", a.addTarget)
 	mux.HandleFunc("POST /settings/targets/delete", a.deleteTarget)
 	mux.HandleFunc("POST /settings/keys", a.saveKeys)
+	mux.HandleFunc("POST /settings/keys/test", a.testKeys)
 	mux.HandleFunc("POST /settings/limits", a.saveLimits)
 	mux.HandleFunc("GET /upgrade", a.upgrade)
 	mux.HandleFunc("POST /run", a.run)

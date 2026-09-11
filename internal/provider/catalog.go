@@ -46,7 +46,7 @@ var catalog = []CatalogEntry{
 	},
 	{
 		Name: "openai", Label: "OpenAI", Access: AccessAPI,
-		Engines:     map[string]string{ChatGPTEngine: "gpt-5.5"},
+		Engines:     map[string]string{ChatGPTEngine: OpenAIDefaultModel},
 		Credentials: []string{"OPENAI_API_KEY"},
 		KeyURL:      "https://platform.openai.com/api-keys",
 		Note:        "ChatGPT's model with web search on, billed per token.",
