@@ -356,3 +356,108 @@ func openEmpty(t *testing.T) *store.DB {
 	t.Cleanup(func() { db.Close() })
 	return db
 }
+
+// TestPromptTemplatesMatchTheDocumentedCatalog. The templates are the walks
+// worth repeating, and their ids match Cloud so a client that has learned one
+// keeps it after an upgrade.
+func TestPromptTemplatesMatchTheDocumentedCatalog(t *testing.T) {
+	s, _ := connect(t)
+	res, err := s.ListPrompts(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]*mcp.Prompt{}
+	for _, p := range res.Prompts {
+		got[p.Name] = p
+	}
+	for _, want := range []string{"limelit_weekly_pulse", "limelit_competitor_radar", "limelit_why_not_cited"} {
+		p, ok := got[want]
+		if !ok {
+			t.Errorf("missing documented prompt %q", want)
+			continue
+		}
+		if p.Description == "" {
+			t.Errorf("%q has no description", want)
+		}
+	}
+}
+
+func TestCompetitorRadarDefaultsAndWalk(t *testing.T) {
+	s, _ := connect(t)
+	ctx := context.Background()
+
+	// With no arguments the walk still has to be complete and specific.
+	res, err := s.GetPrompt(ctx, &mcp.GetPromptParams{Name: "limelit_competitor_radar"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var text string
+	for _, m := range res.Messages {
+		if tc, ok := m.Content.(*mcp.TextContent); ok {
+			text += tc.Text
+		}
+	}
+	for _, want := range []string{"list_competitors", "get_overview_kpis", "list_source_urls", "get_matrix", "30 days", "10 percentage points"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("the walk does not mention %q:\n%s", want, text)
+		}
+	}
+	// Every tool it names must actually exist, or the walk sends the model
+	// at something that is not there.
+	tools, err := s.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	registered := map[string]bool{}
+	for _, tool := range tools.Tools {
+		registered[tool.Name] = true
+	}
+	for _, named := range []string{"list_competitors", "get_overview_kpis", "list_source_urls", "get_matrix"} {
+		if !registered[named] {
+			t.Errorf("the walk names %q, which is not a registered tool", named)
+		}
+	}
+
+	// Arguments are honoured.
+	res, err = s.GetPrompt(ctx, &mcp.GetPromptParams{
+		Name:      "limelit_competitor_radar",
+		Arguments: map[string]string{"window_days": "7", "threshold_pp": "3"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	text = ""
+	for _, m := range res.Messages {
+		if tc, ok := m.Content.(*mcp.TextContent); ok {
+			text += tc.Text
+		}
+	}
+	if !strings.Contains(text, "7 days") || !strings.Contains(text, "3 percentage points") {
+		t.Errorf("arguments were not interpolated:\n%s", text)
+	}
+}
+
+// TestPromptTemplatesDoNotPromiseCloudFeatures: a walk that tells the model to
+// explain WHY a number moved would send it somewhere this instance cannot
+// measure, and it would answer from guesswork.
+func TestPromptTemplatesDoNotPromiseCloudFeatures(t *testing.T) {
+	s, _ := connect(t)
+	ctx := context.Background()
+	for _, name := range []string{"limelit_weekly_pulse", "limelit_competitor_radar", "limelit_why_not_cited"} {
+		res, err := s.GetPrompt(ctx, &mcp.GetPromptParams{Name: name, Arguments: map[string]string{"prompt_id": "1"}})
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		var text string
+		for _, m := range res.Messages {
+			if tc, ok := m.Content.(*mcp.TextContent); ok {
+				text += strings.ToLower(tc.Text)
+			}
+		}
+		for _, cloudOnly := range []string{"get_sentiment", "list_segments", "get_perception", "get_fanouts"} {
+			if strings.Contains(text, cloudOnly) {
+				t.Errorf("%s sends the model at the Cloud-only tool %q", name, cloudOnly)
+			}
+		}
+	}
+}

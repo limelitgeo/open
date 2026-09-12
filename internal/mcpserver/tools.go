@@ -724,6 +724,40 @@ Report n alongside every figure, and say whether a number came from an api or a 
 	})
 
 	s.AddPrompt(&mcp.Prompt{
+		Name:        "limelit_competitor_radar",
+		Description: "Who is gaining on you, by how much, and what they are being cited for.",
+		Arguments: []*mcp.PromptArgument{
+			{Name: "window_days", Description: "Trailing window, default 30"},
+			{Name: "threshold_pp", Description: "Only report moves of at least this many percentage points, default 10"},
+		},
+	}, func(ctx context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		days := req.Params.Arguments["window_days"]
+		if days == "" {
+			days = "30"
+		}
+		threshold := req.Params.Arguments["threshold_pp"]
+		if threshold == "" {
+			threshold = "10"
+		}
+		return &mcp.GetPromptResult{
+			Description: "Competitor radar",
+			Messages: []*mcp.PromptMessage{{
+				Role: "user",
+				Content: &mcp.TextContent{Text: fmt.Sprintf(`Show me the competitor radar over the last %s days.
+
+1. list_competitors, so you know who is actually tracked. A brand that is not tracked cannot appear in these numbers at all, and saying so is part of the answer.
+2. get_overview_kpis with days=%s. The ranking it returns carries each brand's visibility, share of voice and average position, mine included.
+3. get_overview_kpis again with days=%s doubled, and derive the earlier window by subtraction so you can state a move rather than a level.
+4. Report only brands that moved at least %s percentage points, and say plainly if nobody did.
+5. For the brand that moved most, call list_source_urls on its domain to see which of its pages are being cited.
+6. get_matrix to find the specific prompts where that brand is named and I am not.
+
+Rules for the answer. Quote n with every figure; if n is under 20 say the numbers are still settling rather than presenting a move as a trend. Say whether a figure came from an api or a scraped target. Do not attribute a cause: this instance measures what was said, not why. End with the prompts and the pages, not with advice.`, days, days, days, threshold)},
+			}},
+		}, nil
+	})
+
+	s.AddPrompt(&mcp.Prompt{
 		Name:        "limelit_why_not_cited",
 		Description: "Why one prompt never names us, and who it names instead.",
 		Arguments:   []*mcp.PromptArgument{{Name: "prompt_id", Description: "The prompt to investigate", Required: true}},
