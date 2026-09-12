@@ -17,6 +17,8 @@ package provider
 import (
 	"context"
 	"errors"
+	"io"
+	"net/http"
 	"strings"
 )
 
@@ -173,4 +175,14 @@ func truncateBody(body string) string {
 		body = body[:max] + "..."
 	}
 	return ": " + body
+}
+
+// readLimited reads a response body under a cap and closes it.
+//
+// The cap matters: these are third-party responses and a scraped results page
+// can be very large, so an unbounded read hands a remote service the ability
+// to exhaust this process's memory.
+func readLimited(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+	return io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 }

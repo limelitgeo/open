@@ -58,10 +58,11 @@ What works today, verified against a live instance:
 - **One binary.** No Docker, no Node, no Postgres. It creates and migrates its
   own SQLite database on first start and serves the dashboard at
   `localhost:1515`.
-- **Six engines.** ChatGPT, Claude, Perplexity and Gemini through their vendor
-  APIs with web search on; Google AI Overview and AI Mode through a scraper,
-  because those two have no API at all. Five providers of eleven are
-  implemented; Settings lists the rest with a link to each key page.
+- **All seven engines.** ChatGPT, Claude, Perplexity and Gemini through their
+  vendor APIs with web search on; Google AI Overview, Google AI Mode and Bing
+  Copilot through scrapers, because those three have no API at all. Six
+  providers of eleven are implemented; Settings lists the rest with a link to
+  each key page.
 - **The full measurement chain.** Answers are stored, searched for your brand
   and every tracked competitor with the rank of the list item they appear in,
   and every cited source is classified as your own, a competitor's, social,
@@ -80,7 +81,7 @@ What works today, verified against a live instance:
   your own cron, with a hard `runs_per_day` ceiling checked before any spend.
 
 What does not work yet: `export` and `upgrade` report that they are not
-implemented rather than pretending to work, and six of eleven providers are
+implemented rather than pretending to work, and five of eleven providers are
 unbuilt.
 
 Everything marked *planned* below is tracked in
@@ -116,7 +117,7 @@ Limelit Open takes the other side of it:
 | **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | **working** |
 | **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | **working** |
 | **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | **working** |
-| **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | **5 of 11, six engines** |
+| **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | **6 of 11, all seven engines** |
 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | **working** |
 | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |

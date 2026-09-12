@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
@@ -384,5 +385,203 @@ func TestDataForSEOMissingCredentialsIsAuth(t *testing.T) {
 		if _, err := NewDataForSEO(pair[0], pair[1]); !errors.Is(err, ErrAuth) {
 			t.Errorf("(%q,%q): err = %v, want ErrAuth", pair[0], pair[1], err)
 		}
+	}
+}
+
+// ---- SearchApi -------------------------------------------------------------
+
+// searchApiStub routes by the engine parameter, the way the real API does, so
+// the two-step AI Overview path is exercised rather than stubbed out.
+func newSearchApiAgainst(t *testing.T, byEngine map[string]string) (*searchApiProvider, *int) {
+	t.Helper()
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		engine := r.URL.Query().Get("engine")
+		fixture, ok := byEngine[engine]
+		if !ok {
+			http.Error(w, `{"error":"unexpected engine `+engine+`"}`, http.StatusBadRequest)
+			return
+		}
+		// A page_token call carries the query inside the token, and sending q
+		// alongside it is rejected by the real API.
+		if r.URL.Query().Get("page_token") != "" && r.URL.Query().Get("q") != "" {
+			http.Error(w, `{"error":"q must not accompany page_token"}`, http.StatusBadRequest)
+			return
+		}
+		body, err := os.ReadFile("testdata/" + fixture)
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(body)
+	}))
+	t.Cleanup(srv.Close)
+
+	p, err := NewSearchApi("sa-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sp := p.(*searchApiProvider)
+	sp.endpoint = srv.URL + "/search"
+	return sp, &calls
+}
+
+// TestSearchApiReachesBingCopilot is the reason this provider exists: nothing
+// else in this build can see that surface.
+func TestSearchApiReachesBingCopilot(t *testing.T) {
+	p, calls := newSearchApiAgainst(t, map[string]string{"bing_copilot": "searchapi_bing_copilot.json"})
+	resp, err := p.Run(context.Background(), Request{Engine: BingCopilotEngine, Prompt: "q"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(resp.Text) == "" {
+		t.Fatal("no answer text")
+	}
+	if len(resp.Citations) == 0 {
+		t.Fatal("no reference links parsed")
+	}
+	if resp.Calls != 1 || *calls != 1 {
+		t.Errorf("calls reported %d, made %d, want 1 and 1", resp.Calls, *calls)
+	}
+	if resp.Model != "" {
+		t.Errorf("model = %q, want empty for a scraped surface", resp.Model)
+	}
+	if p.Access() != AccessScraped {
+		t.Errorf("access = %q", p.Access())
+	}
+}
+
+func TestSearchApiReachesAIMode(t *testing.T) {
+	p, _ := newSearchApiAgainst(t, map[string]string{"google_ai_mode": "searchapi_ai_mode.json"})
+	resp, err := p.Run(context.Background(), Request{Engine: AIModeEngine, Prompt: "q"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Citations) == 0 || strings.TrimSpace(resp.Text) == "" {
+		t.Fatalf("text=%d citations=%d", len(resp.Text), len(resp.Citations))
+	}
+	for i, c := range resp.Citations {
+		if !strings.HasPrefix(c.URL, "http") {
+			t.Errorf("citation %d is not a URL: %q", i, c.URL)
+		}
+		if c.Position != i+1 {
+			t.Errorf("citation %d has position %d", i, c.Position)
+		}
+	}
+}
+
+// TestSearchApiAIOverviewTakesTwoCalls pins the two-step, and pins that both
+// calls are reported. A user watching their bill should see what this costs.
+func TestSearchApiAIOverviewTakesTwoCalls(t *testing.T) {
+	p, calls := newSearchApiAgainst(t, map[string]string{
+		"google":             "searchapi_google_probe.json",
+		"google_ai_overview": "searchapi_ai_overview.json",
+	})
+	resp, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *calls != 2 {
+		t.Errorf("made %d HTTP calls, want 2", *calls)
+	}
+	if resp.Calls != 2 {
+		t.Errorf("reported Calls = %d, want 2: the billable cost must be visible", resp.Calls)
+	}
+	if strings.TrimSpace(resp.Text) == "" || len(resp.Citations) == 0 {
+		t.Fatalf("text=%d citations=%d", len(resp.Text), len(resp.Citations))
+	}
+}
+
+// TestSearchApiIgnoresTheNotAvailableErrorWhenATokenIsPresent.
+//
+// Probed 2026-09-12, the ai_overview block read "An AI Overview is not
+// available for this search" and handed over a page_token that then resolved
+// a 7,000 character answer. Trusting that error text would throw the answer
+// away and record a brand miss that never happened. The recorded fixture is
+// exactly that response.
+func TestSearchApiIgnoresTheNotAvailableErrorWhenATokenIsPresent(t *testing.T) {
+	raw, err := os.ReadFile("testdata/searchapi_google_probe.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(raw), "not available") {
+		t.Skip("the fixture no longer carries the misleading error")
+	}
+	p, _ := newSearchApiAgainst(t, map[string]string{
+		"google":             "searchapi_google_probe.json",
+		"google_ai_overview": "searchapi_ai_overview.json",
+	})
+	resp, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+	if err != nil {
+		t.Fatalf("the not-available error was trusted over the token that works: %v", err)
+	}
+	if strings.TrimSpace(resp.Text) == "" {
+		t.Error("no answer recovered")
+	}
+}
+
+// TestSearchApiNoTokenIsNoAnswerSurface: when Google renders no overview at
+// all there is no token, and that is not a miss for the brand.
+func TestSearchApiNoTokenIsNoAnswerSurface(t *testing.T) {
+	for name, body := range map[string]string{
+		"no ai_overview block": `{"search_metadata":{"status":"Success"},"organic_results":[]}`,
+		"block with no token":  `{"search_metadata":{"status":"Success"},"ai_overview":{"error":"not available"}}`,
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte(body))
+		}))
+		p, _ := NewSearchApi("sa-test")
+		sp := p.(*searchApiProvider)
+		sp.endpoint = srv.URL + "/search"
+
+		_, err := sp.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+		if !errors.Is(err, ErrNoAnswerSurface) {
+			t.Errorf("%s: err = %v, want ErrNoAnswerSurface", name, err)
+		}
+		srv.Close()
+	}
+}
+
+func TestSearchApiEmptyAnswerIsNoAnswerSurface(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"search_metadata":{"status":"Success"},"markdown":"   ","text_blocks":[]}`))
+	}))
+	defer srv.Close()
+	p, _ := NewSearchApi("sa-test")
+	sp := p.(*searchApiProvider)
+	sp.endpoint = srv.URL + "/search"
+
+	_, err := sp.Run(context.Background(), Request{Engine: BingCopilotEngine, Prompt: "q"})
+	if !errors.Is(err, ErrNoAnswerSurface) {
+		t.Fatalf("err = %v, want ErrNoAnswerSurface", err)
+	}
+}
+
+func TestSearchApiWrongEngineIsTyped(t *testing.T) {
+	p, _ := NewSearchApi("sa-test")
+	_, err := p.Run(context.Background(), Request{Engine: ClaudeEngine, Prompt: "q"})
+	if !errors.Is(err, ErrUnsupportedEngine) {
+		t.Fatalf("err = %v, want ErrUnsupportedEngine", err)
+	}
+}
+
+func TestSearchApiErrorTextHandlesBothShapes(t *testing.T) {
+	// The API returns error as a string in some shapes and an object in
+	// others, and reading only one would swallow the other.
+	if got := searchApiErrorText("plain message"); got != "plain message" {
+		t.Errorf("string form = %q", got)
+	}
+	if got := searchApiErrorText(map[string]any{"message": "structured"}); got != "structured" {
+		t.Errorf("object form = %q", got)
+	}
+	if got := searchApiErrorText(nil); got != "" {
+		t.Errorf("nil should be empty, got %q", got)
+	}
+}
+
+func TestSearchApiMissingKeyIsAuthFailure(t *testing.T) {
+	if _, err := NewSearchApi("  "); !errors.Is(err, ErrAuth) {
+		t.Fatalf("err = %v, want ErrAuth", err)
 	}
 }

@@ -1,0 +1,200 @@
+{
+  "search_metadata": {
+    "id": "search_o87gAV43YWhdllbb1k1PwrlO",
+    "status": "Success",
+    "created_at": "2026-09-12T15:22:40Z",
+    "request_time_taken": 2.27,
+    "parsing_time_taken": 0.05,
+    "total_time_taken": 2.32,
+    "request_url": "https://www.google.com/search?q=best+AI+visibility+tracking+tools",
+    "html_url": "https://www.searchapi.io/api/v1/searches/search_o87gAV43YWhdllbb1k1PwrlO.html",
+    "json_url": "https://www.searchapi.io/api/v1/searches/search_o87gAV43YWhdllbb1k1PwrlO"
+  },
+  "search_parameters": {
+    "engine": "google_ai_overview",
+    "page_token": "L2FzeW5jL2ZvbHNyY2g_Z2xceDNkdXNceDI2aGxceDNkZW5ceDI2cHdzXHgzZDBceDI2eXZceDNkM1x4MjZjc1x4M2QwXHgyNmVpXHgzZE1XNmxhcHpERDZHR3B0UVB4cjc4SUFceDI2YXN5bmNceDNkX2Jhc2VqczoveGpzL18vanMvayUzRHhqcy5zLmVuLkVvY21hYkg1Vld3LjIwMTkuTy9hbSUzREFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBRVFnQkFBQUFKQUNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUVBQUlBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQkFBQUVBQWlBQkFBQUFBQUFBQUVBUUFBQUFBQVFBQUFBQUFBQUFHQUFnQUlBQUVBSUFBQUFvQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQWdRQkFBQUFFUWdBQUFFQUFJQl9OdDhBQU5BQUFBQUFBQUFjQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFrQUFBQUFBQUFBQUFDd0FBQUFBQWd3QUFDQUFCQWdBQUlBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUNBQUFBQUZBQUFBQUFBRUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFJQUFBQUtBQUFBQUFBQU1BQUFBQUFBQUFBQUVBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDREFBQUFBQUFBQUFBQUFBRkFBSVBBRENBSVFBQUFBQUFBUUFBQUFBQUFBQUFBQUFBbEFBQUFBQUFBQUFJQUFDQUJnQUFBQUFPUUFlRHdBaHdnS0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ0FBQ2lBT1pBRUJFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUtBaVBBVUFBQUFBQUFCYkF3QUMvZGclM0QwL2JyJTNEMS9pY2hjJTNEMS9ycyUzREFDVDkwb0VuaVNxVDZRa3REVGJmVlAtTnZja1lEYXJhNncvY2IlM0Rsb2FkZWRfaF8wP2NiJTNEMTIxNTA5Mzc4LF9iYXNlY3NzOi94anMvXy9zcy9rJTNEeGpzLnMudzFySm1SeWRpZWcuTC5CMS5PL2FtJTNEQ0FBSUFBQUFBQUNBQUFBQUFBQUFBQUFBQUVDQUFDSUFBQUFBQUFBQUFBQUFBQUFBQUFCQ0FDQUFBQUFDQUFBQUFBQUFBQUFBQUFBQUFBQUlBQVFBQUFBQUFBSUFBQWdBQUFBQUVCUUFBQUFBQUFBQUFFQUJBQUFBQUJBQ29BRVJBQUFCQUFBQUFBQUFBQUFVZWdBQUFNQUFBQUFBQUFDQUJ6QUFjQkFBQUFBQUFBQUFBQkFBQUFBQUFJQUFBQ0FCQUFBQUFBQUFBRUFRQUFBQUFBQUFBQUFJQUFBQUFBQWdBSUFBVUFBQUFBQUNLQUFBZ0FBQUFBQ0FBQUFBQUFBQUFBQUFRZ0FoQUFBQUFBQUFBQUVBQUFBQUFBQUFBT0FBQUFBQUFBQUFBQUFBQUFBQUFCQUFBQUFBQUFBQUFBQUFBSURnQUFBQUFBQUFRREFBQUFBQUFBQUFBQUNBQUFBZ0FBQUFBQUFBQUFBQUFJZ0VJQUVBSUFBQUFBQUFEQUFBQUFBQUFBQUFBQUFnQUJCQ0lRQkFBRkFBQXE0SUFBQUE0QUJBQUFBQUFBQUFBQUFBQUFRSUFBQUFBQUJBQUFBQUFJQUFBSUlBaEFBQ0FBQUFBQUlBQUFBQVFBQUFBQUFBTVFBQUFBQUFBQUFnZ0FJZ0FBRUFqQ0FCQUpBb0pBQ0lBQUFRQUFDQUFBQUFBSWdBQUFBQUFGQUFBUUVBQUFBQUFBQUFBQUFRQVFBQUFBQUFBQUFBQUFBQUFBQUFBTUFTQUxCQUNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFVQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDL2JyJTNEMS9jYiUzRGxvYWRlZF9oXzAvcnMlM0RBQ1Q5MG9GWl90Wm9XYTlfM2pzSXZ2elRfMVA3b1paSzhnP2NiJTNEMTIxNTA5Mzc4LF9iYXNlY29tYjoveGpzL18vanMvayUzRHhqcy5zLmVuLkVvY21hYkg1Vld3LjIwMTkuTy9jayUzRHhqcy5zLncxckptUnlkaWVnLkwuQjEuTy9hbSUzRENBQUlBQUFBQUFDQUFBQUFBQUFBQUFBQUFFQ0FBQ0lBQUFBQUFBQUFBQUFBQUFBQUFBQkNBQ0FBQUFBQ0FBQUFBQUFBQUFBQUFBQUFBQUFJQUFRQUFBQUFBQUlBQUFnQUFBQUFFQlFBQUFBRVFnQkFBRUFKQUNBQUFCQUNvQUVSQUFBQkFBQUFBQUFBQUFBVWVnQUlBTUFBQUFBQUFBQ0FCekFBY0JBQUFBQUFBQUFBQUJBQUFBQkFBSUVBQWlBQkFBQUFBQUFBQUVBUUFBQUFBQVFBQUFBSUFBQUFHQUFnQUlBQVVBSUFBQUFxS0FBQWdBQUFBQUNBQUFBQUFBQUFBQUFBUWdRaEFBQUFFUWdBQUFFQUFJQl9OdDhBQVBBQUFBQUFBQUFjQUFBQUFBQUFBQkFBQUFBQUFBQUFBQUFBQUluZ0FBQUFBQUFBUURDd0FBQUFBQWd3QUFDQUFCQWdBQUlBQUFBQUFBQUFBSWdFSUFFQUlBQUFBQUFBREFBQUFBQUFBQUFBQUFBZ0FCQkNJUUJBQUZBQUFxNElBRUFBNEFCQUFBQUFBQUFBQUFBQUFBUUlBQUFBQUFCUUFBQUFBSUFBQUlJQWhBQUNBQUFBQUFJQUFBQUtRQUFBQUFBQU1RQUFBQUFBQUFBZ2tBSWdBQUVBakNBQkFKQW9KQUNJQUFBUUFDREFBQUFBQUlnQUFBQUFBRkFBSWZFRENBSVFBQUFBQUFBUUFRQUFBQUFBQUFBQUFBbEFBQUFBQU1BU0FMQkFDQUJnQUFBQUFPUUFlRHdBaHdnS0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ0FBQ2lBT1pBVUJFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUtBaVBBVUFBQUFBQUFCYkF3QUMvZCUzRDEvZWQlM0QxL2RnJTNEMC9iciUzRDEvdWpnJTNEMS9pY2hjJTNEMS9ycyUzREFDVDkwb0VNUlFNUlRITmFDck4yenhzc19aTDRjNlNxYmcvY2IlM0Rsb2FkZWRfaF8wP2NiJTNEMTIxNTA5Mzc4LF9mbXQ6bWFkbCxfaWQ6QjJKdHlkLF9tYWRvOmVkXHgyNnFceDNkYmVzdCtBSSt2aXNpYmlsaXR5K3RyYWNraW5nK3Rvb2xzXHgyNm1scm9ceDNkMGE1bFFfaXM2WWI0ekJQNjJkYV9wVWJFMFB5U3B2WVNQVFdzRlhaYzZQeGF0aEVDYnd3T195Rm9nWVUwTURmZjB4cUplUzdMNG1FZ2p4MllSUmUwQ3ZLTnpfaUJmWTg1eWZVcUxmQlI0ckx0WVpON0piUlExWHM1NHNRekVlVG0tUFdMU2s2cWx6MldwWWxLN0RVXHgyNm1scm9zXHgzZEFNeV9GbnVVb3ZFXHgyNm1yY1x4M2RDQUE0Z0FOUUFXZ0FjQUNZQVFDZ0FRQ29BUUN3QVFDNkFRRUJceDI2c2NhX2Vzdlx4M2RmMWFlZTA5Zjk2NDg3NjE0XHgyNm1ndHlwXHgzZDQxXHgyNnNuclx4M2Qx"
+  },
+  "text_blocks": [
+    {
+      "type": "paragraph",
+      "answer": "For all-around tracking and integration with existing SEO workflows, Semrush is widely considered the best overall AI visibility tool.",
+      "reference_indexes": [
+        2,
+        3
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Learn more about how technical platforms approach monitoring and optimization by watching this overview on Scrunch AI:"
+    },
+    {
+      "type": "paragraph",
+      "answer": "Semrush (AI Toolkit): Best for users already inside an SEO ecosystem. It combines traditional rankings with prompt tracking, competitor benchmarking, and sentiment analysis.",
+      "reference_indexes": [
+        1,
+        4,
+        5
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Otterly.AI: Best budget-friendly option for small businesses and solo founders. Plans start around $25–$29/month to track brand mentions, sentiment, and rankings across ChatGPT, Perplexity, and Google AI Overviews. You can explore their features directly on .",
+      "reference_indexes": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Profound: Best for enterprise-level reporting and data-heavy teams needing deep compliance, scale, and multi-model coverage.",
+      "reference_indexes": [
+        11
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Peec AI: Best for e-commerce and agencies. It specializes in URL citation categorization, brand aliases, and multi-client reporting.",
+      "reference_indexes": [
+        0
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Scrunch AI: Best for actionable Generative Engine Optimization (GEO) insights and technical monitoring, offering raw text and citation data via deep response-level APIs.",
+      "reference_indexes": [
+        12
+      ]
+    },
+    {
+      "type": "paragraph",
+      "answer": "Learn more about how technical platforms approach monitoring and optimization by watching this overview on Scrunch AI: 55s7 Best AI Search Tracking and Visibility Tools (Rank in ...3 months agoYouTube · GEO Mastery with Adam"
+    },
+    {
+      "type": "paragraph",
+      "answer": "If you share your company size and budget, I can help you choose the most suitable tool for your team."
+    }
+  ],
+  "markdown": "For all-around tracking and integration with existing SEO workflows, Semrush is widely considered the best overall AI visibility tool. [2](https://www.google.com/goto?url=CAESfAHrOzAVaFhKWvn-j6cq7cLuP3JsZKIGzyHaT9vJLknKhzXH_UIDwpxNODEoDB81JePkqRz_P6GAsuEz5E8Iwo_ef-YrEDx6VCJWYoak3xdBMrx4cAxt6vwZdi6MjvMcPOJM-_nKSRby_VzVYpLSZsIhbYpyHTHC9KpfjZA) [3](https://www.google.com/goto?url=CAESgQEB6zswFfyX9pFfDSZoqK8sm9sco5qswUbuynhzNvEuPaJM0rTcbzT1a6ReycCHdGWhorOl98Va_nVx55dHYyCZ5m1MHBqAB4f3cKh_U4EY3uPM-uwXBesY2V7IOXSmdEqBWEn2_Lr_4hEBh6scKJfqiEvC6YkqhlbLeEW0Ssh-xXQ)\n\nLearn more about how technical platforms approach monitoring and optimization by watching this overview on Scrunch AI:\n\nSemrush (AI Toolkit): Best for users already inside an SEO ecosystem. It combines traditional rankings with prompt tracking, competitor benchmarking, and sentiment analysis. [1](https://www.google.com/goto?url=CAESZQHrOzAVzIGGR2SsfcBgzbxd9o0CXD63eopPTF3JI3j7N0i5WC_bjPMsE1S2wYNCCxv6J-EhHkFcNbGI5XwFneZmEnTNqiWoYv5f6n_xBzK0rK5U33mZTkDH99DFHnowoXYRP-C2) [4](https://www.google.com/goto?url=CAESbwHrOzAVs9HX_1n78FDrSJ6oGgHu1WK-FuEqr2dZOlVe0nUAw6YhbnfgQVou__fGSwfstnjiFzdDdScXXqj6Ci2CDj-XyihrpCj0dbVGslnFbEdD5dLaAvsKO8hC9cqJNFDVapQdrNQkgnY7mJ_zgQ) [5](https://www.google.com/goto?url=CAESbwHrOzAV9GzaFei1g0KVTmqWdQQvzWIFwbdAlQqG47GMuHKuvV-tQILNS1c_UtY8k9sMhV0Tbi7m0invTu6Of-Nna_hI1LeGwa-hGxAM55QLk_f5MLzm6eBUhCbotSwyi_O4Pswe_nekfgkLrlCp_Q)\n\nOtterly.AI: Best budget-friendly option for small businesses and solo founders. Plans start around $25–$29/month to track brand mentions, sentiment, and rankings across ChatGPT, Perplexity, and Google AI Overviews. You can explore their features directly on . [6](https://www.google.com/goto?url=CAESdQHrOzAV6VRvXyjHlOvv0GMzGQlIsIelCM5YrMs-l9hJbBCfYl-LOZ3dn2x_nwYj6Z0Z0IMNPb0cjm5wHJXfgeMwyqIWH3_a5uQj04STn9nniIoGJ3QzmR9gNzNbHV1pYoEVs7DQF3WEYjoZ1QW9LBRmDo7e9g) [7](https://www.google.com/goto?url=CAEScQHrOzAVjXgbTAUp5O8ScEFfbJaJ5vSYbqFQsmMe9w4aqzwXDTgiN-3RtvM129nbn9vpd79t5C4WzpxGWIWRf2gW58khc2ziiulhIBY2F_TaHmb1w4yQdd5JMOU0zZfJXl-znmDbxBC9Ief-HM2kgerV) [8](https://www.google.com/goto?url=CAESaAHrOzAV-B5N4ZmWHGK4ZwVjO4lbajRb6yq_RE8Y0ARvJdqhkU024TYqryjDfoBkyhsVDm6BuVpRzIHEEcmgQerx_bRxesOP2e1UvsPGTKBmoapcCyFpLYtiJXG1L69xFoUmRFTVLWkj) [9](https://www.google.com/goto?url=CAESkQEB6zswFclTx4vF2J-P9O3BR22OTIlJ1C0FcbVGjNud-XVwhMt_E89BqmA5yhm15HXjs5qIF3SaH5EZUk8NPsNW1TaPOK5avNzOZ5qFz4vHWoQVeiFFQcQSuDOxCBo9bxXesAEOTqXrvyg7mXmFqM9Z5QPfJWnZ7b4uwvl5jiv8yEKeDjZrjRUYskR1YlBIIV_O) [10](https://www.google.com/goto?url=CAESSwHrOzAVmyx-uqVFgYt2uBp4sGgRVTVYpiCWVG-pV8bA03kP3__ZnaQG1xvC38ZxTSihm5nF0-nIbD1FdLzulfacaZYrk3A3q4EgkQ)\n\nProfound: Best for enterprise-level reporting and data-heavy teams needing deep compliance, scale, and multi-model coverage. [11](https://www.google.com/goto?url=CAESbQHrOzAVYoocsanuOWqb24FNxQoZQuRybgb6_LLKph4Ix9C4VM9sJ5_lOuLHZRr6y85KIfnZAUH24qY62e-x47ZfSsr07xo-vcSTjP0uNywULsnlWhWv8kBIF8vU4WUD5ew4qnO6xkBLtnfpRY4)\n\nPeec AI: Best for e-commerce and agencies. It specializes in URL citation categorization, brand aliases, and multi-client reporting. [0](https://www.google.com/goto?url=CAEShwEB6zswFbXVY5j_u8tzevewyY8zAFxZiz3fIrOjza658ypXG1Wsu8hyo2J8zslSXIXjTa6XVQZ713ORplbEjFLDvOxs02BkfUgEBCmxBOJR2kNg52-D72rA6qm5zUrp7AzK-u6oem_GPLvH7eTV5LXy-Dq3TH6vG7fq-mAiIlBsD0txjwky3QM)\n\nScrunch AI: Best for actionable Generative Engine Optimization (GEO) insights and technical monitoring, offering raw text and citation data via deep response-level APIs. [12](https://www.google.com/goto?url=CAESaAHrOzAVnToMFvfvLfgv8oK4HbAZRAI5PuomjYvR-rhR_aQVEsZwXae_CwCsRMX5pzseMDhTq4OPFVe0oZhIKO-A2XVph_z2LV4faRe8bEarJUkwjDjeJH-UD6-D9b_LuhNPA1c6dmcC)\n\nLearn more about how technical platforms approach monitoring and optimization by watching this overview on Scrunch AI: 55s7 Best AI Search Tracking and Visibility Tools (Rank in ...3 months agoYouTube · GEO Mastery with Adam\n\nIf you share your company size and budget, I can help you choose the most suitable tool for your team.\n\n[[0] - 7 Best AI Search Visibility Trackers (I've Tested Over 6 Months)](https://www.google.com/goto?url=CAEShwEB6zswFbXVY5j_u8tzevewyY8zAFxZiz3fIrOjza658ypXG1Wsu8hyo2J8zslSXIXjTa6XVQZ713ORplbEjFLDvOxs02BkfUgEBCmxBOJR2kNg52-D72rA6qm5zUrp7AzK-u6oem_GPLvH7eTV5LXy-Dq3TH6vG7fq-mAiIlBsD0txjwky3QM)\n[[1] - Best AI Visibility Tools in 2026: 11 Ranked & Compared - KIME](https://www.google.com/goto?url=CAESZQHrOzAVzIGGR2SsfcBgzbxd9o0CXD63eopPTF3JI3j7N0i5WC_bjPMsE1S2wYNCCxv6J-EhHkFcNbGI5XwFneZmEnTNqiWoYv5f6n_xBzK0rK5U33mZTkDH99DFHnowoXYRP-C2)\n[[2] - The Best AI Visibility Tracking Tools (My Honest Reviews)](https://www.google.com/goto?url=CAESfAHrOzAVaFhKWvn-j6cq7cLuP3JsZKIGzyHaT9vJLknKhzXH_UIDwpxNODEoDB81JePkqRz_P6GAsuEz5E8Iwo_ef-YrEDx6VCJWYoak3xdBMrx4cAxt6vwZdi6MjvMcPOJM-_nKSRby_VzVYpLSZsIhbYpyHTHC9KpfjZA)\n[[3] - Best SEO / AI Visibility Tools (2026) - Style Factory](https://www.google.com/goto?url=CAESgQEB6zswFfyX9pFfDSZoqK8sm9sco5qswUbuynhzNvEuPaJM0rTcbzT1a6ReycCHdGWhorOl98Va_nVx55dHYyCZ5m1MHBqAB4f3cKh_U4EY3uPM-uwXBesY2V7IOXSmdEqBWEn2_Lr_4hEBh6scKJfqiEvC6YkqhlbLeEW0Ssh-xXQ)\n[[4] - Best AI Visibility Platforms for 2026 - Business.com](https://www.google.com/goto?url=CAESbwHrOzAVs9HX_1n78FDrSJ6oGgHu1WK-FuEqr2dZOlVe0nUAw6YhbnfgQVou__fGSwfstnjiFzdDdScXXqj6Ci2CDj-XyihrpCj0dbVGslnFbEdD5dLaAvsKO8hC9cqJNFDVapQdrNQkgnY7mJ_zgQ)\n[[5] - 15 Best AI Search Monitoring Tools (I Tested in 2026) - Orchly AI](https://www.google.com/goto?url=CAESbwHrOzAV9GzaFei1g0KVTmqWdQQvzWIFwbdAlQqG47GMuHKuvV-tQILNS1c_UtY8k9sMhV0Tbi7m0invTu6Of-Nna_hI1LeGwa-hGxAM55QLk_f5MLzm6eBUhCbotSwyi_O4Pswe_nekfgkLrlCp_Q)\n[[6] - 14 Best AI Search Visibility Tools - How to Choose the Best?](https://www.google.com/goto?url=CAESdQHrOzAV6VRvXyjHlOvv0GMzGQlIsIelCM5YrMs-l9hJbBCfYl-LOZ3dn2x_nwYj6Z0Z0IMNPb0cjm5wHJXfgeMwyqIWH3_a5uQj04STn9nniIoGJ3QzmR9gNzNbHV1pYoEVs7DQF3WEYjoZ1QW9LBRmDo7e9g)\n[[7] - 9 Best AI Visibility Tools and Platforms for 2026, Tested and Ranked](https://www.google.com/goto?url=CAEScQHrOzAVjXgbTAUp5O8ScEFfbJaJ5vSYbqFQsmMe9w4aqzwXDTgiN-3RtvM129nbn9vpd79t5C4WzpxGWIWRf2gW58khc2ziiulhIBY2F_TaHmb1w4yQdd5JMOU0zZfJXl-znmDbxBC9Ief-HM2kgerV)\n[[8] - The 8 best AI visibility tools in 2026 - Zapier](https://www.google.com/goto?url=CAESaAHrOzAV-B5N4ZmWHGK4ZwVjO4lbajRb6yq_RE8Y0ARvJdqhkU024TYqryjDfoBkyhsVDm6BuVpRzIHEEcmgQerx_bRxesOP2e1UvsPGTKBmoapcCyFpLYtiJXG1L69xFoUmRFTVLWkj)\n[[9] - The 10 Best AI Visibility Tools for 2026 - Evertune](https://www.google.com/goto?url=CAESkQEB6zswFclTx4vF2J-P9O3BR22OTIlJ1C0FcbVGjNud-XVwhMt_E89BqmA5yhm15HXjs5qIF3SaH5EZUk8NPsNW1TaPOK5avNzOZ5qFz4vHWoQVeiFFQcQSuDOxCBo9bxXesAEOTqXrvyg7mXmFqM9Z5QPfJWnZ7b4uwvl5jiv8yEKeDjZrjRUYskR1YlBIIV_O)\n[[10] - AI Search Monitoring Tool: Track ChatGPT, Perplexity ...](https://www.google.com/goto?url=CAESSwHrOzAVmyx-uqVFgYt2uBp4sGgRVTVYpiCWVG-pV8bA03kP3__ZnaQG1xvC38ZxTSihm5nF0-nIbD1FdLzulfacaZYrk3A3q4EgkQ)\n[[11] - Best AI Visibility Tracking Tools (2026) - Rivo](https://www.google.com/goto?url=CAESbQHrOzAVYoocsanuOWqb24FNxQoZQuRybgb6_LLKph4Ix9C4VM9sJ5_lOuLHZRr6y85KIfnZAUH24qY62e-x47ZfSsr07xo-vcSTjP0uNywULsnlWhWv8kBIF8vU4WUD5ew4qnO6xkBLtnfpRY4)\n[[12] - 7 Best AI Search Tracking and Visibility Tools (Rank in ...](https://www.google.com/goto?url=CAESaAHrOzAVnToMFvfvLfgv8oK4HbAZRAI5PuomjYvR-rhR_aQVEsZwXae_CwCsRMX5pzseMDhTq4OPFVe0oZhIKO-A2XVph_z2LV4faRe8bEarJUkwjDjeJH-UD6-D9b_LuhNPA1c6dmcC)",
+  "reference_links": [
+    {
+      "index": 0,
+      "title": "7 Best AI Search Visibility Trackers (I've Tested Over 6 Months)",
+      "link": "https://www.google.com/goto?url=CAEShwEB6zswFbXVY5j_u8tzevewyY8zAFxZiz3fIrOjza658ypXG1Wsu8hyo2J8zslSXIXjTa6XVQZ713ORplbEjFLDvOxs02BkfUgEBCmxBOJR2kNg52-D72rA6qm5zUrp7AzK-u6oem_GPLvH7eTV5LXy-Dq3TH6vG7fq-mAiIlBsD0txjwky3QM",
+      "snippet": "* Peec AI. Google URL citations categorization and checking whether the exact brand is presented in the page content. Ability to a...",
+      "source": "Medium",
+      "favicon": "https://encrypted-tbn2.gstatic.com/faviconV2?url=https://medium.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSbw8YZ0oszyHnrc2m5i5Dsfa5VdzZUBgbfSgzgi1n5m0nRXedFDhRx3g_Z0SVQHQn-ZrlNwhZiCeGkmuVJkWagpjA9-U8es_D_wpir"
+    },
+    {
+      "index": 1,
+      "title": "Best AI Visibility Tools in 2026: 11 Ranked & Compared - KIME",
+      "link": "https://www.google.com/goto?url=CAESZQHrOzAVzIGGR2SsfcBgzbxd9o0CXD63eopPTF3JI3j7N0i5WC_bjPMsE1S2wYNCCxv6J-EhHkFcNbGI5XwFneZmEnTNqiWoYv5f6n_xBzK0rK5U33mZTkDH99DFHnowoXYRP-C2",
+      "snippet": "Table_title: Quick comparison of the 11 best AI visibility tools Table_content: | Tool | AI engines tracked (top tier) | Best for ...",
+      "source": "KIME",
+      "favicon": "https://encrypted-tbn1.gstatic.com/faviconV2?url=https://kime.ai&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSvZeUR-m6bFdatSqu5w5xwKQNr7gJBZ7wAcq38DRR_-lxV6v5rZMNerTau4VLe7VPbPPZCRhDIPHFF9Vmp1KX70LewuahBS2xcE67v"
+    },
+    {
+      "title": "The Best AI Visibility Tracking Tools (My Honest Reviews)",
+      "snippet": "The Best AI Visibility Tracking Tools (My Honest Reviews) * The Best AI Visibility Tracking Tools. * Important Caveats (Don't Skip...",
+      "link": "https://www.google.com/goto?url=CAESfAHrOzAVaFhKWvn-j6cq7cLuP3JsZKIGzyHaT9vJLknKhzXH_UIDwpxNODEoDB81JePkqRz_P6GAsuEz5E8Iwo_ef-YrEDx6VCJWYoak3xdBMrx4cAxt6vwZdi6MjvMcPOJM-_nKSRby_VzVYpLSZsIhbYpyHTHC9KpfjZA",
+      "source": "Position Digital",
+      "favicon": "https://encrypted-tbn1.gstatic.com/faviconV2?url=https://www.position.digital&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSE8l9zEOJa5LZ95qCgwLV_IHHdZ9POGHv9mHv9K52PO869s6CAIe8BReZf9ZL3ZLnRZLoLQZqMeUszzdQllN1UiG2yb7Hwro_tfVOA",
+      "index": 2
+    },
+    {
+      "title": "Best SEO / AI Visibility Tools (2026) - Style Factory",
+      "snippet": "Which SEO / AI visibility tool is best overall? For businesses that want the strongest all-round mix of SEO features and AI visibi...",
+      "link": "https://www.google.com/goto?url=CAESgQEB6zswFfyX9pFfDSZoqK8sm9sco5qswUbuynhzNvEuPaJM0rTcbzT1a6ReycCHdGWhorOl98Va_nVx55dHYyCZ5m1MHBqAB4f3cKh_U4EY3uPM-uwXBesY2V7IOXSmdEqBWEn2_Lr_4hEBh6scKJfqiEvC6YkqhlbLeEW0Ssh-xXQ",
+      "source": "www.stylefactoryproductions.com",
+      "favicon": "https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.stylefactoryproductions.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSTQylq9cSUvMQ-xecTQAty_nLy38uvRj52Kagyu02pttQ_pVbXw_PX59p4LTtWzqTl8K2Fa8CGEVwUEIoh45pfaoFaU2bu2YwmkC-D",
+      "index": 3
+    },
+    {
+      "title": "Best AI Visibility Platforms for 2026 - Business.com",
+      "snippet": "Best AI Visibility Platforms * HubSpot AEO:Best for Affordability. * Profound:Best for Enterprise Businesses. * Semrush AI Visibil...",
+      "link": "https://www.google.com/goto?url=CAESbwHrOzAVs9HX_1n78FDrSJ6oGgHu1WK-FuEqr2dZOlVe0nUAw6YhbnfgQVou__fGSwfstnjiFzdDdScXXqj6Ci2CDj-XyihrpCj0dbVGslnFbEdD5dLaAvsKO8hC9cqJNFDVapQdrNQkgnY7mJ_zgQ",
+      "source": "Business.com",
+      "favicon": "https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.business.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTvP_5pMp1ftB4gnHj4HnGIVVPVipGogclGLMBElIvM0lHGb0jwIB49UL3xiVGSdHt5yx2EGkGQsfUWZixRkVq6AKahhz9ob_DAZqTU",
+      "index": 4
+    },
+    {
+      "title": "15 Best AI Search Monitoring Tools (I Tested in 2026) - Orchly AI",
+      "snippet": "How AI visibility works in SEMrush. SEMrush follows a model similar to Ahrefs. Instead of tracking fully custom prompts, AI visibi...",
+      "link": "https://www.google.com/goto?url=CAESbwHrOzAV9GzaFei1g0KVTmqWdQQvzWIFwbdAlQqG47GMuHKuvV-tQILNS1c_UtY8k9sMhV0Tbi7m0invTu6Of-Nna_hI1LeGwa-hGxAM55QLk_f5MLzm6eBUhCbotSwyi_O4Pswe_nekfgkLrlCp_Q",
+      "source": "Orchly AI",
+      "favicon": "https://encrypted-tbn3.gstatic.com/faviconV2?url=https://orchly.ai&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSNCAZ6sW1nIIf9K9rlKOd3MzieiSdLVuaSMiYAXoJcmH8Ow07ZC1UYR_81HBLpdvXzmoSAuKnu6l8jDOeSFKGn9UIJEt_HWZKDp-Q",
+      "index": 5
+    },
+    {
+      "title": "14 Best AI Search Visibility Tools - How to Choose the Best?",
+      "snippet": "3. Otterly.AI. Quick Verdict: Best value for small to medium businesses needing essential AI visibility tracking without enterpris...",
+      "link": "https://www.google.com/goto?url=CAESdQHrOzAV6VRvXyjHlOvv0GMzGQlIsIelCM5YrMs-l9hJbBCfYl-LOZ3dn2x_nwYj6Z0Z0IMNPb0cjm5wHJXfgeMwyqIWH3_a5uQj04STn9nniIoGJ3QzmR9gNzNbHV1pYoEVs7DQF3WEYjoZ1QW9LBRmDo7e9g",
+      "source": "Loopex Digital",
+      "favicon": "https://encrypted-tbn3.gstatic.com/faviconV2?url=https://www.loopexdigital.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQfLXBdn3q9rj8tFI760pKUJ4PW8smig7dszkrQf1idcIsKhFCbYlfSoa9s8wEgGnWgMCswKSvOLC7puVTrOd6RPOtHqWTmuFdBdleC",
+      "index": 6
+    },
+    {
+      "title": "9 Best AI Visibility Tools and Platforms for 2026, Tested and Ranked",
+      "snippet": "Table_title: 9 Best AI Visibility Tools and Platforms for 2026, Tested and Ranked Table_content: | Tool | Best For | LLM Coverage ...",
+      "link": "https://www.google.com/goto?url=CAEScQHrOzAVjXgbTAUp5O8ScEFfbJaJ5vSYbqFQsmMe9w4aqzwXDTgiN-3RtvM129nbn9vpd79t5C4WzpxGWIWRf2gW58khc2ziiulhIBY2F_TaHmb1w4yQdd5JMOU0zZfJXl-znmDbxBC9Ief-HM2kgerV",
+      "source": "www.usegrowthos.com",
+      "favicon": "https://encrypted-tbn3.gstatic.com/faviconV2?url=https://www.usegrowthos.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcR-sU65Hbe2gjZ8TRnNIfY-HITEeky997YiqFTm8Ga96wBkfl-p4utDYLvjqLvxxVY73s7L_crZNnw-S9HsMKJ-MSZfsX9gOQJI-tA7",
+      "index": 7
+    },
+    {
+      "title": "The 8 best AI visibility tools in 2026 - Zapier",
+      "snippet": "Otterly.AI pricing: Lite plan starts at $25/month (billed annually), which includes the daily tracking of 15 prompts and tracks Go...",
+      "link": "https://www.google.com/goto?url=CAESaAHrOzAV-B5N4ZmWHGK4ZwVjO4lbajRb6yq_RE8Y0ARvJdqhkU024TYqryjDfoBkyhsVDm6BuVpRzIHEEcmgQerx_bRxesOP2e1UvsPGTKBmoapcCyFpLYtiJXG1L69xFoUmRFTVLWkj",
+      "source": "Zapier",
+      "favicon": "https://encrypted-tbn1.gstatic.com/faviconV2?url=https://zapier.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTZdEydECZ9h8GixjoiaaNWIn0WETe5E6K6bVFajxthfnWVBkJkUDLauAAmXzXCgG7wonNyC22m1cNgH9QpA59tAkxraTBhZMKaLFA",
+      "index": 8
+    },
+    {
+      "title": "The 10 Best AI Visibility Tools for 2026 - Evertune",
+      "snippet": "Q: What is the best AI visibility tool? Evertune is the most comprehensive AI visibility platform for enterprise brands. The only ...",
+      "link": "https://www.google.com/goto?url=CAESkQEB6zswFclTx4vF2J-P9O3BR22OTIlJ1C0FcbVGjNud-XVwhMt_E89BqmA5yhm15HXjs5qIF3SaH5EZUk8NPsNW1TaPOK5avNzOZ5qFz4vHWoQVeiFFQcQSuDOxCBo9bxXesAEOTqXrvyg7mXmFqM9Z5QPfJWnZ7b4uwvl5jiv8yEKeDjZrjRUYskR1YlBIIV_O",
+      "source": "www.evertune.ai",
+      "favicon": "https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.evertune.ai&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRj13KvQj3jLDKGGsKB_R2jj8A7G6ZN_keHrn_DLTVlHpRgBZy0Hm2EY8RNbJ2T0wvxsrWZ3Blo-uS72KeyfpcCHvgt",
+      "index": 9
+    },
+    {
+      "title": "AI Search Monitoring Tool: Track ChatGPT, Perplexity ...",
+      "snippet": "Get your brand mentioned, and your website cited onChatGPT, Perplexity, AI Overviews, AI Mode, Gemini, and Copilot. It's otterly s...",
+      "link": "https://www.google.com/goto?url=CAESSwHrOzAVmyx-uqVFgYt2uBp4sGgRVTVYpiCWVG-pV8bA03kP3__ZnaQG1xvC38ZxTSihm5nF0-nIbD1FdLzulfacaZYrk3A3q4EgkQ",
+      "source": "OtterlyAI",
+      "favicon": "https://encrypted-tbn3.gstatic.com/faviconV2?url=https://otterly.ai&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQbtzCKemu24ip7ik_Vrhk6Mq1H0u9nUgJ5jdEcLOEVnnysYOX_4b0Im01p8_LxU4exXlbMOb6t-U5mvksrtPmZWFG2gVqSq20fnldn",
+      "index": 10
+    },
+    {
+      "title": "Best AI Visibility Tracking Tools (2026) - Rivo",
+      "snippet": "Key Takeaways * AI visibility tracking tools monitor how brands appear in answers generated by ChatGPT, Perplexity, Claude, Gemini...",
+      "link": "https://www.google.com/goto?url=CAESbQHrOzAVYoocsanuOWqb24FNxQoZQuRybgb6_LLKph4Ix9C4VM9sJ5_lOuLHZRr6y85KIfnZAUH24qY62e-x47ZfSsr07xo-vcSTjP0uNywULsnlWhWv8kBIF8vU4WUD5ew4qnO6xkBLtnfpRY4",
+      "source": "Rivo",
+      "favicon": "https://encrypted-tbn1.gstatic.com/faviconV2?url=https://www.rivo.io&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAPCI8dqUfnE-qhLHxTxaGMOT7eV8BaVAMKFVpqUv3seMzT-0nnlRuwzqfkV07WSusZcaW4-P4rvKFNNvSaSf-UOWaF0fNGwwALYOB",
+      "index": 11
+    },
+    {
+      "title": "7 Best AI Search Tracking and Visibility Tools (Rank in ...",
+      "snippet": "7 Best AI Search Tracking and Visibility Tools (Rank in ChatGPT & Perplexity!) simple it takes your core target keywords and autom...",
+      "link": "https://www.google.com/goto?url=CAESaAHrOzAVnToMFvfvLfgv8oK4HbAZRAI5PuomjYvR-rhR_aQVEsZwXae_CwCsRMX5pzseMDhTq4OPFVe0oZhIKO-A2XVph_z2LV4faRe8bEarJUkwjDjeJH-UD6-D9b_LuhNPA1c6dmcC",
+      "source": "YouTube",
+      "favicon": "https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.youtube.com&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQnb1rWlWWUGcsEARn3vF44CoOfvdMaAkWT0xQL5cBNS6O11nyWdDeMDTtpaVcv_tpoDFK_WP9Bsjw21EkaHiCjrYIfCbyTex-WNnePzw",
+      "index": 12
+    }
+  ]
+}

@@ -68,5 +68,20 @@ func Default() *Registry {
 		},
 	})
 
+	// The only route to Bing Copilot in this build, and a second read on the
+	// two Google AI surfaces. Two scrapers disagreeing about the same surface
+	// is a signal about the surface, not noise.
+	reg.Register(Registration{
+		Name:   "searchapi",
+		Access: AccessScraped,
+		Engines: map[string]string{
+			AIOverviewEngine: "", AIModeEngine: "", BingCopilotEngine: "",
+		},
+		Credentials: []string{"SEARCHAPI_KEY"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewSearchApi(src("SEARCHAPI_KEY"))
+		},
+	})
+
 	return reg
 }

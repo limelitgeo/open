@@ -1,0 +1,314 @@
+{
+  "search_metadata": {
+    "id": "search_mR5DzpePyDI8GG7Dj4YdGQno",
+    "status": "Success",
+    "created_at": "2026-09-12T15:22:23Z",
+    "request_time_taken": 4.02,
+    "parsing_time_taken": 0.11,
+    "total_time_taken": 4.13,
+    "request_url": "https://www.google.com/search?q=best+AI+visibility+tracking+tools&oq=best+AI+visibility+tracking+tools&gl=us&hl=en",
+    "html_url": "https://www.searchapi.io/api/v1/searches/search_mR5DzpePyDI8GG7Dj4YdGQno.html",
+    "json_url": "https://www.searchapi.io/api/v1/searches/search_mR5DzpePyDI8GG7Dj4YdGQno"
+  },
+  "search_parameters": {
+    "engine": "google",
+    "q": "best AI visibility tracking tools",
+    "device": "desktop",
+    "hl": "en",
+    "gl": "us"
+  },
+  "search_information": {
+    "query_displayed": "best AI visibility tracking tools",
+    "total_results": 102000000,
+    "time_taken_displayed": 0.33,
+    "detected_location": "Glenroy Village, Indianapolis, IN",
+    "has_no_results_for": false
+  },
+  "ai_overview": {
+    "error": "An AI Overview is not available for this search",
+    "page_token": "L2FzeW5jL2ZvbHNyY2g_Z2xceDNkdXNceDI2aGxceDNkZW5ceDI2cHdzXHgzZDBceDI2eXZceDNkM1x4MjZjc1x4M2QwXHgyNmVpXHgzZE1XNmxhcHpERDZHR3B0UVB4cjc4SUFceDI2YXN5bmNceDNkX2Jhc2VqczoveGpzL18vanMvayUzRHhqcy5zLmVuLkVvY21hYkg1Vld3LjIwMTkuTy9hbSUzREFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBRVFnQkFBQUFKQUNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUVBQUlBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQkFBQUVBQWlBQkFBQUFBQUFBQUVBUUFBQUFBQVFBQUFBQUFBQUFHQUFnQUlBQUVBSUFBQUFvQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQWdRQkFBQUFFUWdBQUFFQUFJQl9OdDhBQU5BQUFBQUFBQUFjQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFrQUFBQUFBQUFBQUFDd0FBQUFBQWd3QUFDQUFCQWdBQUlBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUNBQUFBQUZBQUFBQUFBRUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFJQUFBQUtBQUFBQUFBQU1BQUFBQUFBQUFBQUVBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDREFBQUFBQUFBQUFBQUFBRkFBSVBBRENBSVFBQUFBQUFBUUFBQUFBQUFBQUFBQUFBbEFBQUFBQUFBQUFJQUFDQUJnQUFBQUFPUUFlRHdBaHdnS0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ0FBQ2lBT1pBRUJFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUtBaVBBVUFBQUFBQUFCYkF3QUMvZGclM0QwL2JyJTNEMS9pY2hjJTNEMS9ycyUzREFDVDkwb0VuaVNxVDZRa3REVGJmVlAtTnZja1lEYXJhNncvY2IlM0Rsb2FkZWRfaF8wP2NiJTNEMTIxNTA5Mzc4LF9iYXNlY3NzOi94anMvXy9zcy9rJTNEeGpzLnMudzFySm1SeWRpZWcuTC5CMS5PL2FtJTNEQ0FBSUFBQUFBQUNBQUFBQUFBQUFBQUFBQUVDQUFDSUFBQUFBQUFBQUFBQUFBQUFBQUFCQ0FDQUFBQUFDQUFBQUFBQUFBQUFBQUFBQUFBQUlBQVFBQUFBQUFBSUFBQWdBQUFBQUVCUUFBQUFBQUFBQUFFQUJBQUFBQUJBQ29BRVJBQUFCQUFBQUFBQUFBQUFVZWdBQUFNQUFBQUFBQUFDQUJ6QUFjQkFBQUFBQUFBQUFBQkFBQUFBQUFJQUFBQ0FCQUFBQUFBQUFBRUFRQUFBQUFBQUFBQUFJQUFBQUFBQWdBSUFBVUFBQUFBQUNLQUFBZ0FBQUFBQ0FBQUFBQUFBQUFBQUFRZ0FoQUFBQUFBQUFBQUVBQUFBQUFBQUFBT0FBQUFBQUFBQUFBQUFBQUFBQUFCQUFBQUFBQUFBQUFBQUFBSURnQUFBQUFBQUFRREFBQUFBQUFBQUFBQUNBQUFBZ0FBQUFBQUFBQUFBQUFJZ0VJQUVBSUFBQUFBQUFEQUFBQUFBQUFBQUFBQUFnQUJCQ0lRQkFBRkFBQXE0SUFBQUE0QUJBQUFBQUFBQUFBQUFBQUFRSUFBQUFBQUJBQUFBQUFJQUFBSUlBaEFBQ0FBQUFBQUlBQUFBQVFBQUFBQUFBTVFBQUFBQUFBQUFnZ0FJZ0FBRUFqQ0FCQUpBb0pBQ0lBQUFRQUFDQUFBQUFBSWdBQUFBQUFGQUFBUUVBQUFBQUFBQUFBQUFRQVFBQUFBQUFBQUFBQUFBQUFBQUFBTUFTQUxCQUNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFVQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDL2JyJTNEMS9jYiUzRGxvYWRlZF9oXzAvcnMlM0RBQ1Q5MG9GWl90Wm9XYTlfM2pzSXZ2elRfMVA3b1paSzhnP2NiJTNEMTIxNTA5Mzc4LF9iYXNlY29tYjoveGpzL18vanMvayUzRHhqcy5zLmVuLkVvY21hYkg1Vld3LjIwMTkuTy9jayUzRHhqcy5zLncxckptUnlkaWVnLkwuQjEuTy9hbSUzRENBQUlBQUFBQUFDQUFBQUFBQUFBQUFBQUFFQ0FBQ0lBQUFBQUFBQUFBQUFBQUFBQUFBQkNBQ0FBQUFBQ0FBQUFBQUFBQUFBQUFBQUFBQUFJQUFRQUFBQUFBQUlBQUFnQUFBQUFFQlFBQUFBRVFnQkFBRUFKQUNBQUFCQUNvQUVSQUFBQkFBQUFBQUFBQUFBVWVnQUlBTUFBQUFBQUFBQ0FCekFBY0JBQUFBQUFBQUFBQUJBQUFBQkFBSUVBQWlBQkFBQUFBQUFBQUVBUUFBQUFBQVFBQUFBSUFBQUFHQUFnQUlBQVVBSUFBQUFxS0FBQWdBQUFBQUNBQUFBQUFBQUFBQUFBUWdRaEFBQUFFUWdBQUFFQUFJQl9OdDhBQVBBQUFBQUFBQUFjQUFBQUFBQUFBQkFBQUFBQUFBQUFBQUFBQUluZ0FBQUFBQUFBUURDd0FBQUFBQWd3QUFDQUFCQWdBQUlBQUFBQUFBQUFBSWdFSUFFQUlBQUFBQUFBREFBQUFBQUFBQUFBQUFBZ0FCQkNJUUJBQUZBQUFxNElBRUFBNEFCQUFBQUFBQUFBQUFBQUFBUUlBQUFBQUFCUUFBQUFBSUFBQUlJQWhBQUNBQUFBQUFJQUFBQUtRQUFBQUFBQU1RQUFBQUFBQUFBZ2tBSWdBQUVBakNBQkFKQW9KQUNJQUFBUUFDREFBQUFBQUlnQUFBQUFBRkFBSWZFRENBSVFBQUFBQUFBUUFRQUFBQUFBQUFBQUFBbEFBQUFBQU1BU0FMQkFDQUJnQUFBQUFPUUFlRHdBaHdnS0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ0FBQ2lBT1pBVUJFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUtBaVBBVUFBQUFBQUFCYkF3QUMvZCUzRDEvZWQlM0QxL2RnJTNEMC9iciUzRDEvdWpnJTNEMS9pY2hjJTNEMS9ycyUzREFDVDkwb0VNUlFNUlRITmFDck4yenhzc19aTDRjNlNxYmcvY2IlM0Rsb2FkZWRfaF8wP2NiJTNEMTIxNTA5Mzc4LF9mbXQ6bWFkbCxfaWQ6QjJKdHlkLF9tYWRvOmVkXHgyNnFceDNkYmVzdCtBSSt2aXNpYmlsaXR5K3RyYWNraW5nK3Rvb2xzXHgyNm1scm9ceDNkMGE1bFFfaXM2WWI0ekJQNjJkYV9wVWJFMFB5U3B2WVNQVFdzRlhaYzZQeGF0aEVDYnd3T195Rm9nWVUwTURmZjB4cUplUzdMNG1FZ2p4MllSUmUwQ3ZLTnpfaUJmWTg1eWZVcUxmQlI0ckx0WVpON0piUlExWHM1NHNRekVlVG0tUFdMU2s2cWx6MldwWWxLN0RVXHgyNm1scm9zXHgzZEFNeV9GbnVVb3ZFXHgyNm1yY1x4M2RDQUE0Z0FOUUFXZ0FjQUNZQVFDZ0FRQ29BUUN3QVFDNkFRRUJceDI2c2NhX2Vzdlx4M2RmMWFlZTA5Zjk2NDg3NjE0XHgyNm1ndHlwXHgzZDQxXHgyNnNuclx4M2Qx"
+  },
+  "ads": [
+    {
+      "position": 1,
+      "block_position": "top",
+      "title": "Peec AI: LLM Visibility Tool | The #1 AI Visibility Solution",
+      "link": "https://peec.ai/?utm_device=c&utm_adgroup=196865847769&utm_location=9198355&utm_matchtype=p&utm_network=g&utm_source=adwords&utm_medium=cpc&utm_campaign=23640035916&utm_term=ai%20visibility%20tools&utm_content=799833223908&hsa_acc=4200945333&hsa_cam=23640035916&hsa_grp=196865847769&hsa_ad=799833223908&hsa_src=g&hsa_tgt=kwd-2433358144221&hsa_kw=ai%20visibility%20tools&hsa_mt=p&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=23640035916&gbraid=0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASAAEgLgIfD_BwE",
+      "source": "Peec AI",
+      "domain": "peec.ai",
+      "displayed_link": "https://www.peec.ai › ai › visibility",
+      "tracking_link": "https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQAxoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASAAEgLgIfD_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_3SV3F6dIoPjwt_hsMjRshzsbr0yg&q&nis=4&adurl=https://peec.ai/?utm_device%3Dc%26utm_adgroup%3D196865847769%26utm_location%3D9198355%26utm_matchtype%3Dp%26utm_network%3Dg%26utm_source%3Dadwords%26utm_medium%3Dcpc%26utm_campaign%3D23640035916%26utm_term%3Dai%2520visibility%2520tools%26utm_content%3D799833223908%26hsa_acc%3D4200945333%26hsa_cam%3D23640035916%26hsa_grp%3D196865847769%26hsa_ad%3D799833223908%26hsa_src%3Dg%26hsa_tgt%3Dkwd-2433358144221%26hsa_kw%3Dai%2520visibility%2520tools%26hsa_mt%3Dp%26hsa_net%3Dadwords%26hsa_ver%3D3%26gad_source%3D1%26gad_campaignid%3D23640035916%26gbraid%3D0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn%26gclid%3DEAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASAAEgLgIfD_BwE",
+      "snippet": "The complete AI Visibility Solution. Peec AI tracks brand rankings in AI models. Try now. Peec AI...",
+      "sitelinks": {
+        "expanded": [
+          {
+            "title": "See Pricing Plans",
+            "link": "https://peec.ai/pricing?utm_device=c&utm_adgroup=196865847769&utm_location=9198355&utm_matchtype=p&utm_network=g&utm_source=adwords&utm_medium=cpc&utm_campaign=23640035916&utm_term=ai%20visibility%20tools&utm_content=799833223908&hsa_acc=4200945333&hsa_cam=23640035916&hsa_grp=196865847769&hsa_ad=799833223908&hsa_src=g&hsa_tgt=kwd-2433358144221&hsa_kw=ai%20visibility%20tools&hsa_mt=p&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=23640035916&gbraid=0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASABEgLmU_D_BwE",
+            "tracking_link": "https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQBBoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASABEgLmU_D_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_1p6ILCpz-56BBXNpAKBncHkSrLVw&q&nis=4&adurl=https://peec.ai/pricing?utm_device%3Dc%26utm_adgroup%3D196865847769%26utm_location%3D9198355%26utm_matchtype%3Dp%26utm_network%3Dg%26utm_source%3Dadwords%26utm_medium%3Dcpc%26utm_campaign%3D23640035916%26utm_term%3Dai%2520visibility%2520tools%26utm_content%3D799833223908%26hsa_acc%3D4200945333%26hsa_cam%3D23640035916%26hsa_grp%3D196865847769%26hsa_ad%3D799833223908%26hsa_src%3Dg%26hsa_tgt%3Dkwd-2433358144221%26hsa_kw%3Dai%2520visibility%2520tools%26hsa_mt%3Dp%26hsa_net%3Dadwords%26hsa_ver%3D3%26gad_source%3D1%26gad_campaignid%3D23640035916%26gbraid%3D0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn%26gclid%3DEAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASABEgLmU_D_BwE"
+          },
+          {
+            "title": "Try Free For 7 Days",
+            "link": "https://peec.ai/?utm_device=c&utm_adgroup=196865847769&utm_location=9198355&utm_matchtype=p&utm_network=g&utm_source=adwords&utm_medium=cpc&utm_campaign=23640035916&utm_term=ai%20visibility%20tools&utm_content=799833223908&hsa_acc=4200945333&hsa_cam=23640035916&hsa_grp=196865847769&hsa_ad=799833223908&hsa_src=g&hsa_tgt=kwd-2433358144221&hsa_kw=ai%20visibility%20tools&hsa_mt=p&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=23640035916&gbraid=0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASADEgKLH_D_BwE",
+            "tracking_link": "https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQBhoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASADEgKLH_D_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_3NLFkf2Z25ZNuMpMm6PkjSXmglcA&q&nis=4&adurl=https://peec.ai/?utm_device%3Dc%26utm_adgroup%3D196865847769%26utm_location%3D9198355%26utm_matchtype%3Dp%26utm_network%3Dg%26utm_source%3Dadwords%26utm_medium%3Dcpc%26utm_campaign%3D23640035916%26utm_term%3Dai%2520visibility%2520tools%26utm_content%3D799833223908%26hsa_acc%3D4200945333%26hsa_cam%3D23640035916%26hsa_grp%3D196865847769%26hsa_ad%3D799833223908%26hsa_src%3Dg%26hsa_tgt%3Dkwd-2433358144221%26hsa_kw%3Dai%2520visibility%2520tools%26hsa_mt%3Dp%26hsa_net%3Dadwords%26hsa_ver%3D3%26gad_source%3D1%26gad_campaignid%3D23640035916%26gbraid%3D0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn%26gclid%3DEAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASADEgKLH_D_BwE"
+          },
+          {
+            "title": "Start Free Trial",
+            "link": "https://peec.ai/?utm_device=c&utm_adgroup=196865847769&utm_location=9198355&utm_matchtype=p&utm_network=g&utm_source=adwords&utm_medium=cpc&utm_campaign=23640035916&utm_term=ai%20visibility%20tools&utm_content=799833223908&hsa_acc=4200945333&hsa_cam=23640035916&hsa_grp=196865847769&hsa_ad=799833223908&hsa_src=g&hsa_tgt=kwd-2433358144221&hsa_kw=ai%20visibility%20tools&hsa_mt=p&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=23640035916&gbraid=0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASACEgLy-vD_BwE",
+            "tracking_link": "https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQBRoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASACEgLy-vD_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_3nDxPng_gQe4-lpOvTlny9Sp5FOA&q&nis=4&adurl=https://peec.ai/?utm_device%3Dc%26utm_adgroup%3D196865847769%26utm_location%3D9198355%26utm_matchtype%3Dp%26utm_network%3Dg%26utm_source%3Dadwords%26utm_medium%3Dcpc%26utm_campaign%3D23640035916%26utm_term%3Dai%2520visibility%2520tools%26utm_content%3D799833223908%26hsa_acc%3D4200945333%26hsa_cam%3D23640035916%26hsa_grp%3D196865847769%26hsa_ad%3D799833223908%26hsa_src%3Dg%26hsa_tgt%3Dkwd-2433358144221%26hsa_kw%3Dai%2520visibility%2520tools%26hsa_mt%3Dp%26hsa_net%3Dadwords%26hsa_ver%3D3%26gad_source%3D1%26gad_campaignid%3D23640035916%26gbraid%3D0AAAAA_Sim-P71-g0WfQblU8mzFJcygpmn%26gclid%3DEAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYASACEgLy-vD_BwE"
+          }
+        ]
+      },
+      "badge": "10K+ visits in past month",
+      "favicon": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIACAAIAMBEQACEQEDEQH/xAAaAAABBQEAAAAAAAAAAAAAAAAIAQMEBQYH/8QALRAAAgEEAAIHCQEAAAAAAAAAAQIDAAQFEQYSBxZVcZSz0SEiNjdBYXWBkRP/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A4bQTbbE5K7hE1pjrueInQeKBmU/sCgd6v5rsjIeFf0oK91ZHKOpVlOiCNEGgRQWIVQST7AB9aAgejHjfH8O8F2GJyljlkurdpecJYuw96RmGj3Gg0tx0tcN20f8ApcxZWGPeueSxdR/TQDVxJexZPiLKX9uGEN1eTTR840eVnJG/vo0Engj40wH5K38xaAyKDCdN/wAssv3weclAK9AqsyMGRirKdgg6INBY9YM12vkPFP60DV1lsldxGG7yF3PETspLOzLvuJoIVB//2Q==",
+      "advertiser_info_token": "QVJYZXR5cWwtQlhBSVp6QTZhQzBJaHhTQ25EQmNsa1BQMkhjQXNIUjBBbVY2MGlZNjNaenY0UHRKUnZYbEZOUUZqSDJOS1FSRnRBRF9JTHlDVkRjNVo5VU5sQTJxaTBiZGVTTEJKTXkyaVI1ZmNjM0ZIYkc2YWNoOFNHbkxKN016ZENrMHcyTkxDU1BIelVWRW9hel80ZF9RaHZzTlVoVWwtS0pubGxCWG1oVU9sNVJpUC02Mko0ZjF6X2I1Skx2d2tXcFp2ei1RZVh1cU5CMlpRbnlNSHh5emM5YVJnMnZ5dzFheHEtWHNXR1ZpN1lVYWpnUFJhcXpLbzRnbVJRR1NOeU5oV0hKRzkta3FsbEtzVzljNF96TlpJZUVyQzhKdW5pLWRQck8ySkE0SU00"
+    },
+    {
+      "position": 2,
+      "block_position": "top",
+      "title": "AI Observability Tool - No Trial. No Demo. Just Free",
+      "link": "https://newrelic.com/lp/ai-monitoring?utm_medium=cpc&utm_source=google&utm_campaign=EVER-GREEN_NB_SEARCH_MISC_AMER_NORAM_EN&utm_network=g&utm_keyword=ai%20observability%20tools&utm_device=c&_bt=807912484244&_bm=p&_bn=g&cq_cmp=21096192921&cq_con=191437030770&cq_plac=&hstk_creative=807912484244&hstk_campaign=21096192921&hstk_network=googleAds&gad_source=1&gad_campaignid=21096192921&gbraid=0AAAAADln4Y_JpcwSq0wO3NIwFSB3xvxAI&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYAiAAEgLFZfD_BwE",
+      "source": "New Relic",
+      "domain": "newrelic.com",
+      "displayed_link": "https://www.newrelic.com",
+      "tracking_link": "https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQAhoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYAiAAEgLFZfD_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_1rmP7MoRPFfcn_D-fMW5MQcJGeQw&q&nis=4&adurl=https://newrelic.com/lp/ai-monitoring?utm_medium%3Dcpc%26utm_source%3Dgoogle%26utm_campaign%3DEVER-GREEN_NB_SEARCH_MISC_AMER_NORAM_EN%26utm_network%3Dg%26utm_keyword%3Dai%2520observability%2520tools%26utm_device%3Dc%26_bt%3D807912484244%26_bm%3Dp%26_bn%3Dg%26cq_cmp%3D21096192921%26cq_con%3D191437030770%26cq_plac%3D%26hstk_creative%3D807912484244%26hstk_campaign%3D21096192921%26hstk_network%3DgoogleAds%26gad_source%3D1%26gad_campaignid%3D21096192921%26gbraid%3D0AAAAADln4Y_JpcwSq0wO3NIwFSB3xvxAI%26gclid%3DEAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYAiAAEgLFZfD_BwE",
+      "snippet": "No new instrumentation needed. Set up fast with New Relic's® AI capabilities. Sign up now!",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAsVBMVEX///8ArGkc54MdJSyq2sEAqGEAp14AABAWHyfI59dITVEA5nwAAAAA5Xjx/fah8sOho6UAEBseFigAs22Z8r++9tXF99rf+upI6pRS6pjl++73/vp47quB77Cp88gs6IiO8LicmZ4AeERq7aRg7J8AvWcdo2Ic8Ic66Y7W+eQTzHcdCSUPOC19yZ8dICtnam3w8PDY2dq5urt7foCQ0bAjsHJZvo0QDyC/6dNIuYSd1rniW4aIAAABEUlEQVQ4jZWTi1KDMBBFl8SERxJaKFRt1Rar1qq1Bdv6+P8Pk5AA8ghO7zDDsOdkd5kBgDPj+8M8EmI0gGPEUH5NDfjySqAi4nrWg+c3GhfKbYePBCsQK293DTxFuo7iuFQW9SozPZyJSD4uq1XKV07u0VoWVrrgPyjl8UILYzt8WrPnTT1ys2DoxSKVEODXt21z6YhYDQG/27v9X8GlLQFjhycmIcW2NHDgZP2CXFM1sb20XwD44I6aYxIg9bg0bKMAkP0ngOecIRzIoOAec24W/FPePw81CAdKFD+1v3ApfH4RjY8utCOFUHUnnfaVMCmOb3swwI4rgX6bfq/MCcIJsbrD6ySc/gzgPPv5MO/mF5c8ELpKvOMvAAAAAElFTkSuQmCC",
+      "advertiser_info_token": "QVJYZXR5cmF4QS1pVlRLNHNaY2I2cWp6RXhwY0t1OS1rXzl0VHNaR2NaZjAwNGpRUjdjTW53SUVQTk5Mc2F5UnZ5Y1NjS3hDRlZtQWE0OTlSX2d1a1NVQzRXQzh6VFFXYUJvbFY4UzBjdGxSQTN3cUFLNElxLXpjX1pESHNuRDQ2RVFwd1RpdDE3R2dVbmcwUDNUWVktLXhtbk9RLWgxWVBGYTNqVkxPOTg5eUlHUnhkWFhyMVROWmc4TVFwbGg0czRqbTNwWElPMWdselJFTmRPVXZKTFI3aEE5S2NiNnEycTA4eTBua1J1U0RoeElfRHA3aGNMN196WDVlYnc5b25UVmpnR0VhX0k2bE1jNTh4NldBa0dpTGN4UQ=="
+    },
+    {
+      "position": 3,
+      "block_position": "top",
+      "title": "Check Your AI Visibility Score | Ai Visibility Tools",
+      "link": "https://www.semrush.com/",
+      "source": "Semrush",
+      "domain": "www.semrush.com",
+      "displayed_link": "https://www.semrush.com › ai_search › seo_toolkit",
+      "tracking_link": "https://www.google.com/aclk?sa=L&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQARoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYAyAAEgLj9_D_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_3ReKG7p5-lUEnAIWAftt5Sr5hvfA&q&nis=4&adurl",
+      "snippet": "Ranking #1 on Google but invisible in AI answers? See the full picture with Semrush. Find what...",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAACfElEQVRIie1VTWgTQRT+Zieb5teENJGUBgUrpSAerIhWasESWws9+N9SFcFS8adCoSh4qCI9SD3lVs8qtJcePaigh3rpxR6soCIorSI0ZbNpsslmZ3fHUzXZbNKq7UHId5x5733vfe+9GRLdEcFWQtjS6DWCGsGmwPHnLjzHVlZ1wASlCIhuJ/VtGkFGSyoZnG0b3r+7y+30r6x+f70w9ebjs0gwSIlo60I2uMk5llxN4fKxu31Hbge9Xt0EOAiB6MD7xYXRJ23gXKSevyFQdVmW2Jn2G5c670cC9ZoOzksMHBSKmutLhETBIxCrJNUITG4sZ6TuPQNDXRM7t8cKDIZpb+mg+LA0P/ioNRq0RqO+gLdS9KC7YezU1Mm2mwBJZVN5Leeps++nyRELN7z9/ErKLVmaUXFMBULl/I+R6Xh81NV7J/Ri/rGnzl/JGAAz0Ln3QpZlrcVV8cnrEjK4cmL8XPstr6uOGVb1i8E5Qr5ooUxDewJVl2TJ6O8YuXj0Xv22oKZD06tksualKQJZj0AzspKcP77v/NDViVi4UWMosPVDA3AIWFic9ZclXHKgGdmDu04Pxh80N8YKDCaHs6hhpgndgGmnkkAgK8rM3GQ0FLZclYwpBxepK6V+U7RSKx1Io+NA77WeRKy+ycJBCFxOjD0dmPsy7XJYCUoqICDMUH1i2LeWuGGylUz6cFP39Z5Ec6ylwMBNkF/WABXAgYczw88/TUXdNitVtnj43SaDs8ZAy3hforXpkMaQU4tHhHBuykry3dfZyZfD6cKybXSrROUwOEvmZahAufQEoIATEVfFl86mAgsoEaOeCGwesY3i///RagQ1gn/HT3PA7LdP1O4NAAAAAElFTkSuQmCC",
+      "advertiser_info_token": "QVJYZXR5cUdJYUZiMmdESXBUcWVOTWdJZWtGTms0dzBXNkVmUmxzVm05TVVDMzh1QVBpWWxya1NPcm16RXhVOWVUM1J3eFIwVUNSM2YtcjlYckpNQ2ROZjVRVjVoNDMtLUVaX0N2aHRtQlBCWGZlUnp3b0phb2xhSE92OWkzNGJyNHhJWnhFQXUxcG1fSVotUGd0d0xRUUZDc3F3SDNXWFhDNTRlcHZzWmlVTUttNHdxSU55TU1zREswWTBVMGpiS255Sm1WMXBIeEtfMS1TX0NVWDlDYXN0UXpVYjhYVG5wdC0xMEJtaDlaZjB0djdNY3AwZ0FESFljVnNIQk5ZUE1abzI3bXo3azkweGRoOHNWMTZVOEc1TDVWYW9uNkhHZlJHNGZQOEJMeTVLUWgxLU92RXdFRHVzeUMycmZ3"
+    },
+    {
+      "position": 4,
+      "block_position": "top",
+      "title": "Real-Time Observability for AI | AI Observability and Control",
+      "link": "https://launchdarkly.com/",
+      "source": "LaunchDarkly",
+      "domain": "launchdarkly.com",
+      "displayed_link": "https://www.launchdarkly.com › ai_o11y › learn_more",
+      "tracking_link": "https://www.google.com/aclk?sa=L&ai=DChsSEwjA4qSlrOmWAxUeQf8BHbi0EPgYACICCAEQABoCbWQ&co=1&ase=2&gclid=EAIaIQobChMIwOKkpazplgMVHkH_AR24tBD4EAAYBCAAEgIPefD_BwE&cid=CAAS0wHkaKwfroF61rUV0E-FI2FO74paqG0bZJMwFKkvv3i8iXGnqQDySMCfc_F6co_IlZHUfAvIcgNLhuF8nBmh-GlLi0lBy6sDzPd1E230PNb1HYDV4QGOJfjxTrPYFJ7oSWAPZmuQ2FFJREJe1YPbrgKNMJGtUnTcxtvNfNaQkedqSAItk54MAvdK9-8hZQykZFOVMHjPg3G3BVXDRERkVQN5mRqPh91LYZ_UYPhcclte2yZ999Ee6qnfZkqAAqEs8M8ULrz605tzNOoG15wgEZ57flCs&cce=2&category=acrcp_v1_32&sig=AOD64_2NW3O_MNTDm7jCUCEuPg2U_tJM_Q&q&nis=4&adurl",
+      "snippet": "Don't just observe: test and control your AI agents in production. All without redeploying. Optimize...",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAADR0lEQVRIibWWu0vrUBzHf2kiqdG2FG2jiMQaGwsOPgYXHRREJ1+I4CwqXQQ3cXQTF8ExuGhBERyUYhGx/4OIS2qqqOhpiw1UJPaRxx1yb73Ua5Je6G8Ih5Pz+374Pc4Da21thVqao6bqVQNkWUYI6bpeE4Asy7Ozszc3N6lUSlVVm16Y/RpomlYoFCRJEkWR4zi/34/juKVXFRE4HI5isTg9PR0MBgVByGQyduKorgYejycaje7t7XEcd3d3Z4dhkSKEkDGgadrhcJQnE4lEMBhMJpNdXV3muTKLACF0eHiYy+W2trbS6TRCKJ/PA0Bzc/Pw8DAAsCwriqJ5HGYAmqZXVlbi8fj6+rqu67FYrK+vDyH09vaWyWTC4bAdhkWKNE1Lp9P9/f2RSKSnpwcAHh4e9vf3Nzc3AeDs7GxqagoA7u/vWZb1+XwEQVQHMMzoznA4vL297XK5AEDX9dPT08XFxevra4ZhDHBnZ+d3RhX7QJKkQqHA8/zy8nJ58vn5ub293Rg/Pj52dHRUMGwBNE1TVVVV1VKp9PHxgeP41dXVyMjI95VPT08Mw/zN+AKUO/Kf1tvbS9O0z+fzer1ut5sgiKGhofHx8Z8Y5bb+DUAIHRwcMAzT0NBQX1/f2NjodDpdLhdJkuX2t2+iKAaDQUP5y7murs7pdBIEYXxJkiQI4j/UAaBUKpXHtlLU1tYWCASampr8fr/b7fZ6vRiGDQ4Ojo2NfV9sbO/KFJmYruuapimKYhRZlmUAuLi4mJiY+En978PDOgMYhuE4TpKkob67u6vreln99fXVRN0WAACKxSJCaH5+XpKk1dVVYzIWiwUCgc/PTxN1AKjc2RWm63oqlQqFQpeXlwMDAwDw8vISiUQ2NjYA4OTkhGVZE3ULgKF+dHS0sLAAAPF4fGdn5/z83Pi7tLQ0NzcHf5ryp0PbrMgIoePj48nJSZ7n19bWAMDj8VAUpSiKoijZbBbDMHN1CwD8fOEIgsBxXCKR6O7uNr9wLGrwHY8Q4nneprp1BBX2/v4+OjoajUYFQQiFQnYeFlU/W7LZbDKZrMmzJZ/Pz8zM3N7e2leHalMky3Iul2tpacEwzKaLRZErjKIoiqKqcqn56/oX8ZSg3wUPk6YAAAAASUVORK5CYII=",
+      "advertiser_info_token": "QVJYZXR5cWFlQ0RoWGNKMFJXWmtfc3hCWlNLaFJSZlZ5SThEdlFQWlBZaHY2V0I3d3JqZHZmQnNrSjR0dUwyY2R1N040ekhYOUJ3bVkteTFmYzBxRTBiRmwzdjQ1RzF0dWk3Z0RkT25WSEZmb2hhaldhd2FTdmtJRWhaNk5MZDZycUdTWENfa1dhSm1BWmZSOUJya1p0aXVDOElKcUVxLU12VWMteU9sTEYxLXJwMmFSMzIycm14OFJVNWR3V1dsWlNNdXM2U0tZRUpUUkE5d1p6Z2FNSE11X1JxektHeW1obkdNeWhoUUZEUXZoV29zeFJWMVdPZUlGcDJYVDlJbjdoN2J1T19MaE9pdVdydnNITmszSlRnazhjR0ktQXdiWWRSOUdKcHFOV1p2WDJieVoweDNFLXVvclVDVzdiNDdwYzEzUkE="
+    }
+  ],
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "The 8 best AI visibility tools in 2026",
+      "link": "https://zapier.com/blog/best-ai-visibility-tool/",
+      "source": "Zapier",
+      "domain": "zapier.com",
+      "displayed_link": "https://zapier.com › App picks › Best apps",
+      "snippet": "AthenaHQ, Am I on AI?, Rankshift, XFunnel, Knowatoa, Waikay, Evertune, Superlines, and RankScale. And tools like Scrunch and SISTRIX are ...",
+      "snippet_highlighted_words": [
+        "AthenaHQ"
+      ],
+      "date": "Nov 10, 2025",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcAQMAAABIw03XAAAAA1BMVEX/TwBuA1r9AAAAC0lEQVR4AWMYRAAAAIwAASLW8i0AAAAASUVORK5CYII="
+    },
+    {
+      "position": 2,
+      "title": "15 Best AI Search Monitoring Tools (I Tested in 2026)",
+      "link": "https://orchly.ai/blog/best-ai-search-monitoring-tools/",
+      "source": "Orchly AI",
+      "domain": "orchly.ai",
+      "displayed_link": "https://orchly.ai › Blog › AEO Tools",
+      "snippet": "Hands-on comparison of AI search monitoring tools, ranked by real usage, actionability, and fit for teams in 2026.",
+      "snippet_highlighted_words": [
+        "Hands-on comparison of AI search monitoring tools"
+      ],
+      "date": "Mar 2, 2026",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAMAAADeQm2wAAAAeFBMVEX////8xu77oOT8r+j+9vz6d9r6ftz6fNv5edr//P75cNj7nOP7qeb7kOD5c9j9zfD90/L8ten5btf8x+3+5ff3aNT5gtz2YtL+6vj+8vr3h9n2WdD3ZtP7v+v6uej93fT0T8z0Us3zTMrzRMnyM8X81/H3kdvyKsTG2iQYAAAA70lEQVR4AaXLVXaEQBRF0YtLN+48rCRh/jNMpfD+7YNe9gJfZpgfWfZpluPqPN/z9jcvODDUHxznZb2j2N9GslsQep76KdXDznJP5RQH5r4fRzgqQ19t48DKiWtclZXj5Cc2cdOiM4y0gy7L4+rCvAdoGJqmTqCym3wYD6RmAiod1TYAv2oupAKYl+G/plHaN3Qi068zUaOiHnBvyMnULxYtjNgAqPuJghi25tGyOqSclhvyN24NjPh0ImMiuaznap8ol2WR1r5sR6h5Q64Si/XTlsmvFHodCNKbCymlEFy3lge2bJXP1glXdvcMX/YHv3caPqsA5DcAAAAASUVORK5CYII="
+    },
+    {
+      "position": 3,
+      "title": "What are actually the best AI visibility tools right now? : r/aeo",
+      "link": "https://www.reddit.com/r/aeo/comments/1uazav3/what_are_actually_the_best_ai_visibility_tools/",
+      "source": "Reddit · r/aeo",
+      "domain": "www.reddit.com",
+      "displayed_link": "160+ comments  ·  2 months ago",
+      "snippet": "Saw a post on r/SEO on this but there were 100 spam comments and no clear answer lol. So, thought I’d try it myself on here! I’ve tried quite ...",
+      "sitelinks": {
+        "list": [
+          {
+            "title": "Best budget-friendly tools for AI Visibility (GEO ...",
+            "link": "https://www.google.com/goto?url=CAESpAEB6zswFSVfv5EAU3z8WT0URT2bgKJ9cJYiNhS1FogMxJblA1TxSqU0wss7VXV6ZQ14q1AI2EYnPxkJn8gasoiVLdPFoTVUMYmd7aWAgY2q6UycougaK92hXLUFyWaDvCjnLZBuhdqvEQrm-yqimOC1y9LOCa9tn5Lu5j-WLo1UbI4yD2m11S0tjA9ybatGuZbi-LSxjygCu8pX7HKwtC3OMW2ayA",
+            "answer_count": 99,
+            "date": "Feb 6, 2026"
+          },
+          {
+            "title": "Every AI visibility tool I've tested only does ...",
+            "link": "https://www.google.com/goto?url=CAESlQEB6zswFZoo178yk_nEK5FzTRSZBXtWN_BXee5dD7Q8EGsuUlR4Nmln8di6iTxnEZqi5QNcMn0pUMjJJPn6nGue4z1e-Kok03l147nAN4MXEGiUYEg09FEz-eAiJzMfOJnl8BsnI4zoPMIqHMhopJQ1m6xJuMKPvtV1aq79BiV281y34FkTyKdu_-5VEVRFt5o_nr25kA",
+            "answer_count": 69,
+            "date": "Mar 10, 2026"
+          }
+        ]
+      },
+      "rich_snippet": {
+        "detected_extensions": {
+          "answer_link": "https://www.google.com/goto?url=CAESnQEB6zswFQxdfPeINIhJnZ2SFtnwJ2N8j1-hBrrlzR9B7-jVGpnh2mRuI_tLmWOUBdkAnn57L7rO1RjvKqcy3JuAko3HHIyOH5emFfaKvq8DWMNgLy6GmZ9XiUdpao-1seapn0mlCJarZeQBSDiKuiHZ-ekg9MZcSLnqGpMC78OS-JIbwHjaBCcAiBG1XZ5pgGpBzx9FyG6RRFx3xP79",
+          "answer_count": 165,
+          "top_answer": "My hot take is everyone is trying to sell you a subscription and what most people ..."
+        }
+      },
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAhFBMVEVHcEz/RQD/RQD/RQD/RQD/RQD/RQD/RQD/RQD/PQD/NgD+XS32dlf5vK3////64dusLADUz9H+jXLOPAoSHiFrLBm3uLn3/f7jVS/b6e77pJDJo6H718//RQDw9ffs5+jm8fPIXlHqKwD5+PjolIP/VgP/SQLQ2uAyODvQ4ekABAhqcHK4ptuCAAAAHnRSTlMAPobB7P9mHdb//////////////////////////8J6YdtgAAABWUlEQVR4AWySYZNDMBCGWyw2SI9TGnWqILT////dm6Enc+MZH8Qz2V3Je/rj7Lgekec659N/fIgPnn+yCULaYaYwsCqShYhiQXQ+dJxIedltQDZfqZQyY6K1st3vO78WsiyNDI3zySK/caJUygTMzN7eTnxdBXMcb3+0TsMC30RUJfciqSIs8JCZycHwWV1n2UVuXDKzxsDOySWu5AGVoB/TUh5imhJFpQTNfav7uDcSlBERJLUN9LOLewn6LnpCNS0EyvKg+vLRjVRLUIuxe8hSDYyyLqatyr68jdO6cxpvWGIeDOQQujagNs7YuumbJmYiZz0E3aJvMc95Ps8F+rV6PQQ0JY4XpVqVv0Cu2lYps9HbDp6HRS9Kv1+vt1Z4HeDI/1yZiFMNFIzWqYkChftl8zSkegE6HSYmENgxYYQHRGzUHiLHyh3ModvZo7nHxA71ofwdSnYAAPpVIo4RUPiIAAAAAElFTkSuQmCC"
+    },
+    {
+      "position": 4,
+      "title": "5 AI Visibility Tools to Track Your Brand Across LLMs",
+      "link": "https://backlinko.com/llm-tracking-tools",
+      "source": "Backlinko",
+      "domain": "backlinko.com",
+      "displayed_link": "https://backlinko.com › Blog",
+      "snippet": "5 AI Visibility Tools to Track Your Brand Across LLMs · 1. Semrush · 2. Profound · 3. ZipTie.Dev · 4. Peec AI · 5. Gumshoe.AI.",
+      "snippet_highlighted_words": [
+        "1. Semrush"
+      ],
+      "date": "Jun 19, 2026",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAPFBMVEX////////h9O/p9/PV8OlizLIAt5AAt49/1L77/v1Nx6oAvJgAuZQswaC25dnq+PQfv52h3s6K2MQRvpt2hFIwAAAAFHRSTlP/9+767e35/+7y7v//6uvv9uzr6lINbsAAAACtSURBVHgBtVJFAsMwDGuDhmD3/7eOw4NTfQmYJW3n2y6kFPtHl9LGAlij1eJCsswOwDFbwsnpHTtDIZBx7PzYzcdk8v68ZpPQ97naJRHLI4rkqPmEZSvaMxq2bSpwLvddsmNdO94jS5PyYcq+0U7zbeRqmwgQRmcAkO+rhGN2HtUpvpUt/deBGgbuWFb5D0KBT6zwNeBtxgJ8vOBfylqutq6QrVepiCaT/wI7z24zDAeicXQwGAAAAABJRU5ErkJggg=="
+    },
+    {
+      "position": 5,
+      "title": "The Best AI Visibility Tracking Tools (My Honest Reviews)",
+      "link": "https://www.position.digital/blog/best-ai-visibility-tracking-tools/",
+      "source": "Position Digital",
+      "domain": "www.position.digital",
+      "displayed_link": "https://www.position.digital › Blog",
+      "snippet": "Compare the 10 best AI visibility tracking tools for monitoring brand mentions in ChatGPT, Gemini & AI Overviews — features, pricing, ...",
+      "snippet_highlighted_words": [
+        "ChatGPT, Gemini & AI Overviews"
+      ],
+      "date": "Jul 29, 2026",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcAQMAAABIw03XAAAAA1BMVEVU+roJKOgTAAAAC0lEQVR4AWMYRAAAAIwAASLW8i0AAAAASUVORK5CYII="
+    },
+    {
+      "position": 6,
+      "title": "Best SEO / AI Visibility Tools (2026) - Style Factory",
+      "link": "https://www.stylefactoryproductions.com/blog/best-seo-ai-visibility-tools",
+      "source": "stylefactoryproductions.com",
+      "domain": "www.stylefactoryproductions.com",
+      "displayed_link": "https://www.stylefactoryproductions.com › blog › best-...",
+      "snippet": "five of the leading SEO / AI visibility tools available today: Semrush, SE Ranking, Moz, Ubersuggest, and Ahrefs.",
+      "snippet_highlighted_words": [
+        "Semrush, SE Ranking, Moz, Ubersuggest, and Ahrefs"
+      ],
+      "date": "Jun 14, 2026",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUPM0gALEgAIkgAIEgAI0gALkgIMEgAIUhhdUeotkW6xkShr0VCW0cAKkj1/UPy+kN/kEYAJUiWpUXu9kN8jEatu0VIYEfa5EOMnEYAEkgAJ0hvgUbh6kNSaEcAH0guSkjL10QiQkjZ40MoRkg0T0gVOUgAGkjH0kQAJEhgUd9jAAAAp0lEQVR4Ac2QxQGAQAwEg58Hd/f+G0TepADmG1mBX2PZjuvRIz9gXEjlkkMtzAOGETGLYpPINEOTE5/dAsuqruLGoy5bbAKAWgOBLbDo+hpI/KFFHFNt0SmnLEEz55q+7Ze4xWT1qZkPvrO0yG2ig+09cUoc+8+sLpNxf9KW5vgOLWaSfHe8GeMTPpwjJjwusJ0IQ/40modCkVH8iMVPsxbQWNGp4c/cBsAKqVjtu/kAAAAASUVORK5CYII="
+    },
+    {
+      "position": 7,
+      "title": "18 Best AI visibility tools for marketing agencies [2026 ...",
+      "link": "https://www.tryprofound.com/blog/best-ai-visibility-tools-for-marketing-agencies",
+      "source": "Profound",
+      "domain": "www.tryprofound.com",
+      "displayed_link": "https://www.tryprofound.com › blog › best-ai-visibility...",
+      "snippet": "The best AI visibility tool for marketing agencies is Profound. ChatGPT, Claude, and Google AI Overviews are the foundation. adds share of ...",
+      "snippet_highlighted_words": [
+        "Profound"
+      ],
+      "date": "Jan 30, 2026",
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAA60lEQVR4AX3SIayDMBRG4V/ik1p8Mo2bwmGeIcHNIJ9agnczc7j5ZHY+qXgCg6p3VyGbLKm85r6tg4XSdcd+9kC+FKAlsglk0wKt4U/orgUeFVcX49Qp+FQ3bXEs8a4cQ7xkWJVdVmhrbKrtguMeUfvxhVRhqTtiqSKPA+by3rleYW4IsNIswrr8hC2Jjw4xnmWJDxtURox9mf1FgFlj5d425mnmB2v8U70TuR+xuzHfcgRImsUj0J+xVJJHn8dVheYkVsSSwu5BCVR6e4I7zZQ1FD80nfKn7XorMYrTNVBrTnxLw0Dht+m+4z/Zj+tf71mVOwAAAABJRU5ErkJggg=="
+    },
+    {
+      "position": 8,
+      "title": "7 Best AI Search Visibility Trackers (I've Tested Over 6 ...",
+      "link": "https://medium.com/@ivanpalii/7-best-ai-search-visibility-trackers-29c14eb8f202",
+      "source": "Medium · Ivan Palii",
+      "domain": "medium.com",
+      "displayed_link": "1 month ago",
+      "snippet": "2/ Promptwatch. Promptwatch has one of the best UX/UI among all the AI tracking tools I've seen. Here are the features I like.",
+      "snippet_highlighted_words": [
+        "Promptwatch"
+      ],
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAARVBMVEVHcEwAAAAAAAAAAAAAAAAAAAB2dnanp6fW1tb///+JiYmzs7Pm5uaUlJS5ubm/v79XV1fMzMwuLi5GRkZgYGAWFhbz8/NaZDsbAAAABnRSTlMATcb6/504Ks4+AAAA00lEQVR4AX3TCw6DIBAEUNQpP/Gv3P+oHbJKpA1MErPwXAgRlVJdP+AvQ98p5oNKPuxDNZ3q69iroY6DQiOC2jAA8kC/ENY55yFhafHGkTNByonlWOC8cGpFShh/cVmJm+x4o7bbg/tG3VMj5oR86tx5pFYDHFZQuwBkRKCyOAWDM2/0RI8AJLx4HDNmBIjBT4JHehEZ5awRGU2BO9EgLxsLBE9z3YjIYxd4cvygT3vcaDWYeEIWsHxS8yfbU6vUjAa0DQqNNK9J84I1r2b7Urd+hy8WUBIcmpFBTAAAAABJRU5ErkJggg=="
+    },
+    {
+      "position": 9,
+      "title": "Best AI Search Monitoring Tools for Marketers in 2026",
+      "link": "https://nightwatch.io/blog/best-ai-search-monitoring-tools/",
+      "source": "nightwatch.io",
+      "domain": "nightwatch.io",
+      "displayed_link": "https://nightwatch.io › blog › best-ai-search-monitoring...",
+      "snippet": "Discover the 5 best AI search monitoring tools for 2026. Compare Nightwatch and more to track your brand visibility across AI search engines.",
+      "snippet_highlighted_words": [
+        "Nightwatch"
+      ],
+      "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAARVBMVEUAAAAAAAAAAAAuLi56enrOzs719fVlZWW7u7v///9NTU2vr6/FxcXn5+eLi4vX19dXV1eVlZWmpqYVFRUjIyPu7u47OzuvOzdkAAAAAnRSTlNj9xuakuMAAAD1SURBVHgBpJIFdgUhFEPb8JDgvv+l9nyZTl2D5+Lw8PCIT/R4sE8ovtD/oBL1xr1YB9TGvmbW6APCkdoH3hV8JCMO6BNpspQLKpINmeq5oXaxu01ksv1axwnHxXFTnJPpLmycu63workaxkBb1FJR1QGjiJt5sVhbuPJ0IvEZllUjMANTYZiAs6mc5+ReXordSm1bxK9NfcCpaeFz29AFKmcPSz2P3WYGXDSMmbios51HcabbSxncJbfdOJxwdyYnwN6AuMS+cUIMW2iKBWoxLHa8ec+ZDdMYiSbPDx57BLZm+vjkJyjn1NOolYbwALyJGm92AAAuow812ZpvPAAAAABJRU5ErkJggg=="
+    }
+  ],
+  "related_questions": [
+    {
+      "is_ai_overview": true,
+      "question": "What are the best AI visibility monitoring tools?",
+      "error": "Google AI Overview loads this answer asynchronously; it was not included in this response.",
+      "next_page_token": "eyJmYyI6IkVxQUJDbUpCU21sVU5IUkxNVEZmUzJwVVNUVlNSRFl3ZEVSbmJWSnhWVVJwYWxjeVEwZGFUamhSVVUxdFVEVjJTMUpZT0hwUk5sVmpUM1ZEZDBkT1ZFWXRPRjl0YUVZd1ZrWjJlRGcyVVdwb2VHaHdVWEJJTkdkRU5uSmxhVTVqWW1OM1RFRk9keElXVFZjMmJHRndla1JFTmtkSGNIUlJVSGh5TnpoSlFSb2lRVVJ6Y2psbVVqTlBVM2RWVEZkSWEwWmFaMlpLUjFSWVJWSTRjblJNWkhnMFFRIiwiZmN2IjoiMyIsInZldCI6IjJhaFVLRXdqY241eWxyT21XQXhVaGc0a0VIVVlmSHdRUXE3a0JLQUI2QkFnd0VBQSIsImVpIjoiJHtofSIsInEiOiJXaGF0IGFyZSB0aGUgYmVzdCBBSSB2aXNpYmlsaXR5IG1vbml0b3JpbmcgdG9vbHM_IiwibGsiOiJHaDVoYVNCMmFYTnBZbWxzYVhSNUlHMXZibWwwYjNKcGJtY2dkRzl2YkhNIiwicWMiOiJDaUZpWlhOMElHRnBJSFpwYzJsaWFXeHBkSGtnZEhKaFkydHBibWNnZEc5dmJITVFBSDA3RmcwXyIsImdsIjoidXMiLCJobCI6ImVuIn0"
+    },
+    {
+      "is_ai_overview": true,
+      "question": "How to track AI visibility?",
+      "error": "Google AI Overview loads this answer asynchronously; it was not included in this response.",
+      "next_page_token": "eyJmYyI6IkVxQUJDbUpCU21sVU5IUkxNVEZmUzJwVVNUVlNSRFl3ZEVSbmJWSnhWVVJwYWxjeVEwZGFUamhSVVUxdFVEVjJTMUpZT0hwUk5sVmpUM1ZEZDBkT1ZFWXRPRjl0YUVZd1ZrWjJlRGcyVVdwb2VHaHdVWEJJTkdkRU5uSmxhVTVqWW1OM1RFRk9keElXVFZjMmJHRndla1JFTmtkSGNIUlJVSGh5TnpoSlFSb2lRVVJ6Y2psbVVqTlBVM2RWVEZkSWEwWmFaMlpLUjFSWVJWSTRjblJNWkhnMFFRIiwiZmN2IjoiMyIsInZldCI6IjJhaFVLRXdqY241eWxyT21XQXhVaGc0a0VIVVlmSHdRUXE3a0JLQUI2QkFoQkVBQSIsImVpIjoiJHtofSIsInEiOiJIb3cgdG8gdHJhY2sgQUkgdmlzaWJpbGl0eT8iLCJsayI6IkdocG9iM2NnZEc4Z2RISmhZMnNnWVdrZ2RtbHphV0pwYkdsMGVRIiwicWMiOiJDaUZpWlhOMElHRnBJSFpwYzJsaWFXeHBkSGtnZEhKaFkydHBibWNnZEc5dmJITVFBSDA3RmcwXyIsImdsIjoidXMiLCJobCI6ImVuIn0"
+    },
+    {
+      "is_ai_overview": true,
+      "question": "Which companies offer AI visibility tools?",
+      "error": "Google AI Overview loads this answer asynchronously; it was not included in this response.",
+      "next_page_token": "eyJmYyI6IkVxQUJDbUpCU21sVU5IUkxNVEZmUzJwVVNUVlNSRFl3ZEVSbmJWSnhWVVJwYWxjeVEwZGFUamhSVVUxdFVEVjJTMUpZT0hwUk5sVmpUM1ZEZDBkT1ZFWXRPRjl0YUVZd1ZrWjJlRGcyVVdwb2VHaHdVWEJJTkdkRU5uSmxhVTVqWW1OM1RFRk9keElXVFZjMmJHRndla1JFTmtkSGNIUlJVSGh5TnpoSlFSb2lRVVJ6Y2psbVVqTlBVM2RWVEZkSWEwWmFaMlpLUjFSWVJWSTRjblJNWkhnMFFRIiwiZmN2IjoiMyIsInZldCI6IjJhaFVLRXdqY241eWxyT21XQXhVaGc0a0VIVVlmSHdRUXE3a0JLQUI2QkFoQUVBQSIsImVpIjoiJHtofSIsInEiOiJXaGljaCBjb21wYW5pZXMgb2ZmZXIgQUkgdmlzaWJpbGl0eSB0b29scz8iLCJsayI6IkdoZGhhU0IyYVhOcFltbHNhWFI1SUdOdmJYQmhibWxsY3ciLCJxYyI6IkNpRmlaWE4wSUdGcElIWnBjMmxpYVd4cGRIa2dkSEpoWTJ0cGJtY2dkRzl2YkhNUUFIMDdGZzBfIiwiZ2wiOiJ1cyIsImhsIjoiZW4ifQ"
+    },
+    {
+      "is_ai_overview": true,
+      "question": "What are the top 5 AI tools right now?",
+      "error": "Google AI Overview loads this answer asynchronously; it was not included in this response.",
+      "next_page_token": "eyJmYyI6IkVxQUJDbUpCU21sVU5IUkxNVEZmUzJwVVNUVlNSRFl3ZEVSbmJWSnhWVVJwYWxjeVEwZGFUamhSVVUxdFVEVjJTMUpZT0hwUk5sVmpUM1ZEZDBkT1ZFWXRPRjl0YUVZd1ZrWjJlRGcyVVdwb2VHaHdVWEJJTkdkRU5uSmxhVTVqWW1OM1RFRk9keElXVFZjMmJHRndla1JFTmtkSGNIUlJVSGh5TnpoSlFSb2lRVVJ6Y2psbVVqTlBVM2RWVEZkSWEwWmFaMlpLUjFSWVJWSTRjblJNWkhnMFFRIiwiZmN2IjoiMyIsInZldCI6IjJhaFVLRXdqY241eWxyT21XQXhVaGc0a0VIVVlmSHdRUXE3a0JLQUI2QkFoQ0VBQSIsImVpIjoiJHtofSIsInEiOiJXaGF0IGFyZSB0aGUgdG9wIDUgQUkgdG9vbHMgcmlnaHQgbm93PyIsImxrIjoiYzVOU0xjOUlMRkZJTEVwVktNa0E0dndDQlZPRnhFd2dJei1uV0tFb016MmpSQ0V2dnh3QSIsInFjIjoiQ2lGaVpYTjBJR0ZwSUhacGMybGlhV3hwZEhrZ2RISmhZMnRwYm1jZ2RHOXZiSE1RQUgwN0ZnMF8iLCJnbCI6InVzIiwiaGwiOiJlbiJ9"
+    }
+  ],
+  "related_searches": [
+    {
+      "query": "Best ai visibility tracking tools reddit",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=Best+ai+visibility+tracking+tools+reddit&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAgvEAE"
+    },
+    {
+      "query": "Best ai visibility tracking tools free",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=Best+ai+visibility+tracking+tools+free&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAg9EAE"
+    },
+    {
+      "query": "AI visibility tools free",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=AI+visibility+tools+free&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAg8EAE"
+    },
+    {
+      "query": "AI visibility tracker",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=AI+visibility+tracker&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAg5EAE"
+    },
+    {
+      "query": "LLM visibility tool",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=LLM+visibility+tool&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAg1EAE"
+    },
+    {
+      "query": "AI visibility audit",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=AI+visibility+audit&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAgzEAE"
+    },
+    {
+      "query": "LLM tracking tool",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=LLM+tracking+tool&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAgyEAE"
+    },
+    {
+      "query": "Best llm tracking tools",
+      "link": "https://www.google.com/search?sca_esv=f1aee09f96487614&gl=us&hl=en&pws=0&q=Best+llm+tracking+tools&sa=X&ved=2ahUKEwjcn5ylrOmWAxUhg4kEHUYfHwQQ1QJ6BAgxEAE"
+    }
+  ],
+  "pagination": {
+    "current": 1,
+    "next": "https://www.google.com/search?q=best+AI+visibility+tracking+tools&oq=best+AI+visibility+tracking+tools&gl=us&hl=en&pws=0&start=10"
+  }
+}
