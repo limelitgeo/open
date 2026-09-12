@@ -29,7 +29,10 @@ import (
 
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/credentials"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+
 	"github.com/limelitgeo/open/internal/httpx"
+	"github.com/limelitgeo/open/internal/mcpserver"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
@@ -228,7 +231,11 @@ func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, 
 	return func() { ticker.Stop() }
 }
 
-// cmdMCP will serve the tool catalog in docs/tools.md over stdio.
+// cmdMCP serves the tool catalog over stdio, which is the shape Claude
+// Desktop and most MCP clients launch.
+//
+// Nothing is written to stdout except protocol frames: stdout IS the
+// transport, so a stray Println would corrupt the session. Logs go to stderr.
 func cmdMCP(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("mcp", flag.ContinueOnError)
 	if err := fs.Parse(args); err != nil {
@@ -239,7 +246,12 @@ func cmdMCP(ctx context.Context, args []string) error {
 		return err
 	}
 	defer db.Close()
-	return errNotImplemented("mcp")
+
+	srv, err := mcpserver.New(mcpserver.Deps{DB: db})
+	if err != nil {
+		return err
+	}
+	return srv.Run(ctx, &mcp.StdioTransport{})
 }
 
 // cmdRun executes one evaluation pass and exits, which is the shape a system

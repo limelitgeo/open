@@ -10,12 +10,17 @@
 package httpx
 
 import (
+	"os"
+
 	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+
+	"github.com/limelitgeo/open/internal/mcpserver"
 	"github.com/limelitgeo/open/internal/store"
 	"github.com/limelitgeo/open/internal/ui"
 )
@@ -36,6 +41,16 @@ func New(addr string, db *store.DB, log *slog.Logger, version string, dash *ui.A
 	mux.HandleFunc("GET /healthz", s.handleHealthz)
 	if dash != nil {
 		dash.Routes(mux)
+	}
+
+	// MCP over streamable HTTP, for a client that connects to a running
+	// instance instead of launching one. It refuses every request until a
+	// token is set, which is why it can be mounted unconditionally.
+	if srv, err := New_(db); err == nil {
+		mux.Handle("/mcp", mcpserver.Handler(srv, os.Getenv(mcpserver.TokenEnv), log))
+		mux.Handle("/mcp/", mcpserver.Handler(srv, os.Getenv(mcpserver.TokenEnv), log))
+	} else if log != nil {
+		log.Error("the MCP endpoint could not be built", "error", err)
 	}
 	s.http = &http.Server{
 		Addr:              addr,
@@ -102,4 +117,10 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// New_ builds the MCP server for the HTTP endpoint. Named apart from New so
+// the two constructors in this file cannot be confused at a glance.
+func New_(db *store.DB) (*mcp.Server, error) {
+	return mcpserver.New(mcpserver.Deps{DB: db})
 }
