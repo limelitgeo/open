@@ -1,0 +1,279 @@
+// Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
+// See the LICENSE file in the repository root for the full terms.
+
+package ui
+
+// View models for the measurement screens.
+//
+// Formatting lives here rather than in template expressions, because a
+// template cannot be tested and a percentage that is rounded in two places
+// eventually rounds differently in each.
+//
+// One rule runs through all of it: a number never appears without the
+// denominator it came from. "71%" is not a headline; "71% of 28 answers" is.
+
+import (
+	"fmt"
+	"html/template"
+	"strings"
+)
+
+// KPIView is one headline number.
+//
+// It carries its own label and denominator because a card that holds only a
+// number is meaningless the moment it is screenshotted, exported, or read by
+// a screen reader.
+type KPIView struct {
+	Label string
+	Value string
+	// Unit is rendered smaller and tighter against the value.
+	Unit string
+	// Denominator is the sample the number rests on, always shown.
+	Denominator string
+	// Delta is the change against the previous equal-length window, already
+	// formatted with its sign. Empty when there is no previous window to
+	// compare against, which is not the same as no change.
+	Delta string
+	// DeltaKind is up, down or flat, for styling only.
+	DeltaKind string
+	// Help is the formula, stated plainly. It is the thing no competitor
+	// shows and the thing that makes a number checkable.
+	Help string
+	// Emphasis marks the one number the page is about.
+	Emphasis bool
+}
+
+// StandingView is one brand in the ranking.
+type StandingView struct {
+	Rank       int
+	Name       string
+	IsOwn      bool
+	Visibility string
+	Share      string
+	// ShareWidth is the bar fill, 0-100, as a CSS percentage string.
+	ShareWidth string
+	Position   string
+	Detail     string
+	// Absent marks a brand that never appeared. The row still renders,
+	// because "you are not in this conversation" is the most useful thing
+	// this tool can say and hiding it would bury it.
+	Absent bool
+}
+
+// SourceView is one cited site.
+type SourceView struct {
+	Site       string
+	SourceType string
+	Citations  int
+	Answers    int
+	// Width is the bar fill relative to the most-cited site.
+	Width string
+}
+
+// GridCellView is one prompt against one target.
+type GridCellView struct {
+	// Ran is false when this pair has no answer at all, which renders as an
+	// empty cell rather than a zero. A prompt that was never asked of an
+	// engine is not a prompt that engine ignored.
+	Ran        bool
+	Label      string
+	Sub        string
+	Background string
+	Ink        string
+	Title      string
+	Href       string
+}
+
+// GridRowView is one prompt across every target.
+type GridRowView struct {
+	PromptID int64
+	Prompt   string
+	Category string
+	Branded  bool
+	Cells    []GridCellView
+}
+
+// GridColumnView is one target's column header.
+type GridColumnView struct {
+	Label  string
+	Access string
+	Spec   string
+}
+
+// AnswerView is one answer in a list.
+type AnswerView struct {
+	ID        int64
+	Prompt    string
+	Engine    string
+	Access    string
+	Status    string
+	StatusOK  bool
+	Model     string
+	When      string
+	Preview   string
+	Mentioned bool
+	Mentions  int
+	Citations int
+	Position  string
+	Href      string
+}
+
+// AnswerDetailView is one answer in full.
+type AnswerDetailView struct {
+	AnswerView
+	// Body is the answer with every brand mention wrapped in a mark element.
+	// Making the reader hunt for the brand in a wall of text is the failure
+	// this screen exists to avoid.
+	Body    template.HTML
+	Brands  []BrandChipView
+	Sources []SourceLinkView
+	// FanOut is what the engine searched on the way to this answer. It is
+	// frequently not the question that was asked, and that gap names the
+	// query you would actually have to win.
+	FanOut    []string
+	InputTok  int
+	OutputTok int
+	Error     string
+}
+
+// BrandChipView is one brand found in an answer.
+type BrandChipView struct {
+	Name     string
+	IsOwn    bool
+	Position string
+	// Times is set only when a brand was named more than once, because "1
+	// time" is noise on every chip that is not repeated.
+	Times string
+}
+
+// SourceLinkView is one citation.
+type SourceLinkView struct {
+	Position   int
+	URL        string
+	Site       string
+	Title      string
+	SourceType string
+}
+
+// MeasurePage is the overview.
+type MeasurePage struct {
+	Base
+	WindowDays int
+	Windows    []WindowOption
+	// HasData is false before the first answer lands. The screen then
+	// teaches rather than showing a wall of zeros.
+	HasData bool
+	// LowN captions every number rather than warning on each one. A new
+	// install is legitimately here on its first day and should not be
+	// covered in warning badges.
+	LowN        bool
+	Answers     int
+	KPIs        []KPIView
+	Trend       template.HTML
+	TrendPoints int
+	Categories  []KPIView
+	Standings   []StandingView
+	Sources     []SourceView
+	Columns     []GridColumnView
+	Rows        []GridRowView
+	Counts      CountsView
+	Targets     []TargetView
+}
+
+// WindowOption is one entry in the window switch.
+type WindowOption struct {
+	Label   string
+	Days    int
+	Href    string
+	Current bool
+}
+
+// AnswersPage is the evidence list.
+type AnswersPage struct {
+	Base
+	Answers []AnswerView
+	Total   int
+	// Filtered says whether a filter is on, so an empty list can tell the
+	// difference between "nothing has run" and "nothing matches".
+	Filtered   bool
+	FilterName string
+	Filters    []WindowOption
+	Counts     CountsView
+}
+
+// AnswerPage is one answer in full.
+type AnswerPage struct {
+	Base
+	Answer AnswerDetailView
+}
+
+// CitationsPage is the sources screen.
+type CitationsPage struct {
+	Base
+	Sources []SourceView
+	Total   int
+	Answers int
+	LowN    bool
+	Kinds   []KPIView
+}
+
+// pct formats a percentage the way every surface here formats it: no decimal
+// unless the number is small enough that the decimal is the difference
+// between "nothing" and "something".
+func pct(v float64) string {
+	if v > 0 && v < 10 {
+		return strings.TrimSuffix(fmt.Sprintf("%.1f", v), ".0")
+	}
+	return fmt.Sprintf("%.0f", v)
+}
+
+// answersWord keeps the denominator readable at n=1.
+func answersWord(n int) string {
+	if n == 1 {
+		return "1 answer"
+	}
+	return fmt.Sprintf("%d answers", n)
+}
+
+// delta formats a change in percentage points. A move is only worth showing
+// when there was a previous window to compare against.
+func delta(now, before float64, hadPrevious bool) (string, string) {
+	if !hadPrevious {
+		return "", ""
+	}
+	diff := now - before
+	switch {
+	case diff > 0.05:
+		return "+" + pct(diff) + " pts", "up"
+	case diff < -0.05:
+		return "-" + pct(-diff) + " pts", "down"
+	default:
+		return "no change", "flat"
+	}
+}
+
+// position renders a mean rank, or says plainly that there is none. Rounding
+// a mean to an integer destroys the difference between 1.0 and 1.4, which on
+// a ranking is the whole signal.
+func position(v float64) string {
+	if v <= 0 {
+		return "not ranked"
+	}
+	return fmt.Sprintf("%.1f", v)
+}
+
+// categoryHelp explains why a prompt shape is scored on its own.
+func categoryHelp(name string) string {
+	switch name {
+	case "discovery":
+		return "Open questions that name nobody. The only shape that measures whether an engine reaches for you unprompted."
+	case "comparison":
+		return "Questions that name a rival. An answer lists rivals by construction, so a low score here is not the same as a low score on discovery."
+	case "use case":
+		return "Questions about the job, not the category."
+	case "brand":
+		return "Questions that name you. Excluded from the headline: asking an engine about yourself measures the question, not the market."
+	default:
+		return "Prompts with no category set."
+	}
+}

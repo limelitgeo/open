@@ -39,6 +39,22 @@
   --info-bg: #e6e8f8;
   --info-fg: #3c3cc9;
 
+  /* The grid's heat ramp. One hue, six steps, intensity only.
+   * Not red-to-green: that ramp asserts "bad" and "good", and 20% visibility
+   * is excellent in one category and dire in another. It is also the ramp
+   * that fails hardest for red-green colour blindness, which is about 8% of
+   * men. Intensity says "more" without saying "good". */
+  --cell-empty: transparent;
+  --cell-0: #f1f2f6;
+  --cell-1: #dfe0fa;
+  --cell-2: #c3c5f6;
+  --cell-3: #9c9ff0;
+  --cell-4: #6e72e6;
+  --cell-5: #4a4ad9;
+
+  --mark-own: #fde68a;
+  --mark-rival: #e9eaf2;
+
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 2px rgb(20 20 28 / 6%), 0 1px 3px rgb(20 20 28 / 4%);
@@ -52,6 +68,17 @@
 
     --brand-strong: #a3a3ff;
     --brand-soft: #232340;
+
+    --cell-empty: transparent;
+    --cell-0: #1c1d26;
+    --cell-1: #23244a;
+    --cell-2: #2f3170;
+    --cell-3: #3f42a0;
+    --cell-4: #5457cc;
+    --cell-5: #7d80ef;
+
+    --mark-own: #6b5a12;
+    --mark-rival: #2a2c38;
 
     --ink: #f2f2f5;
     --ink-2: #c3c6cd;
@@ -338,3 +365,259 @@ details.card > summary:hover { color: var(--brand-strong); }
   .provider-head { flex-direction: column; }
   .provider-form { flex-direction: column; align-items: stretch; }
 }
+
+/* ---------------------------------------------------------------------------
+   The measurement screens.
+
+   Two rules run through everything below.
+
+   A number never appears without its denominator. A card holding only "71%"
+   is meaningless the moment it is screenshotted or read aloud, so every KPI
+   carries its own label and the sample it rests on.
+
+   Numerals are tabular everywhere they can be compared. A column of figures
+   that shifts width as digits change is the clearest signal that nobody
+   looked at the screen.
+   --------------------------------------------------------------------------- */
+
+.pagehead {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.pagehead h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.02em; }
+.pagehead .lede { margin: 0; max-width: 62ch; }
+.crumb { margin: 0 0 6px; font-size: 12px; }
+.crumb a { color: var(--ink-3); }
+
+/* The window switch. A segmented control rather than a dropdown: three
+   options that fit are three options you can see. */
+.segmented {
+  display: inline-flex; background: var(--bg-2); border: 1px solid var(--rule);
+  border-radius: var(--radius-sm); padding: 2px; gap: 2px; flex: none;
+}
+.segmented a {
+  padding: 5px 11px; border-radius: 4px; font-size: 12px; font-weight: 500;
+  color: var(--ink-3); text-decoration: none; transition: background 120ms ease, color 120ms ease;
+}
+.segmented a:hover { color: var(--ink); }
+.segmented a[aria-current="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+/* KPIs. The lead card is visually heavier because one number is the point of
+   the page and four equal cards say nothing is. */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.kpi {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.kpi-lead { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.kpi-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ink-3); display: flex; align-items: center; gap: 5px;
+  /* Two lines reserved so a wrapping title cannot push its number out of line
+     with the others. */
+  min-height: 2.2em;
+}
+.kpi-value { display: flex; align-items: baseline; gap: 2px; }
+.kpi-value .num {
+  font-size: 34px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.kpi-lead .kpi-value .num { font-size: 42px; }
+.kpi-value .unit { font-size: 17px; font-weight: 600; color: var(--ink-3); }
+.kpi-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.denom { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.delta {
+  font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.delta-up { background: var(--pos-bg); color: var(--pos-fg); }
+.delta-down { background: var(--neg-bg); color: var(--neg-fg); }
+.delta-flat { background: var(--bg-2); color: var(--ink-3); }
+
+/* The formula, on hover and on keyboard focus. The thing no competitor shows
+   and the thing that makes a number checkable. */
+.help {
+  width: 14px; height: 14px; border-radius: 50%; background: var(--bg-2);
+  color: var(--ink-4); font-size: 9px; font-weight: 700; display: inline-grid;
+  place-items: center; cursor: help; position: relative; flex: none;
+}
+.help:hover, .help:focus-visible { background: var(--brand-soft); color: var(--brand-strong); }
+.help-pop {
+  position: absolute; bottom: calc(100% + 8px); left: -8px; width: 250px;
+  background: var(--ink); color: var(--bg); padding: 9px 11px; border-radius: var(--radius-sm);
+  font-size: 11.5px; font-weight: 400; line-height: 1.45; text-transform: none;
+  letter-spacing: 0; opacity: 0; pointer-events: none; transition: opacity 120ms ease;
+  z-index: 20; box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+}
+.help:hover .help-pop, .help:focus-visible .help-pop { opacity: 1; }
+
+.caption { font-size: 12px; color: var(--ink-3); margin: -6px 0 18px; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.split-wide { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
+.rail { display: flex; flex-direction: column; gap: 14px; }
+.more { font-size: 12px; font-weight: 500; }
+
+/* Standings. The own row stays visible at zero, because "you are not in this
+   conversation" is the most useful thing this tool can say. */
+table.standings { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.standings th {
+  text-align: left; font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-4); padding: 0 8px 7px; border-bottom: 1px solid var(--rule);
+}
+table.standings td { padding: 9px 8px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+table.standings tr:last-child td { border-bottom: 0; }
+table.standings .num, .num { text-align: right; font-variant-numeric: tabular-nums; }
+.rank { color: var(--ink-4); font-variant-numeric: tabular-nums; width: 22px; }
+.brand { display: block; font-weight: 550; color: var(--ink); }
+.sub { display: block; font-size: 11px; color: var(--ink-4); }
+tr.own .brand { color: var(--brand-strong); }
+tr.own { background: var(--brand-soft); }
+tr.absent .brand { color: var(--ink-3); }
+.tag {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  background: var(--brand); color: #fff; padding: 1px 5px; border-radius: 3px; vertical-align: 1px;
+}
+.muted { color: var(--ink-4); }
+
+.barcell { display: block; height: 4px; background: var(--bg-2); border-radius: 3px; overflow: hidden; margin: 5px 0 0; }
+.bar { display: block; height: 100%; background: var(--brand); border-radius: 3px; }
+tr.own .bar { background: var(--brand-strong); }
+.barwide { width: 110px; }
+
+/* The prompt by engine grid. This is the screen no competitor ships: Elmo,
+   the most complete of them, has no matrix at all. */
+table.grid { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12.5px; }
+.grid-prompt { max-width: 320px; min-width: 220px; }
+.grid-prompt .prompt-text {
+  display: block; color: var(--ink); font-weight: 500; line-height: 1.35;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+th.grid-col {
+  text-align: center; font-size: 10.5px; font-weight: 600; color: var(--ink-3);
+  padding-bottom: 6px; white-space: nowrap;
+}
+th.grid-col span { display: block; }
+th.grid-col .badge { margin-top: 3px; }
+.grid-cell { width: 74px; }
+.cell {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 46px; border-radius: var(--radius-sm); text-decoration: none;
+  font-variant-numeric: tabular-nums; transition: transform 110ms ease, box-shadow 110ms ease;
+}
+a.cell:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.cell-value { font-size: 13px; font-weight: 650; }
+.cell-sub { font-size: 9.5px; opacity: 0.75; font-weight: 500; }
+/* An empty cell is a prompt that was never asked of that engine, not a zero.
+   It reads as absence: dotted, unfilled, unclickable. */
+.cell-empty { border: 1px dashed var(--rule-2); color: var(--ink-4); background: transparent; }
+
+.catlist, .sourcelist, .queries, .chips, .sources, .answers { list-style: none; margin: 0; padding: 0; }
+.catlist li, .sourcelist li { padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.catlist li:last-child, .sourcelist li:last-child { border-bottom: 0; }
+.catlist-head, .sourcelist-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.catlist .cat { font-weight: 550; text-transform: capitalize; flex: 1; }
+.catlist .num, .sourcelist .num { margin-left: auto; font-weight: 600; }
+.sourcelist .site { font-weight: 550; word-break: break-all; }
+
+/* Answers: the evidence list. */
+.answers li { border-bottom: 1px solid var(--rule); }
+.answers li:last-child { border-bottom: 0; }
+.answer-link { display: block; padding: 14px 2px; text-decoration: none; color: inherit; border-radius: var(--radius-sm); }
+.answer-link:hover { background: var(--bg-2); }
+.answer-top { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
+.answer-prompt { font-weight: 550; color: var(--ink); font-size: 14px; }
+.answer-meta { display: flex; gap: 4px; flex: none; }
+.answer-preview {
+  margin: 5px 0 7px; color: var(--ink-3); font-size: 12.5px; line-height: 1.5;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.answer-foot { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.answer-foot .sub { display: inline; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px; background: var(--bg-2); color: var(--ink-2);
+}
+.chip-own { background: var(--brand-soft); color: var(--brand-strong); }
+.chip-miss { background: var(--bg-2); color: var(--ink-3); }
+.chip-rival { background: var(--bg-2); color: var(--ink-2); }
+.chip-rank { font-variant-numeric: tabular-nums; opacity: 0.7; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* One answer in full. The brand is marked in the text, using the same offsets
+   that produced the count, so the highlight and the number cannot disagree. */
+.answer-title { font-size: 19px; line-height: 1.3; max-width: 60ch; }
+.prose { font-size: 14px; line-height: 1.65; color: var(--ink-2); max-width: 72ch; }
+.prose p { margin: 0 0 0.9em; }
+.prose p:last-child { margin-bottom: 0; }
+mark.mark-own { background: var(--mark-own); color: var(--ink); padding: 0 2px; border-radius: 2px; font-weight: 600; }
+mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0 2px; border-radius: 2px; }
+
+.queries li { padding: 6px 0; border-bottom: 1px solid var(--rule); font-size: 12px; }
+.queries li:last-child { border-bottom: 0; }
+.sources { counter-reset: src; }
+.sources li { padding: 8px 0; border-bottom: 1px solid var(--rule); font-size: 12.5px; }
+.sources li:last-child { border-bottom: 0; }
+.sources a { font-weight: 500; }
+
+/* First run. The empty state teaches instead of apologising, and it never
+   shows fake data: every number on the overview comes from a real answer. */
+.empty { text-align: left; }
+.empty h2 { margin: 0 0 6px; }
+.empty-steps { display: flex; flex-direction: column; gap: 2px; margin: 16px 0 14px; }
+.step-row {
+  display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+  border: 1px solid var(--rule); border-radius: var(--radius-sm); background: var(--bg-2);
+}
+.step-row div { flex: 1; }
+.step-row strong { display: block; font-size: 13px; }
+.step-mark {
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--rule); color: var(--ink-3); font-size: 11px; font-weight: 700; flex: none;
+}
+.step-row.done .step-mark { background: var(--brand); color: #fff; }
+
+/* Charts. Inline SVG, so they inherit the page's tokens and follow the theme
+   without a second palette. */
+.chart { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .line { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.chart .area { fill: var(--brand); opacity: 0.1; stroke: none; }
+.chart .dot { fill: var(--brand); stroke: var(--surface); stroke-width: 2; }
+.chart .axis { fill: var(--ink-4); font-size: 10px; font-family: var(--sans); }
+.spark { width: 68px; height: 20px; stroke: var(--brand); stroke-width: 1.5; }
+
+.badge-api { background: var(--info-bg); color: var(--info-fg); }
+.badge-scraped { background: var(--warn-bg); color: var(--warn-fg); }
+.badge-own { background: var(--brand-soft); color: var(--brand-strong); }
+.badge-competitor { background: var(--neg-bg); color: var(--neg-fg); }
+.badge-social { background: var(--bg-2); color: var(--ink-2); }
+.badge-informational { background: var(--info-bg); color: var(--info-fg); }
+.badge-other { background: var(--bg-2); color: var(--ink-3); }
+.badge-warn { background: var(--warn-bg); color: var(--warn-fg); }
+
+@media (max-width: 1080px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .split, .split-wide { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .pagehead { flex-direction: column; }
+}
+
+/* Answer prose. Engines write Markdown, so the small subset they use is
+   rendered rather than shown as syntax. */
+.prose h3 { font-size: 14px; font-weight: 650; color: var(--ink); margin: 1.1em 0 0.4em; }
+.prose h3:first-child { margin-top: 0; }
+.prose ul { margin: 0 0 0.9em; padding-left: 1.1em; }
+.prose li { margin: 0 0 0.35em; }
+.prose code {
+  font-family: var(--mono); font-size: 0.88em; background: var(--bg-2);
+  padding: 1px 4px; border-radius: 3px;
+}
+.prose a { word-break: break-word; }
+.prose strong { color: var(--ink); font-weight: 600; }
+.li-rank { font-variant-numeric: tabular-nums; color: var(--ink-4); font-weight: 600; }
+.chip-times { font-size: 10px; opacity: 0.65; font-weight: 500; }

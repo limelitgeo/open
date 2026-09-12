@@ -1,0 +1,53 @@
+{{define "page"}}
+
+<div class="pagehead">
+  <div>
+    <h1>Answers</h1>
+    <p class="lede">Every answer an engine gave, exactly as it gave it. This is the evidence behind every number on the overview.</p>
+  </div>
+  <nav class="segmented" aria-label="Filter">
+    {{range .Filters}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
+  </nav>
+</div>
+
+{{if not .Answers}}
+  <section class="card empty">
+    {{if .Filtered}}
+      <h2>Nothing matches</h2>
+      <p class="lede">There are {{.Total}} answers stored, none of them {{if .FilterName}}{{.FilterName}}{{else}}matching this filter{{end}}.</p>
+      <p><a class="btn" href="/chats">Clear the filter</a></p>
+    {{else}}
+      <h2>No answers yet</h2>
+      <p class="lede">Run an evaluation and the answers land here, each one readable in full with the brands marked in the text.</p>
+    {{end}}
+  </section>
+{{else}}
+  <p class="caption">{{len .Answers}} of {{.Total}} answers{{if .FilterName}}, showing {{.FilterName}}{{end}}.</p>
+  <ul class="answers">
+    {{range .Answers}}
+    <li class="answer{{if .Mentioned}} hit{{end}}">
+      <a href="{{.Href}}" class="answer-link">
+        <div class="answer-top">
+          <span class="answer-prompt">{{.Prompt}}</span>
+          <span class="answer-meta">
+            <span class="badge">{{.Engine}}</span>
+            <span class="badge badge-{{.Access}}">{{.Access}}</span>
+            {{if not .StatusOK}}<span class="badge badge-warn">{{.Status}}</span>{{end}}
+          </span>
+        </div>
+        <p class="answer-preview">{{.Preview}}</p>
+        <div class="answer-foot">
+          {{if .Mentioned}}
+            <span class="chip chip-own">named you{{if ne .Position "not ranked"}} at #{{.Position}}{{end}}</span>
+          {{else if .StatusOK}}
+            <span class="chip chip-miss">did not name you</span>
+          {{end}}
+          <span class="sub">{{.Mentions}} brands &middot; {{.Citations}} sources &middot; {{.When}}</span>
+        </div>
+      </a>
+    </li>
+    {{end}}
+  </ul>
+{{end}}
+
+{{end}}

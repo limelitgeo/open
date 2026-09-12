@@ -32,11 +32,13 @@ var staticFS embed.FS
 // template defines "page"; the chrome defines the document around it.
 var pages = map[string]string{
 	"overview":           "layout",
+	"chats":              "layout",
+	"chat":               "layout",
+	"citations":          "layout",
 	"prompts":            "layout",
 	"competitors":        "layout",
 	"settings":           "layout",
 	"upgrade":            "layout",
-	"placeholder":        "layout",
 	"wizard_brand":       "wizard",
 	"wizard_competitors": "wizard",
 	"wizard_prompts":     "wizard",

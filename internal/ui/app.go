@@ -13,8 +13,8 @@ import (
 
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/credentials"
-	"github.com/limelitgeo/open/internal/engines"
 	"github.com/limelitgeo/open/internal/mentions"
+	"github.com/limelitgeo/open/internal/metrics"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/runner"
 	"github.com/limelitgeo/open/internal/secrets"
@@ -48,6 +48,7 @@ type App struct {
 	registry *provider.Registry
 	keys     *secrets.Keyring
 	runner   *runner.Runner
+	metrics  *metrics.Service
 	views    *Renderer
 	log      *slog.Logger
 	version  string
@@ -61,7 +62,7 @@ func New(db *store.DB, registry *provider.Registry, keys *secrets.Keyring, run *
 	if err != nil {
 		return nil, err
 	}
-	return &App{db: db, registry: registry, keys: keys, runner: run, views: views, log: log, version: version, cfg: cfg}, nil
+	return &App{db: db, registry: registry, keys: keys, runner: run, metrics: metrics.New(db), views: views, log: log, version: version, cfg: cfg}, nil
 }
 
 // Routes registers every dashboard route on mux.
@@ -76,7 +77,8 @@ func (a *App) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /competitors", a.competitors)
 	mux.HandleFunc("POST /competitors/add", a.addCompetitor)
 	mux.HandleFunc("POST /competitors/delete", a.deleteCompetitor)
-	mux.HandleFunc("GET /chats", a.chats)
+	mux.HandleFunc("GET /chats", a.answers)
+	mux.HandleFunc("GET /chats/{id}", a.answer)
 	mux.HandleFunc("GET /citations", a.citations)
 	mux.HandleFunc("GET /settings", a.settings)
 	mux.HandleFunc("POST /settings/targets/track", a.trackEngine)
@@ -198,36 +200,6 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/overview", http.StatusSeeOther)
 }
 
-func (a *App) overview(w http.ResponseWriter, r *http.Request) {
-	if !a.configured(r.Context()) {
-		http.Redirect(w, r, "/setup", http.StatusSeeOther)
-		return
-	}
-	base, counts, err := a.base(r, "Overview", "overview")
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	targets, err := a.db.Targets(r.Context(), false)
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	page := OverviewPage{
-		Base:       base,
-		WindowDays: 30,
-		Counts:     CountsView{Prompts: counts.Prompts, Competitors: counts.Competitors, Targets: counts.Targets, Chats: counts.Chats},
-	}
-	for _, t := range targets {
-		label := t.Engine
-		if e, ok := engines.Lookup(t.Engine); ok {
-			label = e.Label
-		}
-		page.Targets = append(page.Targets, TargetView{ID: t.ID, Spec: t.Spec, EngineLabel: label, Access: t.Access})
-	}
-	a.write(w, r, "overview", page)
-}
-
 func (a *App) prompts(w http.ResponseWriter, r *http.Request) {
 	if !a.configured(r.Context()) {
 		http.Redirect(w, r, "/setup", http.StatusSeeOther)
@@ -324,36 +296,6 @@ func (a *App) deleteCompetitor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/competitors?flash=competitor-remove", http.StatusSeeOther)
-}
-
-// chats and citations are the evidence screens. They are placeholders until
-// there are answers to show, and they say which issue builds them rather than
-// rendering an empty frame that reads as broken.
-func (a *App) chats(w http.ResponseWriter, r *http.Request) {
-	a.placeholder(w, r, "Answers", "chats",
-		"Every answer an engine gave, with your brand and your competitors highlighted where they appear.",
-		"Answers arrive once the evaluation runner is built. This screen then shows each one in full: the text, the mentions with their rank, and every source cited.",
-		"https://github.com/limelitgeo/open/issues/22")
-}
-
-func (a *App) citations(w http.ResponseWriter, r *http.Request) {
-	a.placeholder(w, r, "Citations", "citations",
-		"The domains and pages the engines trust when they answer about your category.",
-		"Citations are classified as your own, a competitor, social, informational or other. The screen lands with the evidence work.",
-		"https://github.com/limelitgeo/open/issues/22")
-}
-
-func (a *App) placeholder(w http.ResponseWriter, r *http.Request, title, current, lede, detail, issue string) {
-	if !a.configured(r.Context()) {
-		http.Redirect(w, r, "/setup", http.StatusSeeOther)
-		return
-	}
-	base, _, err := a.base(r, title, current)
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	a.write(w, r, "placeholder", PlaceholderPage{Base: base, Lede: lede, Detail: detail, IssueURL: issue})
 }
 
 func (a *App) upgrade(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,82 @@
+{{define "page"}}
+{{with .Answer}}
+
+<div class="pagehead">
+  <div>
+    <p class="crumb"><a href="/chats">Answers</a></p>
+    <h1 class="answer-title">{{.Prompt}}</h1>
+    <p class="lede">
+      <span class="badge">{{.Engine}}</span>
+      <span class="badge badge-{{.Access}}">{{.Access}}</span>
+      {{if .Model}}<span class="mono">{{.Model}}</span>{{end}}
+      <span class="sub">{{.When}}</span>
+    </p>
+  </div>
+</div>
+
+{{if not .StatusOK}}
+<div class="notice notice-warn">
+  <strong>{{.Status}}</strong>
+  {{if eq .Status "no_answer_surface"}}
+    The surface did not render for this query. That is not a miss for your brand, so this answer is excluded from every metric.
+  {{else}}
+    {{.Error}}
+  {{end}}
+</div>
+{{end}}
+
+<div class="split split-wide">
+  <section class="card">
+    <div class="card-head">
+      <h2>The answer</h2>
+      {{if .Mentioned}}<span class="chip chip-own">you are in it</span>{{else if .StatusOK}}<span class="chip chip-miss">you are not in it</span>{{end}}
+    </div>
+    <div class="prose">{{.Body}}</div>
+  </section>
+
+  <div class="rail">
+    {{if .FanOut}}
+    <section class="card">
+      <div class="card-head"><h2>What it searched for</h2></div>
+      <p class="lede">The engine ran these searches before writing. They are often not the question that was asked, and they name the queries you would actually have to win.</p>
+      <ul class="queries">
+        {{range .FanOut}}<li><span class="mono">{{.}}</span></li>{{end}}
+      </ul>
+    </section>
+    {{end}}
+
+    <section class="card">
+      <div class="card-head"><h2>Brands named</h2><span class="badge">{{len .Brands}}</span></div>
+      {{if .Brands}}
+      <ul class="chips">
+        {{range .Brands}}<li class="chip {{if .IsOwn}}chip-own{{else}}chip-rival{{end}}">{{.Name}}{{if .Position}} <span class="chip-rank">{{.Position}}</span>{{end}}{{if .Times}} <span class="chip-times">{{.Times}}</span>{{end}}</li>{{end}}
+      </ul>
+      {{else}}
+      <p class="lede">No tracked brand appears in this answer.</p>
+      {{end}}
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Sources cited</h2><span class="badge">{{len .Sources}}</span></div>
+      {{if .Sources}}
+      <ol class="sources">
+        {{range .Sources}}
+        <li>
+          <a href="{{.URL}}" rel="noopener noreferrer nofollow" target="_blank">{{if .Title}}{{.Title}}{{else}}{{.Site}}{{end}}</a>
+          <span class="sub">{{.Site}} <span class="badge badge-{{.SourceType}}">{{.SourceType}}</span></span>
+        </li>
+        {{end}}
+      </ol>
+      {{else}}
+      <p class="lede">This answer cited nothing.</p>
+      {{end}}
+    </section>
+
+    {{if .InputTok}}
+    <p class="caption">{{.InputTok}} tokens in, {{.OutputTok}} out.</p>
+    {{end}}
+  </div>
+</div>
+
+{{end}}
+{{end}}

@@ -346,17 +346,41 @@ func TestUpgradeScreenShowsTheWholeBoundary(t *testing.T) {
 	}
 }
 
-func TestPlaceholderScreensSayWhatIsMissing(t *testing.T) {
-	// An empty frame reads as broken. These say which issue builds them.
+func TestEvidenceScreensRenderWithNoData(t *testing.T) {
+	// A fresh install has no answers. These screens must say so in a way that
+	// teaches, and must never read as broken.
 	_, _, h := newApp(t, provider.NewRegistry())
 	seedProperty(t, h)
-	for _, path := range []string{"/chats", "/citations"} {
-		body := get(t, h, path).Body.String()
-		if !strings.Contains(body, "Not built yet") {
-			t.Errorf("%s does not say it is unbuilt", path)
+	for path, want := range map[string]string{
+		"/chats":     "No answers yet",
+		"/citations": "No citations yet",
+	} {
+		res := get(t, h, path)
+		if res.Code != http.StatusOK {
+			t.Errorf("%s returned %d", path, res.Code)
 		}
-		if !strings.Contains(body, "github.com/limelitgeo/open/issues") {
-			t.Errorf("%s does not link the issue", path)
+		if !strings.Contains(res.Body.String(), want) {
+			t.Errorf("%s does not say %q", path, want)
+		}
+	}
+}
+
+func TestOverviewTeachesBeforeTheFirstRun(t *testing.T) {
+	// The overview is the first screen anyone sees. With no answers it must
+	// explain what will appear rather than showing a wall of zeros, and it
+	// must never invent a number to fill the space.
+	_, _, h := newApp(t, provider.NewRegistry())
+	seedProperty(t, h)
+	body := get(t, h, "/overview").Body.String()
+
+	if !strings.Contains(body, "No answers yet") {
+		t.Error("the empty overview does not say there is nothing yet")
+	}
+	// A zero headline before any answer exists would be a claim about the
+	// market rather than a statement about the sample.
+	for _, fake := range []string{"kpi-value", "Share of voice"} {
+		if strings.Contains(body, fake) {
+			t.Errorf("the empty overview renders %q, which is a number nobody measured", fake)
 		}
 	}
 }

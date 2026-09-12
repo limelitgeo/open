@@ -1,0 +1,51 @@
+{{define "page"}}
+
+<div class="pagehead">
+  <div>
+    <h1>Citations</h1>
+    <p class="lede">The sites the engines trust when they answer about your category. These are the pages you would have to appear on or displace.</p>
+  </div>
+</div>
+
+{{if not .Sources}}
+  <section class="card empty">
+    <h2>No citations yet</h2>
+    <p class="lede">Sources appear here once an engine has answered and attributed something.</p>
+  </section>
+{{else}}
+
+<section class="kpis" aria-label="Citations by type">
+  {{range .Kinds}}
+  <div class="kpi">
+    <div class="kpi-label">{{.Label}}</div>
+    <div class="kpi-value"><span class="num">{{.Value}}</span><span class="unit">{{.Unit}}</span></div>
+    <div class="kpi-foot"><span class="denom">{{.Denominator}}</span></div>
+  </div>
+  {{end}}
+</section>
+
+{{if .LowN}}<p class="caption">Based on {{.Answers}} answers so far.</p>{{end}}
+
+<section class="card">
+  <div class="card-head">
+    <h2>Every cited site</h2>
+    <span class="badge">{{len .Sources}} sites &middot; {{.Total}} citations</span>
+  </div>
+  <table class="standings">
+    <thead><tr><th>Site</th><th>Type</th><th class="num">Citations</th><th class="num">Answers</th><th></th></tr></thead>
+    <tbody>
+    {{range .Sources}}
+      <tr>
+        <td><span class="brand">{{.Site}}</span></td>
+        <td><span class="badge badge-{{.SourceType}}">{{.SourceType}}</span></td>
+        <td class="num">{{.Citations}}</td>
+        <td class="num muted">{{.Answers}}</td>
+        <td class="barwide"><span class="barcell"><span class="bar" style="width:{{.Width}}"></span></span></td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</section>
+
+{{end}}
+{{end}}

@@ -87,15 +87,6 @@ type CountsView struct {
 	Chats       int
 }
 
-// OverviewPage is the dashboard.
-type OverviewPage struct {
-	Base
-	WindowDays int
-	Counts     CountsView
-	Stats      []StatView
-	Targets    []TargetView
-}
-
 // PromptsPage lists tracked prompts.
 type PromptsPage struct {
 	Base
@@ -176,15 +167,6 @@ type SettingsPage struct {
 type UpgradePage struct {
 	Base
 	CloudFeatures []string
-}
-
-// PlaceholderPage stands in for a screen that is not built yet. It says so
-// rather than showing an empty frame that looks broken.
-type PlaceholderPage struct {
-	Base
-	Lede     string
-	Detail   string
-	IssueURL string
 }
 
 // WizardBase is the chrome for the setup flow.

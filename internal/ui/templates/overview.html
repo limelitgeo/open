@@ -1,52 +1,181 @@
 {{define "page"}}
-<div class="page-head">
+
+<div class="pagehead">
   <div>
     <h1>Overview</h1>
-    <p class="lede">How the engines answer about {{.Property.Name}}, over the last {{.WindowDays}} days.</p>
+    <p class="lede">How {{if .Property.Name}}{{.Property.Name}}{{else}}your brand{{end}} shows up when people ask AI about your category.</p>
   </div>
+  {{if .HasData}}
+  <nav class="segmented" aria-label="Time window">
+    {{range .Windows}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
+  </nav>
+  {{end}}
 </div>
 
-{{if eq .Counts.Chats 0}}
-  <div class="card empty">
-    <h2>No answers yet</h2>
-    <p>Once an evaluation runs, this is where visibility, share of voice and the sources engines cite will appear, each clicking through to the answers behind it.</p>
-    <div class="btn-row" style="justify-content:center">
-      <a class="btn" href="/prompts">Review your prompts</a>
-      <a class="btn" href="/settings">Add a provider key</a>
-    </div>
-  </div>
+{{if not .HasData}}
+  {{template "empty" .}}
 {{else}}
-  <div class="grid-4">
-    {{range .Stats}}
-    <div class="card stat">
-      <div class="label">{{.Label}}</div>
-      <div class="value">{{.Value}}</div>
-      <div class="sub">{{.Sub}}</div>
+
+<section class="kpis" aria-label="Headline numbers">
+  {{range .KPIs}}
+  <div class="kpi{{if .Emphasis}} kpi-lead{{end}}">
+    <div class="kpi-label">
+      {{.Label}}
+      {{if .Help}}<span class="help" tabindex="0" role="note" aria-label="{{.Help}}">?<span class="help-pop">{{.Help}}</span></span>{{end}}
     </div>
-    {{end}}
+    <div class="kpi-value"><span class="num">{{.Value}}</span>{{if .Unit}}<span class="unit">{{.Unit}}</span>{{end}}</div>
+    <div class="kpi-foot">
+      <span class="denom">{{.Denominator}}</span>
+      {{if .Delta}}<span class="delta delta-{{.DeltaKind}}">{{.Delta}}</span>{{end}}
+    </div>
   </div>
+  {{end}}
+</section>
+
+{{if .LowN}}
+<p class="caption">Based on {{.Answers}} answers so far. Numbers settle as more answers arrive.</p>
 {{end}}
 
-<div class="card">
-  <div class="card-head"><h2>Tracked targets</h2><span class="badge">{{len .Targets}}</span></div>
-  {{if not .Targets}}
-    <p class="lede" style="margin:0">No targets yet. A target is one way of asking one engine, like <code>chatgpt:openai:online</code>. Add one in <a href="/settings">Settings</a>.</p>
-  {{else}}
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Target</th><th>Engine</th><th>Mode</th><th class="num">Answers</th></tr></thead>
+<div class="split">
+  <section class="card">
+    <div class="card-head">
+      <h2>Where you stand</h2>
+      <span class="badge">{{len .Standings}} brands</span>
+    </div>
+    <table class="standings">
+      <thead><tr><th></th><th>Brand</th><th class="num">Seen in</th><th class="num">Share</th><th class="num">Avg position</th></tr></thead>
       <tbody>
-      {{range .Targets}}
+      {{range .Standings}}
+        <tr class="{{if .IsOwn}}own{{end}}{{if .Absent}} absent{{end}}">
+          <td class="rank">{{if .Rank}}{{.Rank}}{{else}}-{{end}}</td>
+          <td>
+            <span class="brand">{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}}</span>
+            <span class="sub">{{.Detail}}</span>
+          </td>
+          <td class="num">{{.Visibility}}%</td>
+          <td class="num">
+            <span class="barcell"><span class="bar" style="width:{{.ShareWidth}}"></span></span>
+            {{.Share}}%
+          </td>
+          <td class="num muted">{{.Position}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Visibility over time</h2></div>
+    {{if gt .TrendPoints 1}}
+      {{.Trend}}
+    {{else}}
+      {{.Trend}}
+      <p class="caption">One day of history. The line appears once there is a second day to draw it to.</p>
+    {{end}}
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Every prompt, every engine</h2>
+    <span class="badge">{{len .Rows}} prompts &times; {{len .Columns}} engines</span>
+  </div>
+  <p class="lede">Each cell is how often that engine named you for that prompt. Click one to read the answers behind it.</p>
+  <div class="table-wrap">
+    <table class="grid">
+      <thead>
         <tr>
-          <td><code>{{.Spec}}</code></td>
-          <td>{{.EngineLabel}}</td>
-          <td><span class="badge badge-{{.Access}}">{{.Access}}</span></td>
-          <td class="num">{{.Chats}}</td>
+          <th class="grid-prompt">Prompt</th>
+          {{range .Columns}}<th class="grid-col"><span>{{.Label}}</span><span class="badge badge-{{.Access}}">{{.Access}}</span></th>{{end}}
+        </tr>
+      </thead>
+      <tbody>
+      {{range .Rows}}
+        <tr>
+          <td class="grid-prompt">
+            <span class="prompt-text">{{.Prompt}}</span>
+            <span class="sub">{{.Category}}{{if .Branded}} &middot; <span class="tag">branded</span>{{end}}</span>
+          </td>
+          {{range .Cells}}
+            <td class="grid-cell">
+              {{if .Ran}}
+                <a class="cell" href="{{.Href}}" style="background:{{.Background}};color:{{.Ink}}" title="{{.Title}}">
+                  <span class="cell-value">{{.Label}}</span>
+                  {{if .Sub}}<span class="cell-sub">{{.Sub}}</span>{{end}}
+                </a>
+              {{else}}
+                <span class="cell cell-empty" title="{{.Title}}">&middot;</span>
+              {{end}}
+            </td>
+          {{end}}
         </tr>
       {{end}}
       </tbody>
     </table>
   </div>
-  {{end}}
+</section>
+
+<div class="split">
+  <section class="card">
+    <div class="card-head"><h2>By question type</h2></div>
+    <p class="lede">A question naming a rival lists rivals by construction. Discovery is the one that measures unprompted reach.</p>
+    <ul class="catlist">
+      {{range .Categories}}
+      <li>
+        <div class="catlist-head">
+          <span class="cat">{{.Label}}</span>
+          <span class="num">{{.Value}}{{.Unit}}</span>
+        </div>
+        <span class="barcell"><span class="bar" style="width:{{.Value}}%"></span></span>
+        <span class="sub">{{.Denominator}}</span>
+      </li>
+      {{end}}
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Who gets cited</h2>
+      <a class="more" href="/citations">All sources &rarr;</a>
+    </div>
+    <ul class="sourcelist">
+      {{range .Sources}}
+      <li>
+        <div class="sourcelist-head">
+          <span class="site">{{.Site}}</span>
+          <span class="badge badge-{{.SourceType}}">{{.SourceType}}</span>
+          <span class="num">{{.Citations}}</span>
+        </div>
+        <span class="barcell"><span class="bar" style="width:{{.Width}}"></span></span>
+      </li>
+      {{end}}
+    </ul>
+  </section>
 </div>
+
+{{end}}
+{{end}}
+
+{{define "empty"}}
+<section class="card empty">
+  <h2>No answers yet</h2>
+  <p class="lede">Nothing here is estimated or filled in. Every number on this screen comes from an answer an engine actually gave, so the page stays blank until the first run finishes.</p>
+  <div class="empty-steps">
+    <div class="step-row{{if .Counts.Prompts}} done{{end}}">
+      <span class="step-mark">{{if .Counts.Prompts}}&check;{{else}}1{{end}}</span>
+      <div><strong>{{.Counts.Prompts}} prompts</strong><span class="sub">The questions your buyers ask.</span></div>
+      <a href="/prompts">Edit</a>
+    </div>
+    <div class="step-row{{if .Counts.Targets}} done{{end}}">
+      <span class="step-mark">{{if .Counts.Targets}}&check;{{else}}2{{end}}</span>
+      <div><strong>{{.Counts.Targets}} engines</strong><span class="sub">Which AI surfaces to ask.</span></div>
+      <a href="/settings">Edit</a>
+    </div>
+    <div class="step-row">
+      <span class="step-mark">3</span>
+      <div><strong>Run it</strong><span class="sub">Each prompt goes to each engine once. About a minute.</span></div>
+    </div>
+  </div>
+  <p class="caption">When it finishes you will see how often each engine names you, who it names instead, and every source it cited.</p>
+</section>
 {{end}}
