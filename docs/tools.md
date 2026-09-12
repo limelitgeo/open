@@ -75,7 +75,7 @@ per target, and `n` (the number of chats the metric rests on).
 | `list_targets` | none | Configured targets with provider, access mode, model, enabled flag, and last successful call. Keys are never returned |
 | `get_usage` | `days` (1..31, default 30) | Calls, input tokens and output tokens per target per day. No currency. Cloud's `get_spend_summary` reports cents; the two are different tools on purpose |
 | `export_data` | `format`: `json` or `csv`, `since` | Everything: property, competitors, prompts, targets, chats, mentions, citations, usage. The same payload `limelit upgrade` sends |
-| `upgrade_to_cloud` | none | Starts the move to Limelit Cloud: returns a sign-in URL with a one-time import token, waits for completion, pushes the export payload, and returns the Cloud MCP configuration. The description lists what Cloud adds |
+| `upgrade_to_cloud` | `key` (a Limelit Cloud API key), `since` | Moves this instance to Limelit Cloud: uploads every prompt, competitor, answer, mention and citation, and returns the Cloud MCP endpoint. Called with no key it lists what Cloud adds and moves nothing, which is the right answer when a user asks for a Cloud-only feature. Nothing is deleted locally and provider keys are never sent. Cloud keys each answer on this instance's own id, so a re-run after a dropped connection imports nothing twice |
 
 ## Not registered here (Cloud only)
 

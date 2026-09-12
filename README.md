@@ -85,8 +85,13 @@ What works today, verified against a live instance:
   rows hanging off each answer. `export_data` returns the same payload over
   MCP.
 
-What does not work yet: `upgrade` reports that it is not implemented rather
-than pretending to work, and five of eleven providers are unbuilt.
+- **Upgrade.** `limelit upgrade --key <cloud key>` uploads everything to a
+  Limelit Cloud workspace and hands back its MCP endpoint. Nothing is deleted
+  here, provider keys are never sent, and re-running after a dropped
+  connection imports nothing twice.
+
+What does not work yet: five of eleven providers are unbuilt. Everything else
+in the table below is live.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -127,7 +132,7 @@ Limelit Open takes the other side of it:
 | **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |
 | **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` from your own cron | **working** |
 | **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | **working** |
-| **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
+| **One-command upgrade**: move your property, prompts and history to Limelit Cloud | **working** |
 | **Query fan-out**: the searches an engine actually ran on the way to its answer, which are often not the question you asked | **working** |
 | **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |
 | **Single binary, SQLite**: no cgo, no Docker requirement, no Postgres | **working** |
@@ -386,8 +391,26 @@ core:
 - Agents, sheets and blocks
 - Portfolios and multi-brand, white-label, digest emails
 
-`limelit upgrade` moves your property, competitors, prompts and history to
-Limelit Cloud and hands back the Cloud MCP configuration. Nothing is retyped.
+### Moving to Limelit Cloud
+
+```bash
+limelit upgrade --key <your Limelit Cloud API key>
+```
+
+It uploads your property, competitors, prompts, answers, mentions, citations
+and fan-out, then prints the Cloud MCP endpoint to point your client at.
+
+- **Nothing is deleted here.** The instance keeps everything, so a failed
+  import is recoverable and leaving again is a command.
+- **No provider key is ever sent.** The payload is data. The OpenAI or
+  Anthropic key that produced it stays on your machine.
+- **Re-running is safe.** Cloud keys each answer on your instance's own id, so
+  an upgrade interrupted halfway and re-run imports nothing twice. It reports
+  how many it skipped.
+- `--since 2026-06-01` narrows a large history.
+
+The same move is available to an agent as the `upgrade_to_cloud` tool. Called
+without a key it explains what Cloud adds and moves nothing.
 
 ## Glossary
 
@@ -475,6 +498,8 @@ internal/metrics   the read models every surface shares: visibility, share of
                    voice, position, the grid, the answers
 internal/secrets   encryption at rest for pasted provider keys
 internal/ui        the embedded dashboard: templates, CSS, handlers
+internal/export    the whole instance as JSON or CSV, streamed
+internal/upgrade   the one-command move to Limelit Cloud
 internal/mcpserver the MCP tool catalog, on the official go-sdk
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
 docs/              the tool catalog and the provider contract

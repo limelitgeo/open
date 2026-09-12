@@ -516,3 +516,49 @@ func TestExportDataHonoursSince(t *testing.T) {
 		t.Error("prompts were filtered away by a date filter")
 	}
 }
+
+// TestUpgradeWithoutAKeyExplainsRatherThanFailing. An agent that reaches for
+// this tool is usually answering "can you do sentiment", and the useful reply
+// is the boundary plus how to cross it, not an error.
+func TestUpgradeWithoutAKeyExplainsRatherThanFailing(t *testing.T) {
+	s, _ := connect(t)
+	res := call(t, s, "upgrade_to_cloud", nil)
+	if res.IsError {
+		t.Fatalf("calling it without a key errored: %s", resultText(res))
+	}
+	out := res.StructuredContent.(map[string]any)
+
+	if moved, _ := out["moved"].(bool); moved {
+		t.Fatal("it reported moving data without a key")
+	}
+	adds, _ := out["cloud_adds"].([]any)
+	if len(adds) == 0 {
+		t.Error("it does not say what Cloud adds, which is the whole reason to call it")
+	}
+	if howTo, _ := out["how_to"].(string); !strings.Contains(howTo, "limelit.co/settings") {
+		t.Errorf("it does not say where to get a key: %q", out["how_to"])
+	}
+	// Nothing about a move should appear when nothing moved.
+	for _, absent := range []string{"chats_imported", "workspace_url", "switch_to"} {
+		if _, present := out[absent]; present {
+			t.Errorf("%q is set on a call that moved nothing", absent)
+		}
+	}
+}
+
+// TestUpgradeToolNamesTheBoundaryHonestly: the list is what an agent reads
+// when a user asks for something this server cannot measure, so it must match
+// the tools that are genuinely absent.
+func TestUpgradeToolNamesTheBoundaryHonestly(t *testing.T) {
+	joined := strings.ToLower(strings.Join(cloudAdds, " | "))
+	for _, want := range []string{"sentiment", "segments", "portfolios", "search console", "teams"} {
+		if !strings.Contains(joined, want) {
+			t.Errorf("the Cloud list does not mention %q, which this server has no tool for", want)
+		}
+	}
+	// Fan-out capture shipped in the open core, so the list must not claim
+	// it as Cloud-only.
+	if strings.Contains(joined, "fan-out capture") {
+		t.Error("the list claims fan-out capture is Cloud-only; the open core captures it")
+	}
+}

@@ -15,7 +15,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -41,6 +40,7 @@ import (
 	"github.com/limelitgeo/open/internal/store"
 	"github.com/limelitgeo/open/internal/target"
 	"github.com/limelitgeo/open/internal/ui"
+	"github.com/limelitgeo/open/internal/upgrade"
 )
 
 // version is stamped at build time with -ldflags; it falls back to the module
@@ -364,6 +364,9 @@ func cmdExport(ctx context.Context, args []string) error {
 
 func cmdUpgrade(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("upgrade", flag.ContinueOnError)
+	key := fs.String("key", "", "Limelit Cloud API key (or set "+upgrade.KeyEnv+")")
+	endpoint := fs.String("endpoint", "", "Cloud import endpoint (or set "+upgrade.EndpointEnv+")")
+	since := fs.String("since", "", "only send answers created on or after this date (YYYY-MM-DD)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -372,13 +375,47 @@ func cmdUpgrade(ctx context.Context, args []string) error {
 		return err
 	}
 	defer db.Close()
-	return errNotImplemented("upgrade")
+
+	opts := upgrade.Options{
+		Key:      firstNonEmpty(*key, os.Getenv(upgrade.KeyEnv)),
+		Endpoint: firstNonEmpty(*endpoint, os.Getenv(upgrade.EndpointEnv)),
+		Since:    *since,
+	}
+
+	fmt.Fprintln(os.Stderr, "Exporting and uploading to Limelit Cloud. Nothing here is deleted.")
+	result, err := upgrade.Run(ctx, db, opts)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Imported into Limelit Cloud:\n")
+	fmt.Printf("  %d prompts, %d competitors, %d answers\n",
+		result.Import.Prompts, result.Import.Competitors, result.Import.Chats)
+	fmt.Printf("  %d mentions, %d citations\n", result.Import.Mentions, result.Import.Citations)
+	if result.Import.ChatsSkipped > 0 {
+		fmt.Printf("  %d answers were already there from an earlier run and were left alone\n", result.Import.ChatsSkipped)
+	}
+	if result.WorkspaceURL != "" {
+		fmt.Printf("\nWorkspace: %s\n", result.WorkspaceURL)
+	}
+	if result.MCPURL != "" {
+		fmt.Printf("MCP endpoint: %s\n", result.MCPURL)
+		fmt.Printf("\nPoint your MCP client there with the same API key:\n")
+		fmt.Printf(`  {"mcpServers":{"limelit":{"url":%q,"headers":{"Authorization":"Bearer <your key>"}}}}`+"\n", result.MCPURL)
+	}
+	fmt.Fprintln(os.Stderr, "\nThis instance still has everything. Re-running is safe.")
+	return nil
 }
 
-// errNotImplemented names the command and points at where it lands, so a
-// scaffold build reports a gap instead of pretending to work.
-func errNotImplemented(cmd string) error {
-	return errors.New(cmd + " is not implemented yet, see https://github.com/limelitgeo/open/issues")
+// firstNonEmpty returns the first value that is set, so a flag beats the
+// environment and neither silently wins over the other.
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func newLogger() *slog.Logger {
