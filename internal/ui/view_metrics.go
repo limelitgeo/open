@@ -36,11 +36,22 @@ type KPIView struct {
 	Delta string
 	// DeltaKind is up, down or flat, for styling only.
 	DeltaKind string
-	// Help is the formula, stated plainly. It is the thing no competitor
-	// shows and the thing that makes a number checkable.
+	// Help is the formula, stated plainly. It is the thing that makes a
+	// number checkable.
 	Help string
 	// Emphasis marks the one number the page is about.
 	Emphasis bool
+	// CountLed swaps the headline from a percentage to a count.
+	//
+	// Below a useful sample the two forms say different things. "0 of 4" is
+	// a complete, checkable census of four answers a reader can open. "0%"
+	// is an estimate of a rate from four draws, and it is the form that
+	// reads as a broken widget. The percentage is demoted, never hidden:
+	// the reader paid for these answers and can see every one.
+	CountLed  bool
+	Count     string
+	Total     string
+	TotalHref string
 }
 
 // StandingView is one brand in the ranking.
@@ -74,14 +85,21 @@ type SourceView struct {
 type GridCellView struct {
 	// Ran is false when this pair has no answer at all, which renders as an
 	// empty cell rather than a zero. A prompt that was never asked of an
-	// engine is not a prompt that engine ignored.
-	Ran        bool
-	Label      string
-	Sub        string
-	Background string
-	Ink        string
-	Title      string
-	Href       string
+	// engine is not a prompt that engine ignored, and the two are drawn
+	// differently on purpose: a measured zero is filled and clickable, an
+	// unasked cell is dashed and inert.
+	Ran bool
+	// Label is the fraction, "2/3", not a percentage. At the sample a new
+	// install has, the count is the whole census and a percentage is an
+	// estimate of a rate from a handful of draws.
+	Label string
+	Sub   string
+	// Bin is a CSS class, not a colour. The readable ink over each step of
+	// the ramp differs by theme and flips at a different step in each.
+	Bin     string
+	Scraped bool
+	Title   string
+	Href    string
 }
 
 // GridRowView is one prompt across every target.
@@ -91,13 +109,20 @@ type GridRowView struct {
 	Category string
 	Branded  bool
 	Cells    []GridCellView
+	// Total is the row's own fraction across every engine, so a reader can
+	// see which prompt is lost everywhere without adding up the row.
+	Total string
+	Href  string
 }
 
 // GridColumnView is one target's column header.
 type GridColumnView struct {
-	Label  string
-	Access string
-	Spec   string
+	Label   string
+	Access  string
+	Scraped bool
+	Spec    string
+	// Total is the column's own fraction across every prompt.
+	Total string
 }
 
 // AnswerView is one answer in a list.
@@ -235,11 +260,14 @@ func answersWord(n int) string {
 	return fmt.Sprintf("%d answers", n)
 }
 
-// delta formats a change in percentage points. A move is only worth showing
-// when there was a previous window to compare against.
+// delta formats a change in percentage points.
+//
+// With no earlier window it returns a label saying so rather than "no
+// change". "No change" is a claim about a comparison that was never made, and
+// on a first run it is the most confident wrong thing the screen could say.
 func delta(now, before float64, hadPrevious bool) (string, string) {
 	if !hadPrevious {
-		return "", ""
+		return "first window", "none"
 	}
 	diff := now - before
 	switch {

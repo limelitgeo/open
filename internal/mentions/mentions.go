@@ -151,7 +151,7 @@ func usefulTerms(in []string) []string {
 
 // findTerm returns the byte spans where term occurs as a whole word.
 //
-// Whole word matters both ways. Without it "Peec" matches inside "Peecify";
+// Whole word matters both ways. Without it "Acme" matches inside "Acmeify";
 // with a naive word boundary "acme.com" would never match, because a dot is
 // not a word character. So the boundary test is on the characters either
 // side: a match is real when neither neighbour is a letter or a digit.

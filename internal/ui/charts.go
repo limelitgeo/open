@@ -6,15 +6,21 @@ package ui
 // Charts, drawn as SVG on the server.
 //
 // No charting library and no JavaScript, because this project ships as one
-// binary with no build step and adding a bundler to draw four shapes would
-// cost more than it is worth. Everything here emits an SVG string that the
-// templates drop inline, which also means the charts inherit the page's CSS
-// custom properties and follow light and dark without a second palette.
+// binary with no build step and adding a bundler to draw three shapes would
+// cost more than it is worth. Everything here emits an SVG string the
+// templates drop inline, so the charts inherit the page's CSS custom
+// properties and follow light and dark without a second palette.
 //
-// The degenerate cases are the point of this file. A brand new install has
-// one day of data, or none. A series with one point cannot have a line
-// between points, and the usual way that fails is a divide by len(points)-1.
-// Every function here is written for the empty and single-point cases first.
+// Two rules this file follows.
+//
+// No colour is emitted from Go. A hex string baked into markup cannot be
+// theme-aware, and for the grid the readable ink flips at a different step in
+// each theme. Go decides which bin a value lands in; CSS decides what a bin
+// looks like.
+//
+// The degenerate cases come first. A new install has one day of data, or
+// none. A series with one point has no line to draw, and the usual way that
+// fails is a divide by len(points)-1.
 
 import (
 	"fmt"
@@ -23,11 +29,11 @@ import (
 	"strings"
 )
 
-// Chart geometry. The viewBox is fixed and the SVG scales to its container,
-// so one set of numbers works at every width.
+// Trend geometry. The viewBox is fixed and the SVG scales inside its
+// container.
 const (
 	trendW, trendH = 720.0, 180.0
-	trendPadX      = 8.0
+	trendPadX      = 10.0
 	trendPadTop    = 14.0
 	trendPadBottom = 26.0
 )
@@ -42,26 +48,36 @@ type TrendPoint struct {
 // TrendChart draws visibility over time.
 //
 // The y axis is pinned to 0-100 rather than fitted to the data. A fitted axis
-// makes a move from 2% to 3% look like a doubling, which for a visibility
+// turns a move from 2% to 3% into a visual doubling, which for a visibility
 // metric is the most misleading thing a chart can do.
+//
+// Gaps are never filled. metrics.Series returns only the days that actually
+// ran, and drawing a line across a day nobody measured would show a period
+// that was never observed.
 func TrendChart(points []TrendPoint) template.HTML {
 	if len(points) == 0 {
 		return ""
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, `<svg class="chart chart-trend" viewBox="0 0 %.0f %.0f" preserveAspectRatio="none" role="img" aria-label="Visibility over time">`, trendW, trendH)
+	// xMidYMid meet, not none. Stretching the viewBox shears the axis glyphs
+	// and scales the stroke anisotropically, so a wide container gets fat
+	// horizontal strokes and squashed text.
+	fmt.Fprintf(&b, `<svg class="chart chart-trend" viewBox="0 0 %.0f %.0f" preserveAspectRatio="xMidYMid meet" role="img" aria-label="%s">`,
+		trendW, trendH, template.HTMLEscapeString(trendLabel(points)))
 
-	// Gridlines at 0, 25, 50, 75, 100 give the eye a scale without a legend.
+	// Gridlines carry no information a screen reader needs; the label above
+	// already states the shape.
 	for _, pct := range []float64{0, 25, 50, 75, 100} {
 		y := trendY(pct)
-		fmt.Fprintf(&b, `<line class="grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>`, trendPadX, y, trendW-trendPadX, y)
+		fmt.Fprintf(&b, `<line class="grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" aria-hidden="true"/>`,
+			trendPadX, y, trendW-trendPadX, y)
 	}
 
 	x := func(i int) float64 {
 		if len(points) == 1 {
-			// One point sits in the middle rather than at the left edge,
-			// where it would read as the start of a line that is missing.
+			// A single point sits in the middle. At the left edge it reads as
+			// the start of a line that failed to draw.
 			return trendW / 2
 		}
 		span := trendW - 2*trendPadX
@@ -78,8 +94,8 @@ func TrendChart(points []TrendPoint) template.HTML {
 			fmt.Fprintf(&line, "%s%.1f %.1f ", cmd, x(i), trendY(p.Value))
 		}
 		fmt.Fprintf(&area, "M%.1f %.1f ", x(0), trendY(points[0].Value))
-		for i, p := range points[1:] {
-			fmt.Fprintf(&area, "L%.1f %.1f ", x(i+1), trendY(p.Value))
+		for i := 1; i < len(points); i++ {
+			fmt.Fprintf(&area, "L%.1f %.1f ", x(i), trendY(points[i].Value))
 		}
 		fmt.Fprintf(&area, "L%.1f %.1f L%.1f %.1f Z", x(len(points)-1), trendY(0), x(0), trendY(0))
 
@@ -87,15 +103,22 @@ func TrendChart(points []TrendPoint) template.HTML {
 		fmt.Fprintf(&b, `<path class="line" d="%s"/>`, strings.TrimSpace(line.String()))
 	}
 
-	// Dots last so they sit above the line. With one point this is the whole
-	// chart, and it has to look deliberate rather than broken.
+	// Dots last, so they sit above the line. With one point this is the whole
+	// chart and it has to look deliberate.
+	dotEvery := 1
+	if len(points) > 45 {
+		dotEvery = len(points) / 45
+	}
 	for i, p := range points {
+		if len(points) > 1 && i%dotEvery != 0 && i != len(points)-1 {
+			continue
+		}
 		r := 3.0
 		if len(points) == 1 {
 			r = 5.0
 		}
-		fmt.Fprintf(&b, `<circle class="dot" cx="%.1f" cy="%.1f" r="%.1f"><title>%s: %.0f%% of %d answers</title></circle>`,
-			x(i), trendY(p.Value), r, template.HTMLEscapeString(p.Day), p.Value, p.N)
+		fmt.Fprintf(&b, `<circle class="dot" cx="%.1f" cy="%.1f" r="%.1f"><title>%s: %s of %s</title></circle>`,
+			x(i), trendY(p.Value), r, template.HTMLEscapeString(p.Day), pct(p.Value)+"%", answersWord(p.N))
 	}
 
 	if len(points) == 1 {
@@ -110,20 +133,33 @@ func TrendChart(points []TrendPoint) template.HTML {
 	return template.HTML(b.String())
 }
 
-func trendY(pct float64) float64 {
+// trendLabel describes the series for a screen reader, which cannot see it.
+func trendLabel(points []TrendPoint) string {
+	if len(points) == 1 {
+		return fmt.Sprintf("Visibility on %s: %s%% of %s. One day of history.",
+			points[0].Day, pct(points[0].Value), answersWord(points[0].N))
+	}
+	first, last := points[0], points[len(points)-1]
+	return fmt.Sprintf("Visibility across %d days, %s to %s. From %s%% to %s%%.",
+		len(points), first.Day, last.Day, pct(first.Value), pct(last.Value))
+}
+
+func trendY(v float64) float64 {
 	usable := trendH - trendPadTop - trendPadBottom
-	return trendPadTop + usable*(1-pct/100)
+	return trendPadTop + usable*(1-clampPct(v)/100)
 }
 
 // Sparkline is a bare line for a table cell: no axes, no labels, no scale.
-// It answers "which way is this going" and nothing more.
+// It answers which way this is going and nothing more.
 func Sparkline(values []float64) template.HTML {
-	if len(values) < 2 {
+	if len(values) < 3 {
+		// Two points is a segment, not a trend, and it implies a shape the
+		// data does not support.
 		return ""
 	}
-	const w, h, pad = 68.0, 20.0, 2.0
-	var b strings.Builder
-	fmt.Fprintf(&b, `<svg class="spark" viewBox="0 0 %.0f %.0f" preserveAspectRatio="none" aria-hidden="true">`, w, h)
+	const w, h, pad = 68.0, 20.0, 3.0
+
+	var d strings.Builder
 	for i, v := range values {
 		cmd := "L"
 		if i == 0 {
@@ -131,60 +167,59 @@ func Sparkline(values []float64) template.HTML {
 		}
 		x := pad + (w-2*pad)*float64(i)/float64(len(values)-1)
 		y := pad + (h-2*pad)*(1-clampPct(v)/100)
-		fmt.Fprintf(&b, "%s%.1f %.1f ", cmd, x, y)
+		fmt.Fprintf(&d, "%s%.1f %.1f ", cmd, x, y)
 	}
-	// Wrapped so the path data is one attribute rather than loose text.
-	out := strings.TrimSpace(b.String())
-	return template.HTML(out + `" fill="none"/></svg>`)
+
+	last := values[len(values)-1]
+	lastX := w - pad
+	lastY := pad + (h-2*pad)*(1-clampPct(last)/100)
+
+	return template.HTML(fmt.Sprintf(
+		`<svg class="spark" width="%.0f" height="%.0f" viewBox="0 0 %.0f %.0f" preserveAspectRatio="xMidYMid meet" aria-hidden="true">`+
+			`<path class="spark-line" d="%s" fill="none"/>`+
+			`<circle class="spark-dot" cx="%.1f" cy="%.1f" r="2"/>`+
+			`</svg>`,
+		w, h, w, h, strings.TrimSpace(d.String()), lastX, lastY))
 }
 
-// BarRow is one brand in the share-of-voice ranking.
-type BarRow struct {
-	Label string
-	// Value is the percentage the bar fills to.
-	Value float64
-	// Detail is the small print under the label.
-	Detail string
-	// IsOwn draws the row in the brand colour and keeps it visible at zero.
-	IsOwn bool
-	// Rank is 1-based, or 0 when the brand does not appear at all.
-	Rank int
-}
-
-// heatColor maps a percentage onto the grid's colour ramp.
+// CellMinN is the sample below which a grid cell cannot reach the top of the
+// heat ramp.
 //
-// A sequential single-hue ramp, not a red-to-green one. Red and green carry a
-// judgement ("bad", "good") that this number does not support: 20% visibility
-// is excellent in some categories and terrible in others. It is also the
-// ramp that fails hardest for the ~8% of men with red-green colour blindness.
-// Intensity alone says "more" without saying "good".
-func heatColor(pct float64, n int) string {
-	if n == 0 {
-		return "var(--cell-empty)"
-	}
-	switch {
-	case pct <= 0:
-		return "var(--cell-0)"
-	case pct < 20:
-		return "var(--cell-1)"
-	case pct < 40:
-		return "var(--cell-2)"
-	case pct < 60:
-		return "var(--cell-3)"
-	case pct < 80:
-		return "var(--cell-4)"
-	default:
-		return "var(--cell-5)"
-	}
-}
+// One answer that named you is 100%, and painting it the same as five of five
+// would let a single lucky answer look like dominance. Below this the fill is
+// capped one step short, and the cell still prints its own fraction so the
+// reader can see exactly what it rests on.
+const CellMinN = 5
 
-// heatInk picks readable text for a heat cell. The ramp darkens as it goes,
-// so the top two steps need light text and the rest need dark.
-func heatInk(pct float64, n int) string {
-	if n == 0 || pct < 60 {
-		return "var(--ink)"
+// cellBin picks the heat class for one grid cell.
+//
+// It returns a class, never a colour. The readable ink over each step differs
+// by theme and flips at a different step in each, which CSS can express and a
+// Go string cannot.
+func cellBin(answers int, percent float64) string {
+	if answers == 0 {
+		return "hm-none"
 	}
-	return "#fff"
+	// A measured zero is its own bin, drawn at full strength. Greying it is
+	// the most common way a real finding reads as a broken widget.
+	if percent <= 0 {
+		return "hm-0"
+	}
+	bin := 1
+	switch {
+	case percent >= 80:
+		bin = 5
+	case percent >= 60:
+		bin = 4
+	case percent >= 40:
+		bin = 3
+	case percent >= 20:
+		bin = 2
+	}
+	if answers < CellMinN && bin > 4 {
+		bin = 4
+	}
+	return fmt.Sprintf("hm-%d", bin)
 }
 
 func clampPct(v float64) float64 {

@@ -23,11 +23,23 @@
       {{.Label}}
       {{if .Help}}<span class="help" tabindex="0" role="note" aria-label="{{.Help}}">?<span class="help-pop">{{.Help}}</span></span>{{end}}
     </div>
-    <div class="kpi-value"><span class="num">{{.Value}}</span>{{if .Unit}}<span class="unit">{{.Unit}}</span>{{end}}</div>
-    <div class="kpi-foot">
-      <span class="denom">{{.Denominator}}</span>
-      {{if .Delta}}<span class="delta delta-{{.DeltaKind}}">{{.Delta}}</span>{{end}}
-    </div>
+    {{if .CountLed}}
+      <div class="kpi-value kpi-count">
+        <span class="num">{{.Count}}</span>
+        <span class="of">of</span>
+        {{if .TotalHref}}<a class="num total" href="{{.TotalHref}}">{{.Total}}</a>{{else}}<span class="num total">{{.Total}}</span>{{end}}
+      </div>
+      <div class="kpi-foot">
+        <span class="denom">{{.Value}}{{.Unit}} of answers</span>
+        {{if .Delta}}<span class="delta delta-{{.DeltaKind}}">{{.Delta}}</span>{{end}}
+      </div>
+    {{else}}
+      <div class="kpi-value"><span class="num">{{.Value}}</span>{{if .Unit}}<span class="unit">{{.Unit}}</span>{{end}}</div>
+      <div class="kpi-foot">
+        <span class="denom">{{.Denominator}}</span>
+        {{if .Delta}}<span class="delta delta-{{.DeltaKind}}">{{.Delta}}</span>{{end}}
+      </div>
+    {{end}}
   </div>
   {{end}}
 </section>
@@ -80,39 +92,58 @@
     <h2>Every prompt, every engine</h2>
     <span class="badge">{{len .Rows}} prompts &times; {{len .Columns}} engines</span>
   </div>
-  <p class="lede">Each cell is how often that engine named you for that prompt. Click one to read the answers behind it.</p>
+  <p class="lede">Worst first. Click any cell to read the answers behind it.</p>
   <div class="table-wrap">
     <table class="grid">
       <thead>
         <tr>
-          <th class="grid-prompt">Prompt</th>
-          {{range .Columns}}<th class="grid-col"><span>{{.Label}}</span><span class="badge badge-{{.Access}}">{{.Access}}</span></th>{{end}}
+          <th class="grid-prompt" scope="col">Prompt</th>
+          {{range .Columns}}
+            <th class="grid-col{{if .Scraped}} col-scraped{{end}}" scope="col" title="{{.Spec}}">
+              <span class="col-name">{{.Label}}</span>
+              <span class="badge badge-{{.Access}}">{{.Access}}</span>
+            </th>
+          {{end}}
+          <th class="grid-total" scope="col">All</th>
         </tr>
       </thead>
       <tbody>
       {{range .Rows}}
-        <tr>
-          <td class="grid-prompt">
-            <span class="prompt-text">{{.Prompt}}</span>
-            <span class="sub">{{.Category}}{{if .Branded}} &middot; <span class="tag">branded</span>{{end}}</span>
-          </td>
+        <tr{{if .Branded}} class="row-branded"{{end}}>
+          <th class="grid-prompt" scope="row">
+            <a class="prompt-text" href="{{.Href}}">{{.Prompt}}</a>
+            <span class="sub">{{.Category}}{{if .Branded}} <span class="tag tag-quiet">branded, not in the headline</span>{{end}}</span>
+          </th>
           {{range .Cells}}
             <td class="grid-cell">
               {{if .Ran}}
-                <a class="cell" href="{{.Href}}" style="background:{{.Background}};color:{{.Ink}}" title="{{.Title}}">
+                <a class="cell {{.Bin}}{{if .Scraped}} cell-scraped{{end}}" href="{{.Href}}" title="{{.Title}}">
                   <span class="cell-value">{{.Label}}</span>
                   {{if .Sub}}<span class="cell-sub">{{.Sub}}</span>{{end}}
                 </a>
               {{else}}
-                <span class="cell cell-empty" title="{{.Title}}">&middot;</span>
+                <span class="cell hm-none" title="{{.Title}}" aria-label="{{.Title}}">-</span>
               {{end}}
             </td>
           {{end}}
+          <td class="grid-total">{{.Total}}</td>
         </tr>
       {{end}}
       </tbody>
+      <tfoot>
+        <tr>
+          <th class="grid-prompt" scope="row">Every prompt</th>
+          {{range .Columns}}<td class="grid-total">{{.Total}}</td>{{end}}
+          <td class="grid-total"></td>
+        </tr>
+      </tfoot>
     </table>
   </div>
+  <p class="caption legend">
+    Each cell is how many of that engine's answers named you, over how many were asked.
+    Hatched columns are scraped consumer surfaces; the rest are vendor APIs. The two are never averaged.
+    A dash means that prompt has not been asked of that engine.
+  </p>
 </section>
 
 <div class="split">

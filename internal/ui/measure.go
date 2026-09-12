@@ -99,7 +99,7 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The previous equal-length window, so the headline can carry a move
-	// rather than a bare number. Elmo computes this and throws it away.
+	// rather than a bare number.
 	var (
 		previous    float64
 		hadPrevious bool
@@ -118,9 +118,19 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 	}
 	deltaText, deltaKind := delta(ov.Visibility, previous, hadPrevious)
 
+	// Below a useful sample the count IS the headline. "0 of 4" is a
+	// complete census of four answers the reader can open; "0%" is an
+	// estimate of a rate from four draws, and it is the form that reads as a
+	// broken widget. The percentage is demoted to the footer, never hidden.
+	countLed := ov.LowN
+
 	page.KPIs = []KPIView{
 		{
 			Label: "Visibility", Value: pct(ov.Visibility), Unit: "%",
+			CountLed:    countLed,
+			Count:       fmt.Sprintf("%d", ov.AnswersWithMentions),
+			Total:       fmt.Sprintf("%d", ov.Answers),
+			TotalHref:   "/chats",
 			Denominator: fmt.Sprintf("%d of %s", ov.AnswersWithMentions, answersWord(ov.Answers)),
 			Delta:       deltaText, DeltaKind: deltaKind, Emphasis: true,
 			Help: "The share of answers that name you. Branded prompts are left out, and an answer surface that did not render is left out entirely.",
@@ -237,50 +247,88 @@ func sourceViews(in []metrics.SourceRow) []SourceView {
 
 // gridViews builds the prompt by engine grid.
 //
-// This is the screen no competitor ships. Elmo, the most complete of them,
-// has no matrix at all: comparing two engines there means changing a dropdown
-// and scrolling from memory.
+// This is the screen the product is shown for: one glance answers which
+// engine is losing you which question, which nothing else in this category
+// puts on one page.
+//
+// Cells carry a fraction, not a percentage. "0/1" is a complete census of one
+// answer the reader can open; "0%" is an estimate of a rate from one draw.
 func gridViews(m metrics.Matrix) ([]GridColumnView, []GridRowView) {
 	columns := make([]GridColumnView, 0, len(m.Targets))
 	for _, t := range m.Targets {
 		columns = append(columns, GridColumnView{
-			Label: engineLabel(t.Engine), Access: t.Access, Spec: t.Spec,
+			Label: engineLabel(t.Engine), Access: t.Access,
+			Scraped: t.Access == "scraped", Spec: t.Spec,
 		})
 	}
+
+	colMentions := make([]int, len(m.Targets))
+	colAnswers := make([]int, len(m.Targets))
 
 	rows := make([]GridRowView, 0, len(m.Rows))
 	for _, r := range m.Rows {
 		row := GridRowView{
 			PromptID: r.PromptID, Prompt: r.Prompt,
 			Category: r.Category, Branded: r.Branded,
+			Href: fmt.Sprintf("/chats?prompt=%d", r.PromptID),
 		}
-		for _, t := range m.Targets {
+		rowMentions, rowAnswers := 0, 0
+
+		for i, t := range m.Targets {
 			cell, ok := r.Cells[t.ID]
 			if !ok || cell.Answers == 0 {
 				row.Cells = append(row.Cells, GridCellView{
-					Ran: false, Label: "", Background: heatColor(0, 0), Ink: heatInk(0, 0),
-					Title: "Not asked of this engine yet",
+					Ran: false, Bin: cellBin(0, 0), Scraped: t.Access == "scraped",
+					Title: engineLabel(t.Engine) + ": not asked yet",
 				})
 				continue
 			}
+			rowMentions, rowAnswers = rowMentions+cell.Mentions, rowAnswers+cell.Answers
+			colMentions[i], colAnswers[i] = colMentions[i]+cell.Mentions, colAnswers[i]+cell.Answers
+
 			sub := ""
 			if cell.MeanPosition > 0 {
 				sub = "#" + position(cell.MeanPosition)
 			}
 			row.Cells = append(row.Cells, GridCellView{
-				Ran:        true,
-				Label:      pct(cell.Visibility) + "%",
-				Sub:        sub,
-				Background: heatColor(cell.Visibility, cell.Answers),
-				Ink:        heatInk(cell.Visibility, cell.Answers),
+				Ran:     true,
+				Label:   fmt.Sprintf("%d/%d", cell.Mentions, cell.Answers),
+				Sub:     sub,
+				Bin:     cellBin(cell.Answers, cell.Visibility),
+				Scraped: t.Access == "scraped",
 				Title: fmt.Sprintf("%s: named in %d of %s%s",
 					engineLabel(t.Engine), cell.Mentions, answersWord(cell.Answers), positionSuffix(cell.MeanPosition)),
 				Href: fmt.Sprintf("/chats?prompt=%d&target=%d", r.PromptID, t.ID),
 			})
 		}
+		row.Total = fmt.Sprintf("%d/%d", rowMentions, rowAnswers)
 		rows = append(rows, row)
 	}
+
+	// Worst first, so the prompts you are losing are the ones on screen.
+	// Branded prompts sink to the bottom: they are excluded from the headline
+	// and a high score there is not the same kind of win.
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].Branded != rows[j].Branded {
+			return !rows[i].Branded
+		}
+		return gridRate(rows[i].Total) < gridRate(rows[j].Total)
+	})
+
+	for i := range columns {
+		columns[i].Total = fmt.Sprintf("%d/%d", colMentions[i], colAnswers[i])
+	}
 	return columns, rows
+}
+
+// gridRate turns a "2/3" total back into a rate for sorting. A row nobody has
+// run sorts last among the unbranded rather than first: it is not a loss.
+func gridRate(total string) float64 {
+	var mentions, answers int
+	if _, err := fmt.Sscanf(total, "%d/%d", &mentions, &answers); err != nil || answers == 0 {
+		return 2
+	}
+	return float64(mentions) / float64(answers)
 }
 
 func positionSuffix(pos float64) string {

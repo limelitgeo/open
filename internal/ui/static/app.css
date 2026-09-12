@@ -49,8 +49,25 @@
   --cell-1: #dfe0fa;
   --cell-2: #c3c5f6;
   --cell-3: #9c9ff0;
-  --cell-4: #6e72e6;
+  /* #6e72e6 sat at relative luminance 0.2106, inside the band where neither
+   * black nor white ink clears 4.5:1. This value lifts it clear and spaces
+   * the top of the ramp more evenly. */
+  --cell-4: #787ceb;
   --cell-5: #4a4ad9;
+
+  /* Ink is paired with its step rather than chosen in Go, because the
+   * readable colour flips at a different step in each theme and in the
+   * opposite direction. */
+  --cell-0-ink: var(--ink);
+  --cell-1-ink: var(--ink);
+  --cell-2-ink: var(--ink);
+  --cell-3-ink: var(--ink);
+  --cell-4-ink: var(--ink);
+  --cell-5-ink: #ffffff;
+
+  /* A measured zero is the finding on a new install, and the zero fill is
+   * nearly invisible against the card, so it gets an edge. */
+  --cell-ring: #d3d6dd;
 
   --mark-own: #fde68a;
   --mark-rival: #e9eaf2;
@@ -76,6 +93,16 @@
     --cell-3: #3f42a0;
     --cell-4: #5457cc;
     --cell-5: #7d80ef;
+
+    --cell-0-ink: var(--ink);
+    --cell-1-ink: var(--ink);
+    --cell-2-ink: var(--ink);
+    --cell-3-ink: var(--ink);
+    --cell-4-ink: var(--ink);
+    /* The flip goes the other way here: the brightest step needs dark ink. */
+    --cell-5-ink: var(--on-ink);
+
+    --cell-ring: #3f404d;
 
     --mark-own: #6b5a12;
     --mark-rival: #2a2c38;
@@ -485,8 +512,8 @@ tr.absent .brand { color: var(--ink-3); }
 tr.own .bar { background: var(--brand-strong); }
 .barwide { width: 110px; }
 
-/* The prompt by engine grid. This is the screen no competitor ships: Elmo,
-   the most complete of them, has no matrix at all. */
+/* The prompt by engine grid: one glance answers which engine is losing you
+   which question, without changing a filter and scrolling from memory. */
 table.grid { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12.5px; }
 .grid-prompt { max-width: 320px; min-width: 220px; }
 .grid-prompt .prompt-text {
@@ -621,3 +648,73 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 .prose strong { color: var(--ink); font-weight: 600; }
 .li-rank { font-variant-numeric: tabular-nums; color: var(--ink-4); font-weight: 600; }
 .chip-times { font-size: 10px; opacity: 0.65; font-weight: 500; }
+
+/* ---------------------------------------------------------------------------
+   The grid, revised.
+
+   Cells carry a fraction, not a percentage. On a new install "0/1" is a
+   complete census of one answer the reader can open, while "0%" is an
+   estimate of a rate from a single draw, and it is the form that reads as a
+   broken widget.
+
+   Two kinds of nothing, drawn differently on purpose. A measured zero is
+   filled, ringed, full-strength and clickable, because it is the finding. A
+   cell nobody has run is dashed, transparent and inert, because an unasked
+   prompt is not one the engine ignored.
+   --------------------------------------------------------------------------- */
+
+.hm-none {
+  background: var(--cell-empty); color: var(--ink-4);
+  border: 1px dashed var(--rule-2); cursor: default;
+}
+.hm-0 { background: var(--cell-0); color: var(--cell-0-ink); box-shadow: inset 0 0 0 1px var(--cell-ring); }
+.hm-1 { background: var(--cell-1); color: var(--cell-1-ink); }
+.hm-2 { background: var(--cell-2); color: var(--cell-2-ink); }
+.hm-3 { background: var(--cell-3); color: var(--cell-3-ink); }
+.hm-4 { background: var(--cell-4); color: var(--cell-4-ink); }
+.hm-5 { background: var(--cell-5); color: var(--cell-5-ink); }
+
+/* A scraped surface is hatched as well as badged, so the distinction survives
+   a greyscale print and a colourblind reader. currentColor, so the hatch
+   tracks the ink the bin already flipped to. */
+.cell-scraped {
+  background-image: repeating-linear-gradient(
+    45deg, transparent 0 5px, currentColor 5px 6px);
+  background-blend-mode: normal;
+}
+.cell-scraped { position: relative; }
+.cell-scraped::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: repeating-linear-gradient(45deg, transparent 0 5px, currentColor 5px 6px);
+  opacity: 0.30; pointer-events: none;
+}
+.cell-scraped { background-image: none; }
+th.col-scraped .col-name { text-decoration: underline dotted var(--warn-fg) 2px; text-underline-offset: 3px; }
+
+.col-name { display: block; }
+.grid-total {
+  text-align: center; font-variant-numeric: tabular-nums; font-size: 11.5px;
+  color: var(--ink-3); font-weight: 600; padding: 0 6px;
+}
+table.grid tfoot .grid-total { color: var(--ink-2); border-top: 1px solid var(--rule); padding-top: 7px; }
+table.grid tfoot th.grid-prompt {
+  font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: 0.05em; border-top: 1px solid var(--rule); padding-top: 7px;
+}
+table.grid th.grid-prompt { font-weight: 400; text-align: left; }
+a.prompt-text { color: var(--ink); text-decoration: none; }
+a.prompt-text:hover { text-decoration: underline; }
+tr.row-branded { opacity: 0.72; }
+.tag-quiet { background: var(--bg-2); color: var(--ink-3); font-weight: 600; }
+.legend { max-width: 76ch; margin-top: 10px; }
+
+/* The count-led headline, used below a useful sample. */
+.kpi-count { gap: 7px; align-items: baseline; }
+.kpi-count .of { font-size: 15px; color: var(--ink-3); font-weight: 500; }
+.kpi-count .total { color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; }
+.kpi-count a.total:hover { color: var(--brand-strong); }
+.delta-none { background: var(--bg-2); color: var(--ink-4); font-weight: 500; }
+
+.spark-line { stroke: var(--brand); stroke-width: 1.5; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.spark-dot { fill: var(--brand); }
+.chart-trend { max-height: 190px; }

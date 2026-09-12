@@ -468,3 +468,120 @@ func seedProperty(t *testing.T, h http.Handler) {
 	t.Helper()
 	post(t, h, "/setup/brand", url.Values{"name": {"Acme"}, "domain": {"acme.com"}})
 }
+
+// TestGridDistinguishesAMeasuredZeroFromAnUnaskedCell is the distinction the
+// whole grid rests on. A prompt an engine answered without naming you is a
+// finding, drawn at full strength and clickable. A prompt never asked of that
+// engine is an absence, dashed and inert. Drawing them the same way turns a
+// real result into what looks like a broken widget.
+func TestGridDistinguishesAMeasuredZeroFromAnUnaskedCell(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		answers int
+		percent float64
+		want    string
+	}{
+		{"never asked", 0, 0, "hm-none"},
+		{"asked, not named", 3, 0, "hm-0"},
+		{"named sometimes", 4, 50, "hm-3"},
+		{"named always, big sample", 8, 100, "hm-5"},
+	} {
+		if got := cellBin(tc.answers, tc.percent); got != tc.want {
+			t.Errorf("%s: cellBin(%d, %v) = %q, want %q", tc.name, tc.answers, tc.percent, got, tc.want)
+		}
+	}
+}
+
+// TestGridCapsTheTopBinOnATinySample: one answer that named you is 100%, and
+// painting it like five of five would let a single lucky answer look like
+// dominance.
+func TestGridCapsTheTopBinOnATinySample(t *testing.T) {
+	small := cellBin(1, 100)
+	big := cellBin(CellMinN, 100)
+	if small == big {
+		t.Errorf("one answer at 100%% is drawn the same as %d: both %q", CellMinN, small)
+	}
+	if small != "hm-4" {
+		t.Errorf("capped bin = %q, want hm-4", small)
+	}
+}
+
+func TestSparklineIsWellFormedOrAbsent(t *testing.T) {
+	// Two points is a segment, not a trend.
+	for _, n := range []int{0, 1, 2} {
+		vals := make([]float64, n)
+		if got := Sparkline(vals); got != "" {
+			t.Errorf("%d points produced a sparkline: %s", n, got)
+		}
+	}
+	got := string(Sparkline([]float64{10, 40, 25, 60}))
+	for _, want := range []string{`<svg`, `<path class="spark-line" d="M`, `</svg>`, `width=`, `height=`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("sparkline is missing %q: %s", want, got)
+		}
+	}
+	if strings.Count(got, `d="`) != 1 {
+		t.Errorf("malformed path data: %s", got)
+	}
+}
+
+func TestTrendChartHandlesEveryDegenerateCase(t *testing.T) {
+	if got := TrendChart(nil); got != "" {
+		t.Errorf("no points produced a chart: %s", got)
+	}
+	one := string(TrendChart([]TrendPoint{{Day: "2026-09-11", Value: 0, N: 4}}))
+	if !strings.Contains(one, "<circle") {
+		t.Error("a single point must still draw its dot")
+	}
+	if strings.Contains(one, "<path class=\"line\"") {
+		t.Error("a single point drew a line, which implies a shape the data does not have")
+	}
+	// Stretching the viewBox shears the axis glyphs and scales strokes
+	// anisotropically.
+	if strings.Contains(one, `preserveAspectRatio="none"`) {
+		t.Error("the trend chart stretches its viewBox")
+	}
+	if !strings.Contains(one, `aria-label=`) {
+		t.Error("the chart has no text alternative")
+	}
+	two := string(TrendChart([]TrendPoint{{Day: "a", Value: 10}, {Day: "b", Value: 20}}))
+	if !strings.Contains(two, `<path class="line"`) {
+		t.Error("two points did not draw a line")
+	}
+}
+
+// TestDeltaDoesNotClaimNoChangeWithoutAComparison: on a first run there is no
+// previous window, and "no change" would be a claim about a comparison that
+// was never made.
+func TestDeltaDoesNotClaimNoChangeWithoutAComparison(t *testing.T) {
+	text, kind := delta(0, 0, false)
+	if strings.Contains(strings.ToLower(text), "no change") {
+		t.Errorf("delta = %q with no prior window", text)
+	}
+	if text == "" {
+		t.Error("the first window should be labelled, not left blank")
+	}
+	if kind == "up" || kind == "down" || kind == "flat" {
+		t.Errorf("kind = %q, want a neutral first-window style", kind)
+	}
+}
+
+// TestNoColourIsEmittedFromGo. A hex baked into markup cannot follow the
+// theme, and the readable ink over the heat ramp flips at a different step in
+// each direction per theme.
+func TestNoColourIsEmittedFromGo(t *testing.T) {
+	rendered := []string{
+		string(TrendChart([]TrendPoint{{Day: "a", Value: 50, N: 4}, {Day: "b", Value: 60, N: 4}})),
+		string(Sparkline([]float64{1, 2, 3, 4})),
+	}
+	for _, out := range rendered {
+		if strings.Contains(out, "#") || strings.Contains(out, "rgb(") {
+			t.Errorf("a literal colour was emitted from Go: %s", out)
+		}
+	}
+	for _, bin := range []string{cellBin(0, 0), cellBin(3, 0), cellBin(8, 100)} {
+		if strings.Contains(bin, "#") || strings.Contains(bin, "var(") {
+			t.Errorf("cellBin returned a colour rather than a class: %q", bin)
+		}
+	}
+}
