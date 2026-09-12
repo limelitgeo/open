@@ -56,5 +56,17 @@ func Default() *Registry {
 		},
 	})
 
+	// The first scraped provider. It exists because Google AI Overview and AI
+	// Mode have no API at all: a scraping vendor is the only way to see them.
+	reg.Register(Registration{
+		Name:        "dataforseo",
+		Access:      AccessScraped,
+		Engines:     map[string]string{AIOverviewEngine: "", AIModeEngine: ""},
+		Credentials: []string{"DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewDataForSEO(src("DATAFORSEO_LOGIN"), src("DATAFORSEO_PASSWORD"))
+		},
+	})
+
 	return reg
 }

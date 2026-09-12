@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -258,6 +259,130 @@ func TestEveryRegisteredProviderIsInTheCatalog(t *testing.T) {
 	for _, name := range Default().Names() {
 		if !catalog[name] {
 			t.Errorf("provider %q is registered but missing from the catalog", name)
+		}
+	}
+}
+
+func newDataForSEOAgainst(t *testing.T, h http.Handler) *dataForSEOProvider {
+	t.Helper()
+	srv := httptest.NewServer(h)
+	t.Cleanup(srv.Close)
+	p, err := NewDataForSEO("login", "password")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dp := p.(*dataForSEOProvider)
+	dp.organic, dp.aiMode, dp.userInfo = srv.URL+"/organic", srv.URL+"/ai_mode", srv.URL+"/user"
+	return dp
+}
+
+func TestDataForSEOParsesARecordedAIOverview(t *testing.T) {
+	p := newDataForSEOAgainst(t, against(t, "dataforseo_ai_overview.json"))
+	resp, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "best AI visibility tracking tools"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(resp.Text) == "" {
+		t.Fatal("no overview text")
+	}
+	if len(resp.Citations) == 0 {
+		t.Fatal("no references parsed")
+	}
+	for i, c := range resp.Citations {
+		if !strings.HasPrefix(c.URL, "http") {
+			t.Errorf("citation %d is not a URL: %q", i, c.URL)
+		}
+		if c.Position != i+1 {
+			t.Errorf("citation %d has position %d, want %d", i, c.Position, i+1)
+		}
+	}
+	// A scraped surface has no model. Inventing one would suggest a choice
+	// was made about which model answered.
+	if resp.Model != "" {
+		t.Errorf("model = %q, want empty for a scraped surface", resp.Model)
+	}
+	if p.Access() != AccessScraped {
+		t.Errorf("access = %q", p.Access())
+	}
+}
+
+func TestDataForSEOParsesAIMode(t *testing.T) {
+	p := newDataForSEOAgainst(t, against(t, "dataforseo_ai_mode.json"))
+	resp, err := p.Run(context.Background(), Request{Engine: AIModeEngine, Prompt: "q"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(resp.Text) == "" || len(resp.Citations) == 0 {
+		t.Fatalf("text=%d citations=%d", len(resp.Text), len(resp.Citations))
+	}
+}
+
+// TestDataForSEOMissingOverviewIsNotABrandMiss is the most important test for
+// this provider. Google frequently shows no AI Overview at all, and counting
+// that as an answer that ignored the brand would drag visibility toward zero
+// for reasons that have nothing to do with the brand.
+func TestDataForSEOMissingOverviewIsNotABrandMiss(t *testing.T) {
+	body := `{"status_code":20000,"tasks":[{"status_code":20000,"result":[{"items":[
+		{"type":"organic","title":"a"},{"type":"people_also_ask"}]}]}]}`
+	p := newDataForSEOAgainst(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(body))
+	}))
+	_, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+	if !errors.Is(err, ErrNoAnswerSurface) {
+		t.Fatalf("err = %v, want ErrNoAnswerSurface", err)
+	}
+}
+
+func TestDataForSEOEmptyOverviewBlockIsAlsoNoSurface(t *testing.T) {
+	body := `{"status_code":20000,"tasks":[{"status_code":20000,"result":[{"items":[
+		{"type":"ai_overview","markdown":"   ","items":[]}]}]}]}`
+	p := newDataForSEOAgainst(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(body))
+	}))
+	_, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+	if !errors.Is(err, ErrNoAnswerSurface) {
+		t.Fatalf("err = %v, want ErrNoAnswerSurface", err)
+	}
+}
+
+// TestDataForSEOFailureInsideA200 covers this vendor's habit of reporting
+// problems with an HTTP 200 and a failure code in the body.
+func TestDataForSEOFailureInsideA200(t *testing.T) {
+	for code, want := range map[int]error{
+		40100: ErrAuth,
+		40202: ErrAuth,
+		50401: ErrRateLimited,
+	} {
+		body := fmt.Sprintf(`{"status_code":%d,"status_message":"nope","tasks":[]}`, code)
+		p := newDataForSEOAgainst(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(body))
+		}))
+		_, err := p.Run(context.Background(), Request{Engine: AIOverviewEngine, Prompt: "q"})
+		if !errors.Is(err, want) {
+			t.Errorf("vendor code %d mapped to %v, want %v", code, err, want)
+		}
+	}
+}
+
+func TestDataForSEOLocationRefusesAnUnknownCountry(t *testing.T) {
+	if _, err := dataForSEOLocation(""); err != nil {
+		t.Errorf("an empty country should default: %v", err)
+	}
+	if got, _ := dataForSEOLocation("gb"); got != 2826 {
+		t.Errorf("GB = %d, want 2826", got)
+	}
+	// Silently measuring the United States and labelling it Narnia is the
+	// quiet wrongness this project exists to avoid.
+	if _, err := dataForSEOLocation("XX"); err == nil {
+		t.Error("an unknown country must be an error, not a fall back to the US")
+	}
+}
+
+func TestDataForSEOMissingCredentialsIsAuth(t *testing.T) {
+	for _, pair := range [][2]string{{"", "p"}, {"l", ""}, {"", ""}} {
+		if _, err := NewDataForSEO(pair[0], pair[1]); !errors.Is(err, ErrAuth) {
+			t.Errorf("(%q,%q): err = %v, want ErrAuth", pair[0], pair[1], err)
 		}
 	}
 }
