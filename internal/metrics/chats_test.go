@@ -232,3 +232,39 @@ func TestChatsOffsetWalksThePages(t *testing.T) {
 		t.Fatalf("walked %d rows, want 5", len(seen))
 	}
 }
+
+func TestChatCarriesTheFanOut(t *testing.T) {
+	f := newFixture(t)
+	id, err := f.db.RecordChat(context.Background(), store.ChatRecord{
+		EvaluationID: f.evalID, PromptID: f.prompts["discovery"], TargetID: f.target,
+		Status: store.ChatOK, Text: "Rival leads.",
+		FanOut: []string{"best widget tools 2026", "widget tools comparison"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := f.svc.Chat(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.FanOut) != 2 {
+		t.Fatalf("fanout = %v, want 2 queries in order", got.FanOut)
+	}
+	if got.FanOut[0] != "best widget tools 2026" {
+		t.Errorf("fanout order lost: %v", got.FanOut)
+	}
+}
+
+// TestFanOutIsAbsenceNotZero: a provider that does not report its searches
+// leaves this empty, and that must not read as "the engine searched nothing".
+func TestFanOutAbsentWhenProviderDoesNotReport(t *testing.T) {
+	f := newFixture(t)
+	id := f.chat(t, "discovery", store.ChatOK, 1, 0)
+	got, err := f.svc.Chat(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.FanOut != nil {
+		t.Fatalf("fanout = %v, want nil", got.FanOut)
+	}
+}

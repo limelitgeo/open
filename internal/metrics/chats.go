@@ -64,9 +64,14 @@ type ChatSummary struct {
 // ChatDetail is one answer in full, with everything derived from it.
 type ChatDetail struct {
 	ChatSummary
-	Text      string
-	Brands    []ChatBrand
-	Sources   []ChatSource
+	Text    string
+	Brands  []ChatBrand
+	Sources []ChatSource
+	// FanOut is what the engine searched for on the way to this answer, in
+	// its order. Often it is not the question that was asked, and that gap is
+	// the most actionable thing on the screen: it names the query you would
+	// have to win.
+	FanOut    []string
 	InputTok  int
 	OutputTok int
 	Calls     int
@@ -247,7 +252,21 @@ func (s *Service) Chat(ctx context.Context, id int64) (ChatDetail, error) {
 		return d, err
 	}
 	d.Citations = len(d.Sources)
-	return d, nil
+
+	queries, err := s.db.QueryContext(ctx, `
+		SELECT query FROM fanout WHERE chat_id = ? ORDER BY position`, id)
+	if err != nil {
+		return d, err
+	}
+	defer queries.Close()
+	for queries.Next() {
+		var q string
+		if err := queries.Scan(&q); err != nil {
+			return d, err
+		}
+		d.FanOut = append(d.FanOut, q)
+	}
+	return d, queries.Err()
 }
 
 // SourceURL is one cited page on a site.

@@ -346,6 +346,10 @@ func (r *Runner) record(ctx context.Context, evalID int64, u unit, status string
 	}
 	if status == store.ChatOK && analyzer != nil {
 		rec.Mentions, rec.Citations = analyzer.Analyze(resp.Text, resp.Citations)
+		// Fan-out is kept even when the answer failed to mention anyone: what
+		// the engine searched for is evidence in its own right, and it is the
+		// only evidence available when the brand is absent.
+		rec.FanOut = resp.FanOut
 	}
 
 	// The write outlives cancellation: an answer already paid for must not be

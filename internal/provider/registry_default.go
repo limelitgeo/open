@@ -26,5 +26,35 @@ func Default() *Registry {
 		},
 	})
 
+	reg.Register(Registration{
+		Name:        "anthropic",
+		Access:      AccessAPI,
+		Engines:     map[string]string{ClaudeEngine: AnthropicDefaultModel},
+		Credentials: []string{"ANTHROPIC_API_KEY"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewAnthropic(src("ANTHROPIC_API_KEY"))
+		},
+	})
+
+	reg.Register(Registration{
+		Name:        "perplexity",
+		Access:      AccessAPI,
+		Engines:     map[string]string{PerplexityEngine: PerplexityDefaultModel},
+		Credentials: []string{"PERPLEXITY_API_KEY"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewPerplexity(src("PERPLEXITY_API_KEY"))
+		},
+	})
+
+	reg.Register(Registration{
+		Name:        "google",
+		Access:      AccessAPI,
+		Engines:     map[string]string{GeminiEngine: GoogleDefaultModel},
+		Credentials: []string{"GOOGLE_API_KEY"},
+		New: func(src CredentialSource) (Provider, error) {
+			return NewGoogle(src("GOOGLE_API_KEY"))
+		},
+	})
+
 	return reg
 }

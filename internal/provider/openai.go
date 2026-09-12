@@ -23,10 +23,10 @@ import (
 // project extracting URLs out of prose with a regular expression, which is
 // how a measurement tool starts disagreeing with itself.
 //
-// What this provider deliberately does NOT read: the web_search_call items,
-// which carry the exact searches the model ran while grounding. That is query
-// fan-out, and it is a Limelit Cloud feature. Parsing it here and dropping it
-// on the floor would invite someone to wire it up by accident.
+// The web_search_call items carry query fan-out: the searches the model
+// actually ran while grounding, which are frequently not the question the
+// user typed. They arrive in the same response you already paid for, in
+// action.queries, verified against the live API on 2026-09-11.
 
 const (
 	// OpenAIEndpoint is the Responses API URL.
@@ -120,6 +120,16 @@ type openAIResponse struct {
 	} `json:"error"`
 }
 
+// openAISearchItem is a web_search_call. action.queries is the full fan-out;
+// action.query repeats whichever one the model considered primary.
+type openAISearchItem struct {
+	Type   string `json:"type"`
+	Action struct {
+		Queries []string `json:"queries"`
+		Query   string   `json:"query"`
+	} `json:"action"`
+}
+
 type openAIMessageItem struct {
 	Type    string `json:"type"`
 	Content []struct {
@@ -166,7 +176,7 @@ func (p *openAIProvider) Run(ctx context.Context, req Request) (Response, error)
 		return Response{}, fmt.Errorf("openai: %s", parsed.Error.Message)
 	}
 
-	text, citations := p.readOutput(parsed.Output)
+	text, citations, fanout := p.readOutput(parsed.Output)
 	if strings.TrimSpace(text) == "" {
 		// An empty body with a non-terminal status means the answer never
 		// arrived. Storing it as an answer would count the brand as absent
@@ -178,22 +188,51 @@ func (p *openAIProvider) Run(ctx context.Context, req Request) (Response, error)
 		Text:         text,
 		Model:        parsed.Model,
 		Citations:    citations,
+		FanOut:       fanout,
 		InputTokens:  parsed.Usage.InputTokens,
 		OutputTokens: parsed.Usage.OutputTokens,
 		Calls:        1,
 	}, nil
 }
 
-// readOutput pulls the answer and its attributed sources out of the output
-// items. Anything that is not a message is skipped, which includes the
-// web_search_call items carrying the fan-out.
-func (p *openAIProvider) readOutput(items []json.RawMessage) (string, []Citation) {
+// readOutput pulls the answer, its attributed sources and the fan-out out of
+// the output items.
+func (p *openAIProvider) readOutput(items []json.RawMessage) (string, []Citation, []string) {
 	var (
 		text      strings.Builder
 		citations []Citation
+		fanout    []string
 		seen      = map[string]bool{}
+		seenQuery = map[string]bool{}
 	)
 	for _, item := range items {
+		var probe struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(item, &probe); err != nil {
+			continue
+		}
+		if probe.Type == "web_search_call" {
+			var search openAISearchItem
+			if err := json.Unmarshal(item, &search); err == nil {
+				// queries carries every search in the fan-out; query repeats
+				// one of them, so it is only a fallback for a response that
+				// reported a single search.
+				found := search.Action.Queries
+				if len(found) == 0 && search.Action.Query != "" {
+					found = []string{search.Action.Query}
+				}
+				for _, q := range found {
+					q = strings.TrimSpace(q)
+					if q == "" || seenQuery[q] {
+						continue
+					}
+					seenQuery[q] = true
+					fanout = append(fanout, q)
+				}
+			}
+			continue
+		}
 		var msg openAIMessageItem
 		if err := json.Unmarshal(item, &msg); err != nil || msg.Type != "message" {
 			continue
@@ -219,7 +258,7 @@ func (p *openAIProvider) readOutput(items []json.RawMessage) (string, []Citation
 			}
 		}
 	}
-	return text.String(), citations
+	return text.String(), citations, fanout
 }
 
 // Test proves the key with the cheapest authenticated call OpenAI offers, so
@@ -307,18 +346,6 @@ func openAIStatusError(status int, body string) error {
 	case status == http.StatusTooManyRequests:
 		return fmt.Errorf("%w: openai", ErrRateLimited)
 	default:
-		return fmt.Errorf("openai: http %d%s", status, openAITrim(body))
+		return fmt.Errorf("openai: http %d%s", status, truncateBody(body))
 	}
-}
-
-func openAITrim(body string) string {
-	body = strings.TrimSpace(body)
-	if body == "" {
-		return ""
-	}
-	const max = 300
-	if len(body) > max {
-		body = body[:max] + "..."
-	}
-	return ": " + body
 }

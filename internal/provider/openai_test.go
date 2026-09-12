@@ -80,10 +80,12 @@ func TestOpenAIParsesARealAnswer(t *testing.T) {
 	}
 }
 
-func TestOpenAIIgnoresTheFanOut(t *testing.T) {
+func TestOpenAICapturesTheFanOutWithoutLeakingItIntoTheAnswer(t *testing.T) {
 	// The recorded answer contains a web_search_call item carrying the exact
-	// searches the model ran. That is query fan-out, a hosted feature, and
-	// this provider must not quietly collect it.
+	// searches the model ran. Those are collected as fan-out, and they must
+	// never end up inside the answer text: the matcher searches that text for
+	// brand names, and a query naming a competitor would be recorded as a
+	// mention the reader never saw.
 	raw, err := os.ReadFile("testdata/openai_answer.json")
 	if err != nil {
 		t.Fatal(err)
@@ -107,6 +109,14 @@ func TestOpenAIIgnoresTheFanOut(t *testing.T) {
 		query, _ := m["action"].(map[string]any)["query"].(string)
 		if query != "" && strings.Contains(resp.Text, query) {
 			t.Error("a fan-out query leaked into the answer text")
+		}
+	}
+	if len(resp.FanOut) == 0 {
+		t.Error("the fan-out was not captured")
+	}
+	for _, q := range resp.FanOut {
+		if strings.TrimSpace(q) == "" {
+			t.Error("an empty fan-out query was recorded")
 		}
 	}
 }

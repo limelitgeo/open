@@ -17,6 +17,7 @@ package provider
 import (
 	"context"
 	"errors"
+	"strings"
 )
 
 // Access separates vendor APIs from consumer surfaces reached by scraping.
@@ -83,6 +84,14 @@ type Response struct {
 	Model string
 	// Citations are the sources the engine attributed, in its order.
 	Citations []Citation
+	// FanOut is the searches the engine ran while grounding this answer, in
+	// the order it ran them, deduplicated.
+	//
+	// It is the closest thing to seeing the question the engine actually
+	// asked on your behalf, and it is often not the question the user typed.
+	// Providers that do not expose it leave this empty; that is an absence
+	// of evidence, not evidence the engine searched for nothing.
+	FanOut []string
 	// InputTokens and OutputTokens are zero for scraped providers, which do
 	// not bill by token.
 	InputTokens  int
@@ -149,4 +158,19 @@ type CredentialSource func(name string) string
 // the settings store.
 func StaticCredentials(m map[string]string) CredentialSource {
 	return func(name string) string { return m[name] }
+}
+
+// truncateBody trims an error body for an error message. A provider's own
+// wording is usually the most useful thing available, and the whole body is
+// usually far more than anyone wants in a log line.
+func truncateBody(body string) string {
+	body = strings.TrimSpace(body)
+	if body == "" {
+		return ""
+	}
+	const max = 300
+	if len(body) > max {
+		body = body[:max] + "..."
+	}
+	return ": " + body
 }

@@ -1,0 +1,293 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The landscape of AI visibility tracking tools is rapidly evolving, with a growing number of platforms designed to help businesses monitor their presence and performance within AI-driven search, content generation, and recommendation systems. These tools go beyond traditional SEO to address the unique challenges and opportunities presented by generative AI and AI Overviews (AIOs).\n\nHere are some of the best AI visibility tracking tools, categorized by their primary focus:\n\n**All-in-One & Comprehensive Platforms:**\n\n*   **Semrush:** A top choice for integrated SEO and Generative Engine Optimization (GEO). It extends its existing SEO platform with AI visibility tracking across major engines and Google AI features, including brand performance with sentiment analysis. It also integrates with Semrush's keyword, backlink, and content tools, making it ideal for teams already using the platform.\n*   **Profound:** This tool acts as an all-in-one Large Language Model (LLM) visibility solution. It enables users to ideate prompts, track brand visibility across multiple LLMs, benchmark against competitors, monitor citations, and receive smart optimization suggestions.\n*   **Frase:** Best for teams that want to both monitor and actively improve their AI visibility. It helps track where AI search cites content and provides tools to close any identified gaps.\n*   **OpenLens:** Offers a generous free plan and provides GEO audit tools such as AI Indexing, Site Readiness, and Content Audit. It connects AI citations to traffic performance and content optimization workflows, offering export options and enterprise dashboards.\n*   **Siteimprove:** Offers \"Agentic Content Intelligence\" which works alongside users to ensure accessibility compliance, boost search visibility with SEO and AEO (AI Engine Optimization), optimize content strategy, and predict content performance with analytics.\n\n**Specialized AI Visibility Tracking:**\n\n*   **Promptwatch:** A leading option for AI-optimized content, offering daily tracking of prompts and answers across platforms like ChatGPT, Gemini, and Google AI Overviews. It also provides ad monitoring, AI article tracking, and site audits.\n*   **Rankscale:** Praised for its drill-down reporting capabilities, allowing users to deeply analyze their AI visibility data.\n*   **SE Ranking:** A strong contender for agencies that need to track AI visibility alongside their traditional SEO efforts.\n*   **Rankshift AI:** Designed for scalable, multi-brand tracking, making it suitable for larger organizations or agencies managing multiple clients.\n*   **Advanced Web Ranking:** Specifically highlighted for its ability to track Google's AI Rank.\n*   **Peec AI:** Focuses on citation analysis, helping users understand how their content is being referenced by AI.\n*   **Scrunch AI:** Provides actionable GEO insights, helping users understand and improve their visibility in generative AI environments.\n*   **OtterlyAI:** Specializes in brand sentiment analysis, crucial for understanding how AI-generated content perceives and portrays a brand.\n*   **Adobe LLM Optimizer:** An AEO tool integrated within Adobe Experience Cloud, offering visibility tracking, an opportunities dashboard, and attribution reporting. It can also pull prompt data from Semrush.\n*   **AirOps:** Another tool mentioned for its capabilities in AI visibility tracking.\n*   **ScalePost:** Listed as an AI visibility tool.\n*   **SEO Clarity ArcAI:** Connects AI visibility directly to traffic performance.\n\nMany of these platforms offer features such as tracking brand mentions and recommendations across various AI models (ChatGPT, Gemini, Claude, Perplexity, Alexa), monitoring Google AI Overviews (AIOs), analyzing citations, and providing insights to optimize content for AI search. The goal of these tools is to help businesses avoid being invisible in a search landscape increasingly dominated by AI-generated summaries and recommendations. They often integrate with existing tools like Google Search Console and Google Analytics 4 to provide a more holistic view of content performance."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "groundingMetadata": {
+        "searchEntryPoint": {
+          "renderedContent": "\u003cstyle\u003e\n.container {\n  align-items: center;\n  border-radius: 8px;\n  display: flex;\n  font-family: Google Sans, Roboto, sans-serif;\n  font-size: 14px;\n  line-height: 20px;\n  padding: 8px 12px;\n}\n.chip {\n  display: inline-block;\n  border: solid 1px;\n  border-radius: 16px;\n  min-width: 14px;\n  padding: 5px 16px;\n  text-align: center;\n  user-select: none;\n  margin: 0 8px;\n  -webkit-tap-highlight-color: transparent;\n}\n.carousel {\n  overflow: auto;\n  scrollbar-width: none;\n  white-space: nowrap;\n  margin-right: -12px;\n}\n.headline {\n  display: flex;\n  margin-right: 4px;\n}\n.gradient-container {\n  position: relative;\n}\n.gradient {\n  position: absolute;\n  transform: translate(3px, -9px);\n  height: 36px;\n  width: 9px;\n}\n@media (prefers-color-scheme: light) {\n  .container {\n    background-color: #fafafa;\n    box-shadow: 0 0 0 1px #0000000f;\n  }\n  .headline-label {\n    color: #1f1f1f;\n  }\n  .chip {\n    background-color: #ffffff;\n    border-color: #d2d2d2;\n    color: #5e5e5e;\n    text-decoration: none;\n  }\n  .chip:hover {\n    background-color: #f2f2f2;\n  }\n  .chip:focus {\n    background-color: #f2f2f2;\n  }\n  .chip:active {\n    background-color: #d8d8d8;\n    border-color: #b6b6b6;\n  }\n  .logo-dark {\n    display: none;\n  }\n  .gradient {\n    background: linear-gradient(90deg, #fafafa 15%, #fafafa00 100%);\n  }\n}\n@media (prefers-color-scheme: dark) {\n  .container {\n    background-color: #1f1f1f;\n    box-shadow: 0 0 0 1px #ffffff26;\n  }\n  .headline-label {\n    color: #fff;\n  }\n  .chip {\n    background-color: #2c2c2c;\n    border-color: #3c4043;\n    color: #fff;\n    text-decoration: none;\n  }\n  .chip:hover {\n    background-color: #353536;\n  }\n  .chip:focus {\n    background-color: #353536;\n  }\n  .chip:active {\n    background-color: #464849;\n    border-color: #53575b;\n  }\n  .logo-light {\n    display: none;\n  }\n  .gradient {\n    background: linear-gradient(90deg, #1f1f1f 15%, #1f1f1f00 100%);\n  }\n}\n\u003c/style\u003e\n\u003cdiv class=\"container\"\u003e\n  \u003cdiv class=\"headline\"\u003e\n    \u003csvg class=\"logo-light\" width=\"18\" height=\"18\" viewBox=\"9 9 35 35\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"\u003e\n      \u003cpath fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M42.8622 27.0064C42.8622 25.7839 42.7525 24.6084 42.5487 23.4799H26.3109V30.1568H35.5897C35.1821 32.3041 33.9596 34.1222 32.1258 35.3448V39.6864H37.7213C40.9814 36.677 42.8622 32.2571 42.8622 27.0064V27.0064Z\" fill=\"#4285F4\"/\u003e\n      \u003cpath fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M26.3109 43.8555C30.9659 43.8555 34.8687 42.3195 37.7213 39.6863L32.1258 35.3447C30.5898 36.3792 28.6306 37.0061 26.3109 37.0061C21.8282 37.0061 18.0195 33.9811 16.6559 29.906H10.9194V34.3573C13.7563 39.9841 19.5712 43.8555 26.3109 43.8555V43.8555Z\" fill=\"#34A853\"/\u003e\n      \u003cpath fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M16.6559 29.8904C16.3111 28.8559 16.1074 27.7588 16.1074 26.6146C16.1074 25.4704 16.3111 24.3733 16.6559 23.3388V18.8875H10.9194C9.74388 21.2072 9.06992 23.8247 9.06992 26.6146C9.06992 29.4045 9.74388 32.022 10.9194 34.3417L15.3864 30.8621L16.6559 29.8904V29.8904Z\" fill=\"#FBBC05\"/\u003e\n      \u003cpath fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M26.3109 16.2386C28.85 16.2386 31.107 17.1164 32.9095 18.8091L37.8466 13.8719C34.853 11.082 30.9659 9.3736 26.3109 9.3736C19.5712 9.3736 13.7563 13.245 10.9194 18.8875L16.6559 23.3388C18.0195 19.2636 21.8282 16.2386 26.3109 16.2386V16.2386Z\" fill=\"#EA4335\"/\u003e\n    \u003c/svg\u003e\n    \u003csvg class=\"logo-dark\" width=\"18\" height=\"18\" viewBox=\"0 0 48 48\" xmlns=\"http://www.w3.org/2000/svg\"\u003e\n      \u003ccircle cx=\"24\" cy=\"23\" fill=\"#FFF\" r=\"22\"/\u003e\n      \u003cpath d=\"M33.76 34.26c2.75-2.56 4.49-6.37 4.49-11.26 0-.89-.08-1.84-.29-3H24.01v5.99h8.03c-.4 2.02-1.5 3.56-3.07 4.56v.75l3.91 2.97h.88z\" fill=\"#4285F4\"/\u003e\n      \u003cpath d=\"M15.58 25.77A8.845 8.845 0 0 0 24 31.86c1.92 0 3.62-.46 4.97-1.31l4.79 3.71C31.14 36.7 27.65 38 24 38c-5.93 0-11.01-3.4-13.45-8.36l.17-1.01 4.06-2.85h.8z\" fill=\"#34A853\"/\u003e\n      \u003cpath d=\"M15.59 20.21a8.864 8.864 0 0 0 0 5.58l-5.03 3.86c-.98-2-1.53-4.25-1.53-6.64 0-2.39.55-4.64 1.53-6.64l1-.22 3.81 2.98.22 1.08z\" fill=\"#FBBC05\"/\u003e\n      \u003cpath d=\"M24 14.14c2.11 0 4.02.75 5.52 1.98l4.36-4.36C31.22 9.43 27.81 8 24 8c-5.93 0-11.01 3.4-13.45 8.36l5.03 3.85A8.86 8.86 0 0 1 24 14.14z\" fill=\"#EA4335\"/\u003e\n    \u003c/svg\u003e\n    \u003cdiv class=\"gradient-container\"\u003e\u003cdiv class=\"gradient\"\u003e\u003c/div\u003e\u003c/div\u003e\n  \u003c/div\u003e\n  \u003cdiv class=\"carousel\"\u003e\n    \u003ca class=\"chip\" href=\"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF1Mt2mdXmE7vekZPR4rdu24cRCuU1inn2eA_KXD8Rnevta8aPc52hxGQ0vRGJ7us1wqxToovIq66D4akFGO_nXd42n9jVzIAsXRXeQRa5uCuqoZB3MU0ZsJhM1fPzfpCusdtDhXDGNkijbGw0iJ-wZPJlcAtWgjwsRWEbG9ITZd8pdosfLMG1VO7Fo9CtohXAvqskLxsdagc8StH_gCTnuAiIb\"\u003ebest AI visibility tracking tools\u003c/a\u003e\n    \u003ca class=\"chip\" href=\"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEDg7BQcvsMqzZDDyRcQdKmzLPqt8JdNTiH8Yzn5DnbXXmuroo2vvDVxw6YgPgSqLWy8KDIXI_S3H8DRxzZD6PUXnI26PsNBaHCWQvOwkenIbie8NF5m5AQxUfjG08SIFN0ZfgP31q1sxtIJsUjIaYATqO0Q-yDw5CKo-bR8f-gbJoPDE0msPpKC5rUc9fMEIYCMZajNOh0tE3kjUKY2076afobj3R1eQ==\"\u003eAI content performance tracking tools\u003c/a\u003e\n  \u003c/div\u003e\n\u003c/div\u003e\n"
+        },
+        "groundingChunks": [
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFR1A3zY7ujMInyDu558dVcaLZdyapMEAxR2hXL9LKW6wUsUOHZxQQmkvnHb7hGdef6cD9_JAa7r8y6DPGVzfZ8JEHuRtJExWX3juRJrfiWk_40quY668YYUdf81ZqDypKn3lZJx8SE8dKiexDU43mXLYN2J9yvAC4P0eyZnwE=",
+              "title": "position.digital"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEpW1RCXTcDm5HBFyc__AVhvRXTemfS_NqigGheSZueN70Mn-CHJtkMgFhqP8z4vbqyhTzITANaB9uXs6spT7gyNDifgZNZp7HGu0YdcJF_ybwWutw8AzNbXfDD8T6l77MR5ki9H-duhGUZQIw0IqTvFtcTMRZEYQ2mTg4=",
+              "title": "frase.io"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGDc-yW6ul3WpZtSiznfgU5STihcftrg8hQUCkNPMFs_s9HW_Y-kNq6D_kG31SHMGT-UYfU9i1QLoToKTFO_Bq6bDBo_O_xHvCxxhvQqb9AxkhF4sLQFyaBrOEeq7dRIT0QU3tX2zzSWa3f",
+              "title": "zapier.com"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGbpSkKdNGuDm3Z7gu1XWnC14IHQcYh8eVBR-fPv7FQPSjo7xZ6cTSRjCkg8c__0rtIRSKwkIq7Ske2r-IMHGhRxhGWdGditgNyOF2ZiiuYicXVBqU5Bdmd-Kha-jOhS7EgJYW-GvfwhqDV51n_3QB8w6WWL1LgFlwO3akDfw0O79xmdnV71mGw",
+              "title": "brainlabsdigital.com"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEMq46bnwRENyizoNZXxkMKBr70eeq5ytRdcoRS1LOpYHARKOOJDY58nCQuZo-jQ1oZ_JxVYyvI0DufSh9OUecwxQE0lz9yPdQloKDv-OC94h1vlMu3Jw==",
+              "title": "siteimprove.com"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFTBuY1qSp4kkdeR8ZANBX7Ho-XN9EUYKhVKOWPXfj1deBxSbBpeQP3TB8b1XmBkOw5_5RBY0QmOXEuoaR7JAgwlHY8XTtBcW4HrCo6mmebLNuG9ImtjRVD4ysSGyXaT4zOaHZ8X4BSXvES8b-Ey7P_xpgqLwPRLN2veIFass4B-J9dROerLxlJhNM=",
+              "title": "tryprofound.com"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjcTA6XiiwxERGHUS78uxZgZ3yjDPvUWxyE9oh2nIgJZxXaIPLCVQ71miGbkOS_jp9IJpsZFoqvY0B79qelMV28Jf1BSwAXGf2_toZLKsMS2AQycHAFo6LsMKDAqJzBDCa7LA8Ht0lGhE9clyP4psymiogHPAq6w9ZmRR9",
+              "title": "getmint.ai"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHm-xbk-DCo48lrmf7VIyoSyCT7Jl6S0onkkRQ5K3x4M_-K_vvU6-1yuaVndK7GxR6JeXqqWX3Va6-caRALyzAElrUDsI7oU5i3PHpTfXtojZM5JMn9CHa0cBvREgRcRVGHvORV5b5m7uKm7XbAAMvnIL3EoWaHDHFJ4Q==",
+              "title": "integrate.io"
+            }
+          }
+        ],
+        "groundingSupports": [
+          {
+            "segment": {
+              "startIndex": 774,
+              "endIndex": 899,
+              "text": "It also integrates with Semrush's keyword, backlink, and content tools, making it ideal for teams already using the platform."
+            },
+            "groundingChunkIndices": [
+              0,
+              1
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 998,
+              "endIndex": 1172,
+              "text": "It enables users to ideate prompts, track brand visibility across multiple LLMs, benchmark against competitors, monitor citations, and receive smart optimization suggestions."
+            },
+            "groundingChunkIndices": [
+              2,
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 1271,
+              "endIndex": 1364,
+              "text": "It helps track where AI search cites content and provides tools to close any identified gaps."
+            },
+            "groundingChunkIndices": [
+              1
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 1496,
+              "endIndex": 1630,
+              "text": "It connects AI citations to traffic performance and content optimization workflows, offering export options and enterprise dashboards."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 1631,
+              "endIndex": 1895,
+              "text": "*   **Siteimprove:** Offers \"Agentic Content Intelligence\" which works alongside users to ensure accessibility compliance, boost search visibility with SEO and AEO (AI Engine Optimization), optimize content strategy, and predict content performance with analytics."
+            },
+            "groundingChunkIndices": [
+              4
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2113,
+              "endIndex": 2182,
+              "text": "It also provides ad monitoring, AI article tracking, and site audits."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2183,
+              "endIndex": 2311,
+              "text": "*   **Rankscale:** Praised for its drill-down reporting capabilities, allowing users to deeply analyze their AI visibility data."
+            },
+            "groundingChunkIndices": [
+              0,
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2312,
+              "endIndex": 2437,
+              "text": "*   **SE Ranking:** A strong contender for agencies that need to track AI visibility alongside their traditional SEO efforts."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2438,
+              "endIndex": 2587,
+              "text": "*   **Rankshift AI:** Designed for scalable, multi-brand tracking, making it suitable for larger organizations or agencies managing multiple clients."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2588,
+              "endIndex": 2685,
+              "text": "*   **Advanced Web Ranking:** Specifically highlighted for its ability to track Google's AI Rank."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2686,
+              "endIndex": 2802,
+              "text": "*   **Peec AI:** Focuses on citation analysis, helping users understand how their content is being referenced by AI."
+            },
+            "groundingChunkIndices": [
+              0,
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2803,
+              "endIndex": 2941,
+              "text": "*   **Scrunch AI:** Provides actionable GEO insights, helping users understand and improve their visibility in generative AI environments."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 2942,
+              "endIndex": 3084,
+              "text": "*   **OtterlyAI:** Specializes in brand sentiment analysis, crucial for understanding how AI-generated content perceives and portrays a brand."
+            },
+            "groundingChunkIndices": [
+              0
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3253,
+              "endIndex": 3295,
+              "text": "It can also pull prompt data from Semrush."
+            },
+            "groundingChunkIndices": [
+              5
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3296,
+              "endIndex": 3382,
+              "text": "*   **AirOps:** Another tool mentioned for its capabilities in AI visibility tracking."
+            },
+            "groundingChunkIndices": [
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3383,
+              "endIndex": 3434,
+              "text": "*   **ScalePost:** Listed as an AI visibility tool."
+            },
+            "groundingChunkIndices": [
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3435,
+              "endIndex": 3517,
+              "text": "*   **SEO Clarity ArcAI:** Connects AI visibility directly to traffic performance."
+            },
+            "groundingChunkIndices": [
+              3
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3799,
+              "endIndex": 3958,
+              "text": "The goal of these tools is to help businesses avoid being invisible in a search landscape increasingly dominated by AI-generated summaries and recommendations."
+            },
+            "groundingChunkIndices": [
+              6
+            ]
+          },
+          {
+            "segment": {
+              "startIndex": 3959,
+              "endIndex": 4105,
+              "text": "They often integrate with existing tools like Google Search Console and Google Analytics 4 to provide a more holistic view of content performance."
+            },
+            "groundingChunkIndices": [
+              7
+            ]
+          }
+        ],
+        "webSearchQueries": [
+          "best AI visibility tracking tools",
+          "AI content performance tracking tools"
+        ]
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "candidatesTokenCount": 816,
+    "totalTokenCount": 1234,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 9
+      }
+    ],
+    "toolUsePromptTokenCount": 171,
+    "toolUsePromptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 171
+      }
+    ],
+    "thoughtsTokenCount": 238,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "qZ-kauLXC422_PUPi6nI2Qg"
+}

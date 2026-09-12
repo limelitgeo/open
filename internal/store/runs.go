@@ -77,6 +77,10 @@ type ChatRecord struct {
 	Calls        int
 	Mentions     []Mention
 	Citations    []Citation
+	// FanOut is the searches the engine ran while grounding, in its order.
+	// Empty means the provider did not report any, which is not the same as
+	// the engine having searched for nothing.
+	FanOut []string
 }
 
 // CreateEvaluation opens a pass.
@@ -177,6 +181,14 @@ func (db *DB) RecordChat(ctx context.Context, rec ChatRecord) (int64, error) {
 			VALUES (?, ?, ?, ?, ?, ?, ?)`,
 			chatID, c.URL, c.Host, c.Site, c.Title, c.Position, c.SourceType); err != nil {
 			return 0, fmt.Errorf("insert citation: %w", err)
+		}
+	}
+
+	for i, q := range rec.FanOut {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO fanout (chat_id, query, position) VALUES (?, ?, ?)`,
+			chatID, q, i+1); err != nil {
+			return 0, fmt.Errorf("insert fanout: %w", err)
 		}
 	}
 
