@@ -53,27 +53,35 @@ metric definitions, so moving to the hosted product is one command.
 
 **Pre-release. v0.1 is being built in the open.**
 
-What works today: the binary builds and installs with no toolchain beyond Go,
-creates and migrates its SQLite database on first start, and serves the
-dashboard at `localhost:1515`. The setup wizard runs end to end: brand,
-competitors, a starter prompt pack written from your category, and a provider
-step. Prompts, competitors, targets and the run ceiling are all editable.
+What works today, verified against a live instance:
 
-It fetches real answers. Connect an OpenAI key, press Run, and the prompts are
-asked of ChatGPT with web search on; the answers, their cited sources and the
-token usage are stored. `limelit run` does the same from cron, and a daily or
-hourly schedule runs it while `limelit serve` is up. The remaining ten
-providers are listed in Settings with a link to their key page and a line
-saying they are not built yet.
+- **One binary.** No Docker, no Node, no Postgres. It creates and migrates its
+  own SQLite database on first start and serves the dashboard at
+  `localhost:1515`.
+- **Six engines.** ChatGPT, Claude, Perplexity and Gemini through their vendor
+  APIs with web search on; Google AI Overview and AI Mode through a scraper,
+  because those two have no API at all. Five providers of eleven are
+  implemented; Settings lists the rest with a link to each key page.
+- **The full measurement chain.** Answers are stored, searched for your brand
+  and every tracked competitor with the rank of the list item they appear in,
+  and every cited source is classified as your own, a competitor's, social,
+  informational or other.
+- **The numbers, on screen.** Visibility, share of voice, average position and
+  citation share, each with the sample it rests on; the competitor ranking; the
+  trend; visibility split by question type; and the prompt by engine grid.
+- **The evidence behind them.** Every answer readable in full with your brand
+  marked in the text at the matcher's own offsets, the searches the engine ran
+  on the way there, the brands it named with their ranks, and every source it
+  cited.
+- **MCP.** `limelit mcp` over stdio, or streamable HTTP with a bearer token.
+  Twelve tools on Limelit Cloud's names, so a conversation written against this
+  server keeps working after an upgrade.
+- **Scheduling.** Daily or hourly inside `limelit serve`, or `limelit run` from
+  your own cron, with a hard `runs_per_day` ceiling checked before any spend.
 
-Each answer is searched for your brand and your competitors, with the rank of
-the list item they appear in, and every cited source is classified as your
-own, a competitor's, social, informational or other.
-
-What does not work yet: nothing aggregates those rows. The metrics and the
-dashboard graphs are next, so the screens are still empty. `limelit mcp`,
-`export` and `upgrade` report that they are not implemented rather than
-pretending to work.
+What does not work yet: `export` and `upgrade` report that they are not
+implemented rather than pretending to work, and six of eleven providers are
+unbuilt.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -104,17 +112,18 @@ Limelit Open takes the other side of it:
 
 | Feature | Status |
 |---|---|
-| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | computed, no UI yet |
-| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | computed, no UI yet |
-| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | computed, no UI yet |
-| **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | planned |
-| **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | OpenAI done, 10 to go |
-| **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | planned |
+| **Visibility tracking**: how often each engine mentions your brand, per prompt and over time | **working** |
+| **Share of voice**: your mention rate next to every tracked competitor, on the same prompts | **working** |
+| **Citation analysis**: every URL an answer cited, classified as your own, a competitor, social, informational or other | **working** |
+| **Prompt by target grid**: one cell per prompt and engine, click through to the answers behind it | **working** |
+| **Hybrid providers**: vendor APIs and consumer-surface scrapers behind one interface, labeled on every metric | **5 of 11, six engines** |
+| **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | **working** |
 | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |
 | **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` from your own cron | **working** |
 | **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | planned |
 | **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
+| **Query fan-out**: the searches an engine actually ran on the way to its answer, which are often not the question you asked | **working** |
 | **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |
 | **Single binary, SQLite**: no cgo, no Docker requirement, no Postgres | **working** |
 
@@ -172,13 +181,23 @@ Claude Desktop or Claude Code:
 ```
 
 Remote clients point at `limelit serve` and its streamable HTTP endpoint at
-`/mcp`, with a bearer token from Settings.
+`/mcp`. Set `LIMELIT_MCP_TOKEN` and send it as `Authorization: Bearer <token>`.
+Until that variable is set the endpoint refuses every request: an open MCP
+endpoint would hand anyone who can reach the port every answer you have
+stored.
 
 Then ask things like:
 
 - "How is Acme doing across AI engines this week?"
 - "Which prompts are we losing to Globex, and what do those answers cite instead of us?"
 - "Show me the answers behind our visibility drop, with the exact quotes."
+- "What did the engines actually search for when they answered that prompt?"
+
+Every metric a tool returns carries `n`, the answers it rests on, and the
+`api` or `scraped` access mode of each target. Arguments that only exist in
+Limelit Cloud, such as `segment`, are rejected with an explanation rather than
+silently ignored: a number scoped differently from what you asked for is worse
+than an error.
 
 Tool names mirror Limelit Cloud, so a conversation or a skill written against
 this server keeps working after you upgrade. Full catalog:
@@ -352,7 +371,8 @@ project does none of those, and some of them are deliberately
 These are [Limelit Cloud](https://limelit.co) features and are not in the open
 core:
 
-- Query fan-out capture and rewrite analysis
+- Query fan-out **rewrite analysis** (the capture itself is in the open core:
+  every answer stores the searches the engine ran)
 - Prompt generation from your site, personas, competitor suggestion
 - Discovery of brands you did not list
 - Sentiment and framing, hallucination guard, correction drafts
@@ -445,11 +465,12 @@ internal/target    engine:provider[:model][:online]
 internal/promptpack the starter prompt templates
 internal/mentions  the deterministic brand matcher and list ranking
 internal/citations URL normalisation and source classification
-internal/runner    the evaluation runner: fan-out, the ceiling, usage
+internal/runner    the evaluation runner: the ceiling, usage counters
 internal/metrics   the read models every surface shares: visibility, share of
                    voice, position, the grid, the answers
 internal/secrets   encryption at rest for pasted provider keys
 internal/ui        the embedded dashboard: templates, CSS, handlers
+internal/mcpserver the MCP tool catalog, on the official go-sdk
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
 docs/              the tool catalog and the provider contract
 ```
