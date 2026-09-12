@@ -80,9 +80,13 @@ What works today, verified against a live instance:
 - **Scheduling.** Daily or hourly inside `limelit serve`, or `limelit run` from
   your own cron, with a hard `runs_per_day` ceiling checked before any spend.
 
-What does not work yet: `export` and `upgrade` report that they are not
-implemented rather than pretending to work, and five of eleven providers are
-unbuilt.
+- **Export.** `limelit export` writes the whole instance as one JSON document
+  or a directory of CSVs, streaming, with a `--since` filter that reaches the
+  rows hanging off each answer. `export_data` returns the same payload over
+  MCP.
+
+What does not work yet: `upgrade` reports that it is not implemented rather
+than pretending to work, and five of eleven providers are unbuilt.
 
 Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
@@ -122,7 +126,7 @@ Limelit Open takes the other side of it:
 | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |
 | **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` from your own cron | **working** |
-| **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | planned |
+| **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | **working** |
 | **One-command upgrade**: move your property, prompts and history to Limelit Cloud | planned |
 | **Query fan-out**: the searches an engine actually ran on the way to its answer, which are often not the question you asked | **working** |
 | **Setup wizard**: brand, competitors, a starter prompt pack from your category, one key | **working** |

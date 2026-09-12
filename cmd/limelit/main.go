@@ -18,6 +18,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -31,6 +32,7 @@ import (
 	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/limelitgeo/open/internal/export"
 	"github.com/limelitgeo/open/internal/httpx"
 	"github.com/limelitgeo/open/internal/mcpserver"
 	"github.com/limelitgeo/open/internal/provider"
@@ -308,7 +310,9 @@ func cmdRun(ctx context.Context, args []string) error {
 // cmdExport will write the payload that `upgrade` also sends.
 func cmdExport(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("export", flag.ContinueOnError)
-	fs.String("format", "json", "json or csv")
+	format := fs.String("format", "json", "json or csv")
+	out := fs.String("out", "", "write here instead of stdout; for csv this is a directory (default limelit-export)")
+	since := fs.String("since", "", "only answers created on or after this date (YYYY-MM-DD)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -317,10 +321,47 @@ func cmdExport(ctx context.Context, args []string) error {
 		return err
 	}
 	defer db.Close()
-	return errNotImplemented("export")
+
+	opts := export.Options{Since: *since, Now: time.Now().UTC().Format(time.RFC3339)}
+
+	switch strings.ToLower(*format) {
+	case "json":
+		w := io.Writer(os.Stdout)
+		if *out != "" {
+			f, err := os.Create(*out)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			w = f
+		}
+		if err := export.WriteJSON(ctx, db, w, opts); err != nil {
+			return err
+		}
+		if *out != "" {
+			fmt.Fprintf(os.Stderr, "wrote %s\n", *out)
+		}
+		return nil
+
+	case "csv":
+		dir := *out
+		if dir == "" {
+			dir = "limelit-export"
+		}
+		files, err := export.WriteCSV(ctx, db, dir, opts)
+		if err != nil {
+			return err
+		}
+		for _, f := range files {
+			fmt.Fprintln(os.Stderr, "wrote", f)
+		}
+		return nil
+
+	default:
+		return fmt.Errorf("format must be json or csv, not %q", *format)
+	}
 }
 
-// cmdUpgrade will move this instance to Limelit Cloud.
 func cmdUpgrade(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("upgrade", flag.ContinueOnError)
 	if err := fs.Parse(args); err != nil {

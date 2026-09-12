@@ -77,6 +77,7 @@ func New(deps Deps) (*mcp.Server, error) {
 	registerMetrics(s, deps)
 	registerAnswers(s, deps)
 	registerInstance(s, deps)
+	registerExport(s, deps)
 	registerPrompts2(s, deps)
 
 	return s, nil

@@ -461,3 +461,58 @@ func TestPromptTemplatesDoNotPromiseCloudFeatures(t *testing.T) {
 		}
 	}
 }
+
+func TestExportDataReturnsAWholePayload(t *testing.T) {
+	s, _ := connect(t)
+	res := call(t, s, "export_data", nil)
+	if res.IsError {
+		t.Fatal(resultText(res))
+	}
+	out := res.StructuredContent.(map[string]any)
+
+	if complete, _ := out["complete"].(bool); !complete {
+		t.Fatalf("a one-answer instance should fit inline: %v", out["note"])
+	}
+	counts, _ := out["counts"].(map[string]any)
+	for table, want := range map[string]float64{
+		"competitors": 1, "prompts": 1, "targets": 1, "chats": 1,
+		"mentions": 2, "citations": 1, "fanout": 1,
+	} {
+		if counts[table] != want {
+			t.Errorf("counts[%s] = %v, want %v", table, counts[table], want)
+		}
+	}
+	if _, ok := out["payload"]; !ok {
+		t.Error("a complete export carries its payload")
+	}
+}
+
+// TestExportDataRefusesCSVRatherThanReturningNothing: a directory of files
+// cannot come back through a tool call, and saying so with the command to run
+// beats returning an empty success.
+func TestExportDataRefusesCSVRatherThanReturningNothing(t *testing.T) {
+	s, _ := connect(t)
+	res := call(t, s, "export_data", map[string]any{"format": "csv"})
+	if !res.IsError {
+		t.Fatal("csv was accepted through a tool call")
+	}
+	if !strings.Contains(resultText(res), "limelit export --format csv") {
+		t.Errorf("the refusal does not say what to run: %s", resultText(res))
+	}
+}
+
+func TestExportDataHonoursSince(t *testing.T) {
+	s, _ := connect(t)
+	res := call(t, s, "export_data", map[string]any{"since": "2099-01-01"})
+	out := res.StructuredContent.(map[string]any)
+	counts, _ := out["counts"].(map[string]any)
+
+	if counts["chats"] != float64(0) {
+		t.Errorf("chats = %v past the since date, want 0", counts["chats"])
+	}
+	// Configuration is not time series and survives, or an export scoped to
+	// last week would describe an instance that tracks nothing.
+	if counts["prompts"] == float64(0) {
+		t.Error("prompts were filtered away by a date filter")
+	}
+}
