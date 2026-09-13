@@ -11,6 +11,7 @@ package ui
 // handler that computed its own total would defeat it.
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sort"
@@ -194,7 +195,140 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 	}
 	page.Columns, page.Rows = gridViews(grid)
 
+	if err := a.richCharts(ctx, window, &page, standings); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+
 	a.write(w, r, "overview", page)
+}
+
+// richCharts fills the competitor race, the donut, the engine bars, the
+// citation mix and the fan-out cloud. Every one is drawn from rows the runner
+// wrote; nothing here fills a gap or invents a series.
+func (a *App) richCharts(ctx context.Context, window metrics.Window, page *MeasurePage, standings []metrics.BrandStanding) error {
+	// One stable name set for colour assignment across every chart on the
+	// page, so a brand is the same colour in the race, the donut and the bars.
+	names := make([]string, 0, len(standings))
+	for _, b := range standings {
+		if !b.IsOwn {
+			names = append(names, b.Name)
+		}
+	}
+
+	// The race.
+	brandDays, err := a.metrics.BrandSeries(ctx, window)
+	if err != nil {
+		return err
+	}
+	byBrand := map[string]*RaceSeries{}
+	var order []string
+	for _, bd := range brandDays {
+		s, ok := byBrand[bd.Name]
+		if !ok {
+			s = &RaceSeries{Name: bd.Name, IsOwn: bd.IsOwn, Class: seriesClass(bd.Name, names, bd.IsOwn)}
+			byBrand[bd.Name] = s
+			order = append(order, bd.Name)
+		}
+		s.Points = append(s.Points, TrendPoint{Day: bd.Day, Value: bd.Visibility, N: bd.Answers})
+		s.Last = bd.Visibility
+	}
+	race := make([]RaceSeries, 0, len(order))
+	for _, n := range order {
+		race = append(race, *byBrand[n])
+	}
+	// Legend in standings order: leader first, property always shown.
+	for _, b := range standings {
+		if s, ok := byBrand[b.Name]; ok {
+			page.RaceLegend = append(page.RaceLegend, LegendItem{Name: s.Name, Class: s.Class, IsOwn: s.IsOwn, Value: pct(s.Last) + "%"})
+		}
+	}
+	page.Race = RaceChart(race)
+
+	// The donut.
+	var (
+		slices   []DonutSlice
+		ownShare float64
+		ownSeen  bool
+	)
+	for _, b := range standings {
+		cls := seriesClass(b.Name, names, b.IsOwn)
+		if b.IsOwn {
+			ownShare, ownSeen = b.ShareOfVoice, b.Mentions > 0
+		}
+		if b.ShareOfVoice > 0 {
+			slices = append(slices, DonutSlice{Name: b.Name, IsOwn: b.IsOwn, Class: cls, Share: b.ShareOfVoice})
+		}
+		page.DonutLegend = append(page.DonutLegend, LegendItem{Name: b.Name, Class: cls, IsOwn: b.IsOwn, Value: pct(b.ShareOfVoice) + "%"})
+	}
+	page.Donut = Donut(slices, ownShare, ownSeen)
+
+	// Visibility by engine.
+	cells, err := a.metrics.EngineBreakdown(ctx, window)
+	if err != nil {
+		return err
+	}
+	groupIdx := map[string]int{}
+	var groups []EngineGroup
+	for _, c := range cells {
+		key := c.Engine + "/" + c.Access
+		gi, ok := groupIdx[key]
+		if !ok {
+			gi = len(groups)
+			groupIdx[key] = gi
+			groups = append(groups, EngineGroup{Engine: c.Engine, Access: c.Access, Answers: c.Answers})
+		}
+		groups[gi].Bars = append(groups[gi].Bars, EngineBar{
+			Name: c.Name, IsOwn: c.IsOwn, Class: seriesClass(c.Name, names, c.IsOwn),
+			Visibility: c.Visibility, Mentions: c.Mentions,
+		})
+	}
+	page.Engines = EngineBars(groups)
+	page.EnginesLegend = page.RaceLegend
+
+	// The citation mix.
+	mixRows, err := a.metrics.CitationMix(ctx, window)
+	if err != nil {
+		return err
+	}
+	dayIdx := map[string]int{}
+	var mixDays []MixDay
+	totals := map[string]int{}
+	grand := 0
+	for _, m := range mixRows {
+		di, ok := dayIdx[m.Day]
+		if !ok {
+			di = len(mixDays)
+			dayIdx[m.Day] = di
+			mixDays = append(mixDays, MixDay{Day: m.Day, Counts: map[string]int{}})
+		}
+		mixDays[di].Counts[m.SourceType] += m.Citations
+		mixDays[di].Total += m.Citations
+		totals[m.SourceType] += m.Citations
+		grand += m.Citations
+	}
+	page.Mix = CitationMixChart(mixDays)
+	for _, kind := range mixOrder {
+		if n := totals[kind]; n > 0 {
+			share := 0.0
+			if grand > 0 {
+				share = float64(n) / float64(grand) * 100
+			}
+			page.MixLegend = append(page.MixLegend, MixLegend{Kind: kind, Count: n, Share: pct(share) + "%"})
+		}
+	}
+
+	// The fan-out cloud.
+	words, err := a.metrics.FanOutWords(ctx, window, 36)
+	if err != nil {
+		return err
+	}
+	cloud := make([]CloudWord, 0, len(words))
+	for _, w := range words {
+		cloud = append(cloud, CloudWord{Term: w.Term, Count: w.Count})
+	}
+	page.Cloud = WordCloud(cloud)
+	return nil
 }
 
 // standingViews ranks the brands and keeps the property visible at zero.

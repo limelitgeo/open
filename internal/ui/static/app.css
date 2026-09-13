@@ -72,6 +72,28 @@
   --mark-own: #fde68a;
   --mark-rival: #e9eaf2;
 
+  /* Series colours for competitor charts. Eight hues chosen so the first four
+   * stay furthest apart under protanopia and deuteranopia, assigned to brands
+   * ALPHABETICALLY and never by rank: a brand's colour must not change the
+   * week it overtakes another, or two screenshots stop being comparable.
+   * The property never takes one of these; it is always --brand. */
+  --series-1: #e0851f;
+  --series-2: #2a9d8f;
+  --series-3: #c2185b;
+  --series-4: #7c4dff;
+  --series-5: #3f9142;
+  --series-6: #0288d1;
+  --series-7: #8d6e63;
+  --series-8: #f4511e;
+
+  /* Citation source classes carry fixed colours on every surface, so a
+   * social source is the same colour in the mix chart and on a badge. */
+  --src-own: var(--brand);
+  --src-competitor: #c2185b;
+  --src-social: #e0851f;
+  --src-informational: #2a9d8f;
+  --src-other: #9ca3af;
+
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 2px rgb(20 20 28 / 6%), 0 1px 3px rgb(20 20 28 / 4%);
@@ -106,6 +128,21 @@
 
     --mark-own: #6b5a12;
     --mark-rival: #2a2c38;
+
+    --series-1: #f0a04b;
+    --series-2: #4fc3b0;
+    --series-3: #f06292;
+    --series-4: #b39dff;
+    --series-5: #66bb6a;
+    --series-6: #4fc3f7;
+    --series-7: #bcaaa4;
+    --series-8: #ff8a65;
+
+    --src-own: var(--brand-strong);
+    --src-competitor: #f06292;
+    --src-social: #f0a04b;
+    --src-informational: #4fc3b0;
+    --src-other: #6b7280;
 
     --ink: #f2f2f5;
     --ink-2: #c3c6cd;
@@ -718,3 +755,84 @@ tr.row-branded { opacity: 0.72; }
 .spark-line { stroke: var(--brand); stroke-width: 1.5; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .spark-dot { fill: var(--brand); }
 .chart-trend { max-height: 190px; }
+
+/* ---------------------------------------------------------------------------
+   The rich charts. Series colours come from the tokens above; the classes
+   below only bind a class name to a token, so a brand is one colour in the
+   race, the donut and the bars.
+   --------------------------------------------------------------------------- */
+
+.s-own { --c: var(--brand); }
+.s-1 { --c: var(--series-1); }
+.s-2 { --c: var(--series-2); }
+.s-3 { --c: var(--series-3); }
+.s-4 { --c: var(--series-4); }
+.s-5 { --c: var(--series-5); }
+.s-6 { --c: var(--series-6); }
+.s-7 { --c: var(--series-7); }
+.s-8 { --c: var(--series-8); }
+
+/* The race. Competitors at stroke 2, the property at 3.5 and drawn last so it
+   stays on top: the redundant encoding a colourblind reader needs. */
+.chart-race { max-height: 220px; }
+.chart-race .series.line { fill: none; stroke: var(--c); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
+.chart-race .series.dot { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; }
+.chart-race .series-own.line { stroke-width: 3.5; opacity: 1; }
+.chart-race .series-own.dot { stroke-width: 2; }
+.chart .axis-y { font-size: 9px; }
+
+/* Legends are real lists, so they select, copy and read aloud. */
+.legend-row { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; }
+.legend-row li, .legend-col li { display: flex; align-items: center; gap: 7px; color: var(--ink-2); }
+.legend-row .num, .legend-col .num { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+.legend-row li.own, .legend-col li.own { color: var(--ink); font-weight: 600; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+.legend-col { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px; min-width: 0; }
+.legend-col .legend-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The donut. */
+.donut-wrap { display: flex; align-items: center; gap: 16px; }
+.chart-donut { width: 150px; height: 150px; flex: none; }
+.donut-track { stroke: var(--bg-2); }
+.chart-donut .arc { stroke: var(--c); transition: stroke-width 120ms ease; }
+.chart-donut .arc:hover { stroke-width: 26; }
+.donut-value { font-size: 26px; font-weight: 700; fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.donut-label { font-size: 10px; fill: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Visibility by engine. */
+.chart-engines { max-height: 230px; }
+.chart-engines .bar { fill: var(--c); opacity: 0.9; }
+.chart-engines .bar.series-own { opacity: 1; }
+.chart-engines .bar-zero { opacity: 0.45; }
+.chart-engines .axis-sub { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+.chart-engines .axis-api { fill: var(--info-fg); }
+.chart-engines .axis-scraped { fill: var(--warn-fg); }
+
+/* The citation mix: fixed colour per source class on every surface. */
+.mix-wrap { display: flex; align-items: flex-start; gap: 16px; }
+.chart-mix { max-height: 180px; flex: 1; min-width: 0; }
+.mix-own { fill: var(--src-own); }
+.mix-competitor { fill: var(--src-competitor); }
+.mix-social { fill: var(--src-social); }
+.mix-informational { fill: var(--src-informational); }
+.mix-other { fill: var(--src-other); }
+.mix-legend-own { --c: var(--src-own); }
+.mix-legend-competitor { --c: var(--src-competitor); }
+.mix-legend-social { --c: var(--src-social); }
+.mix-legend-informational { --c: var(--src-informational); }
+.mix-legend-other { --c: var(--src-other); }
+.legend-col li[class^="mix-legend"] .legend-name { text-transform: capitalize; }
+.bar-own { background: var(--src-own); }
+.bar-competitor { background: var(--src-competitor); }
+.bar-social { background: var(--src-social); }
+.bar-informational { background: var(--src-informational); }
+.bar-other { background: var(--src-other); }
+
+/* The word cloud. Frequency is encoded once, as size. */
+.cloud { margin: 4px 0 0; line-height: 1.9; color: var(--ink-2); word-spacing: 0.35em; }
+.cloud span { display: inline-block; padding: 0 2px; color: var(--ink); cursor: default; transition: color 120ms ease; }
+.cloud span:hover { color: var(--brand-strong); }
+
+.split-3 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+.span-2 { min-width: 0; }
+@media (max-width: 1080px) { .split-3 { grid-template-columns: 1fr; } .donut-wrap { flex-wrap: wrap; } }

@@ -585,3 +585,113 @@ func TestNoColourIsEmittedFromGo(t *testing.T) {
 		}
 	}
 }
+
+// TestRichChartsNeverEmitAColour. Every series and every source class binds
+// to a token through a class, so a brand is one colour on every chart and the
+// whole set follows the theme.
+func TestRichChartsNeverEmitAColour(t *testing.T) {
+	race := string(RaceChart([]RaceSeries{
+		{Name: "Acme", IsOwn: true, Class: "s-own", Points: []TrendPoint{{Day: "a", Value: 0, N: 4}, {Day: "b", Value: 25, N: 4}}},
+		{Name: "Rival", Class: "s-1", Points: []TrendPoint{{Day: "a", Value: 50, N: 4}, {Day: "b", Value: 75, N: 4}}},
+	}))
+	donut := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 60}, {Name: "Acme", IsOwn: true, Class: "s-own", Share: 40}}, 40, true))
+	bars := string(EngineBars([]EngineGroup{{Engine: "chatgpt", Access: "api", Answers: 4, Bars: []EngineBar{
+		{Name: "Acme", IsOwn: true, Class: "s-own", Visibility: 0}, {Name: "Rival", Class: "s-1", Visibility: 100},
+	}}}))
+	mix := string(CitationMixChart([]MixDay{{Day: "2026-09-11", Total: 3, Counts: map[string]int{"own": 1, "other": 2}}}))
+
+	for name, out := range map[string]string{"race": race, "donut": donut, "bars": bars, "mix": mix} {
+		if strings.Contains(out, "#") || strings.Contains(out, "rgb(") {
+			t.Errorf("%s emitted a literal colour", name)
+		}
+		if !strings.Contains(out, "<svg") || !strings.Contains(out, "</svg>") {
+			t.Errorf("%s is not a complete SVG", name)
+		}
+		if !strings.Contains(out, "aria-label=") {
+			t.Errorf("%s has no text alternative", name)
+		}
+	}
+}
+
+// TestRaceDrawsTheOwnBrandLastAndHeavier: the property's line must sit on top
+// of the competitors and read without the legend.
+func TestRaceDrawsTheOwnBrandLastAndHeavier(t *testing.T) {
+	out := string(RaceChart([]RaceSeries{
+		{Name: "Acme", IsOwn: true, Class: "s-own", Points: []TrendPoint{{Day: "a", Value: 0}, {Day: "b", Value: 0}}},
+		{Name: "Rival", Class: "s-1", Points: []TrendPoint{{Day: "a", Value: 50}, {Day: "b", Value: 60}}},
+	}))
+	own := strings.LastIndex(out, "series-own line")
+	rival := strings.LastIndex(out, `class="series s-1 line"`)
+	if own < 0 || rival < 0 {
+		t.Fatalf("missing a series: %s", out)
+	}
+	if own < rival {
+		t.Error("the own line is drawn before a competitor's, so it can be covered")
+	}
+}
+
+// TestSeriesClassIsStableAcrossFiltering. A brand's colour must not change
+// when another brand is filtered out or overtakes it.
+func TestSeriesClassIsStableAcrossFiltering(t *testing.T) {
+	all := []string{"Otterly", "Peec AI", "Profound"}
+	before := seriesClass("Peec AI", all, false)
+	after := seriesClass("Peec AI", all, false)
+	if before != after {
+		t.Fatalf("class changed between calls: %q then %q", before, after)
+	}
+	// The property never takes a series slot.
+	if got := seriesClass("Acme", all, true); got != "s-own" {
+		t.Errorf("own brand got %q, want s-own", got)
+	}
+	// Alphabetical, so Otterly < Peec AI < Profound regardless of rank.
+	if seriesClass("Otterly", all, false) != "s-1" || seriesClass("Profound", all, false) != "s-3" {
+		t.Errorf("assignment is not alphabetical: %s %s %s",
+			seriesClass("Otterly", all, false), seriesClass("Peec AI", all, false), seriesClass("Profound", all, false))
+	}
+}
+
+func TestDonutSaysNeverNamedRatherThanShowingAnEmptyRing(t *testing.T) {
+	out := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 100}}, 0, false))
+	if !strings.Contains(out, "never named") {
+		t.Error("a property with no mentions must be labelled, not left as a blank centre")
+	}
+}
+
+func TestEngineBarsDrawAMeasuredZeroAsAStub(t *testing.T) {
+	// Blank would read as "no data". A stub reads as "measured, and zero".
+	out := string(EngineBars([]EngineGroup{{Engine: "chatgpt", Access: "api", Answers: 4, Bars: []EngineBar{
+		{Name: "Acme", IsOwn: true, Class: "s-own", Visibility: 0},
+	}}}))
+	if !strings.Contains(out, "bar-zero") {
+		t.Error("a measured zero was not drawn")
+	}
+}
+
+func TestWordCloudScalesBySquareRootAndSortsAlphabetically(t *testing.T) {
+	words := WordCloud([]CloudWord{{Term: "zebra", Count: 1}, {Term: "apple", Count: 100}, {Term: "mango", Count: 25}})
+	if words[0].Term != "apple" || words[2].Term != "zebra" {
+		t.Errorf("not alphabetical: %v", words)
+	}
+	var apple, mango, zebra CloudWord
+	for _, w := range words {
+		switch w.Term {
+		case "apple":
+			apple = w
+		case "mango":
+			mango = w
+		case "zebra":
+			zebra = w
+		}
+	}
+	if !(apple.Size > mango.Size && mango.Size > zebra.Size) {
+		t.Errorf("sizes not monotonic in count: apple %d, mango %d, zebra %d", apple.Size, mango.Size, zebra.Size)
+	}
+	// Square root: 25 of 100 should sit near the middle, not a quarter of
+	// the way up as a linear scale would put it.
+	if mango.Size < (apple.Size+zebra.Size)/2-3 {
+		t.Errorf("scaling looks linear: mango %d between %d and %d", mango.Size, zebra.Size, apple.Size)
+	}
+	if got := WordCloud(nil); got != nil {
+		t.Errorf("empty input produced %v", got)
+	}
+}

@@ -48,44 +48,64 @@
 <p class="caption">Based on {{.Answers}} answers so far. Numbers settle as more answers arrive.</p>
 {{end}}
 
-<div class="split">
+<section class="card">
+  <div class="card-head">
+    <h2>The race</h2>
+    <span class="badge">{{len .RaceLegend}} brands &middot; {{.TrendPoints}} {{if eq .TrendPoints 1}}day{{else}}days{{end}}</span>
+  </div>
+  <p class="lede">How often each brand is named, over time. Your line is the heavy one.</p>
+  {{.Race}}
+  <ul class="legend-row">
+    {{range .RaceLegend}}<li class="{{.Class}}{{if .IsOwn}} own{{end}}"><span class="swatch"></span>{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}} <span class="num">{{.Value}}</span></li>{{end}}
+  </ul>
+  {{if eq .TrendPoints 1}}<p class="caption">One day of history. Lines appear once there is a second day to draw them to.</p>{{end}}
+</section>
+
+<div class="split split-3">
   <section class="card">
-    <div class="card-head">
-      <h2>Where you stand</h2>
-      <span class="badge">{{len .Standings}} brands</span>
+    <div class="card-head"><h2>Share of voice</h2></div>
+    <p class="lede">Of every time a tracked brand was named, how much was you.</p>
+    <div class="donut-wrap">
+      {{.Donut}}
+      <ul class="legend-col">
+        {{range .DonutLegend}}<li class="{{.Class}}{{if .IsOwn}} own{{end}}"><span class="swatch"></span><span class="legend-name">{{.Name}}</span><span class="num">{{.Value}}</span></li>{{end}}
+      </ul>
     </div>
-    <table class="standings">
-      <thead><tr><th></th><th>Brand</th><th class="num">Seen in</th><th class="num">Share</th><th class="num">Avg position</th></tr></thead>
-      <tbody>
-      {{range .Standings}}
-        <tr class="{{if .IsOwn}}own{{end}}{{if .Absent}} absent{{end}}">
-          <td class="rank">{{if .Rank}}{{.Rank}}{{else}}-{{end}}</td>
-          <td>
-            <span class="brand">{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}}</span>
-            <span class="sub">{{.Detail}}</span>
-          </td>
-          <td class="num">{{.Visibility}}%</td>
-          <td class="num">
-            <span class="barcell"><span class="bar" style="width:{{.ShareWidth}}"></span></span>
-            {{.Share}}%
-          </td>
-          <td class="num muted">{{.Position}}</td>
-        </tr>
-      {{end}}
-      </tbody>
-    </table>
   </section>
 
-  <section class="card">
-    <div class="card-head"><h2>Visibility over time</h2></div>
-    {{if gt .TrendPoints 1}}
-      {{.Trend}}
-    {{else}}
-      {{.Trend}}
-      <p class="caption">One day of history. The line appears once there is a second day to draw it to.</p>
-    {{end}}
+  <section class="card span-2">
+    <div class="card-head"><h2>By engine</h2></div>
+    <p class="lede">Where each brand wins. One bar per brand, one group per engine. Hatched labels are scraped surfaces.</p>
+    {{.Engines}}
   </section>
 </div>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Where you stand</h2>
+    <span class="badge">{{len .Standings}} brands</span>
+  </div>
+  <table class="standings">
+    <thead><tr><th></th><th>Brand</th><th class="num">Seen in</th><th class="num">Share</th><th class="num">Avg position</th></tr></thead>
+    <tbody>
+    {{range .Standings}}
+      <tr class="{{if .IsOwn}}own{{end}}{{if .Absent}} absent{{end}}">
+        <td class="rank">{{if .Rank}}{{.Rank}}{{else}}-{{end}}</td>
+        <td>
+          <span class="brand">{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}}</span>
+          <span class="sub">{{.Detail}}</span>
+        </td>
+        <td class="num">{{.Visibility}}%</td>
+        <td class="num">
+          <span class="barcell"><span class="bar" style="width:{{.ShareWidth}}"></span></span>
+          {{.Share}}%
+        </td>
+        <td class="num muted">{{.Position}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</section>
 
 <section class="card">
   <div class="card-head">
@@ -148,6 +168,33 @@
 
 <div class="split">
   <section class="card">
+    <div class="card-head"><h2>Who gets cited</h2></div>
+    <p class="lede">Each bar is one day's citations, split by what kind of site they point at.</p>
+    {{if .Mix}}
+      <div class="mix-wrap">
+        {{.Mix}}
+        <ul class="legend-col">
+          {{range .MixLegend}}<li class="mix-legend-{{.Kind}}"><span class="swatch"></span><span class="legend-name">{{.Kind}}</span><span class="num">{{.Count}} &middot; {{.Share}}</span></li>{{end}}
+        </ul>
+      </div>
+    {{else}}
+      <p class="caption">No citations yet.</p>
+    {{end}}
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>What the engines searched for</h2></div>
+    <p class="lede">The words in the searches engines ran on the way to their answers. Bigger is more often. This is often not the vocabulary you used.</p>
+    {{if .Cloud}}
+      <p class="cloud">{{range .Cloud}}<span style="font-size:{{.Size}}px;font-weight:{{.Weight}}" title="{{.Count}} searches">{{.Term}}</span> {{end}}</p>
+    {{else}}
+      <p class="caption">None of the engines reported their searches yet.</p>
+    {{end}}
+  </section>
+</div>
+
+<div class="split">
+  <section class="card">
     <div class="card-head"><h2>By question type</h2></div>
     <p class="lede">A question naming a rival lists rivals by construction. Discovery is the one that measures unprompted reach.</p>
     <ul class="catlist">
@@ -166,7 +213,7 @@
 
   <section class="card">
     <div class="card-head">
-      <h2>Who gets cited</h2>
+      <h2>Top cited sites</h2>
       <a class="more" href="/citations">All sources &rarr;</a>
     </div>
     <ul class="sourcelist">
@@ -177,7 +224,7 @@
           <span class="badge badge-{{.SourceType}}">{{.SourceType}}</span>
           <span class="num">{{.Citations}}</span>
         </div>
-        <span class="barcell"><span class="bar" style="width:{{.Width}}"></span></span>
+        <span class="barcell"><span class="bar bar-{{.SourceType}}" style="width:{{.Width}}"></span></span>
       </li>
       {{end}}
     </ul>

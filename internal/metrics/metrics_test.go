@@ -368,3 +368,138 @@ func TestLowNFlipsAtTheThreshold(t *testing.T) {
 		t.Fatalf("answers = %d low_n = %v, want %d and false", got.Answers, got.LowN, LowNThreshold)
 	}
 }
+
+func TestBrandSeriesAlwaysIncludesTheProperty(t *testing.T) {
+	f := newFixture(t)
+	f.chat(t, "discovery", store.ChatOK, 0, 1)
+	f.chat(t, "use case", store.ChatOK, 0, 1)
+
+	rows, err := f.svc.BrandSeries(context.Background(), Window{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var own, rival int
+	for _, r := range rows {
+		if r.IsOwn {
+			own++
+			if r.Visibility != 0 || r.Answers != 2 {
+				t.Errorf("own row = %+v, want 0%% of 2", r)
+			}
+		}
+		if r.Name == "Rival" {
+			rival++
+			if r.Visibility != 100 {
+				t.Errorf("rival row = %+v, want 100%%", r)
+			}
+		}
+	}
+	if own == 0 {
+		t.Fatal("the property is missing from the race: a race without your line does not answer the question")
+	}
+	if rival == 0 {
+		t.Fatal("the rival is missing")
+	}
+}
+
+// TestBrandSeriesCountsAnswersNotMentions guards the fan-out bug in this
+// query too: two own-mentions in one answer is one answer.
+func TestBrandSeriesCountsAnswersNotMentions(t *testing.T) {
+	f := newFixture(t)
+	if _, err := f.db.RecordChat(context.Background(), store.ChatRecord{
+		EvaluationID: f.evalID, PromptID: f.prompts["discovery"], TargetID: f.target,
+		Status: store.ChatOK, Text: "Acme (acme.com) leads.",
+		Mentions: []store.Mention{{BrandName: "Acme", BrandKey: "acme"}, {BrandName: "Acme", BrandKey: "acme"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	rows, err := f.svc.BrandSeries(context.Background(), Window{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range rows {
+		if r.IsOwn && r.Visibility != 100 {
+			t.Fatalf("own visibility = %v on one answer naming us twice, want 100", r.Visibility)
+		}
+	}
+}
+
+func TestEngineBreakdownCoversEveryBrandOnEveryEngine(t *testing.T) {
+	f := newFixture(t)
+	second, err := f.db.AddTarget(context.Background(), store.Target{
+		Spec: "claude:anthropic", Engine: "claude", Provider: "anthropic", Access: "api",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.chat(t, "discovery", store.ChatOK, 1, 1)
+	// A rival-only answer on the second engine.
+	rid := f.rival
+	if _, err := f.db.RecordChat(context.Background(), store.ChatRecord{
+		EvaluationID: f.evalID, PromptID: f.prompts["use case"], TargetID: second,
+		Status: store.ChatOK, Text: "x",
+		Mentions: []store.Mention{{CompetitorID: &rid, BrandName: "Rival", BrandKey: "rival"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	cells, err := f.svc.EngineBreakdown(context.Background(), Window{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 2 engines x 2 brands, zeros filled in.
+	if len(cells) != 4 {
+		t.Fatalf("cells = %d, want 4", len(cells))
+	}
+	got := map[string]float64{}
+	for _, c := range cells {
+		got[c.Engine+"/"+c.Name] = c.Visibility
+	}
+	if got["chatgpt/Acme"] != 100 || got["claude/Acme"] != 0 {
+		t.Errorf("own by engine = chatgpt %v, claude %v; want 100 and 0", got["chatgpt/Acme"], got["claude/Acme"])
+	}
+	if got["claude/Rival"] != 100 {
+		t.Errorf("rival on claude = %v, want 100", got["claude/Rival"])
+	}
+}
+
+func TestCitationMixGroupsBySourceType(t *testing.T) {
+	f := newFixture(t)
+	f.chat(t, "discovery", store.ChatOK, 1, 0,
+		cite("acme.com", "own", 1), cite("g2.com", "informational", 2), cite("reddit.com", "social", 3))
+	rows, err := f.svc.CitationMix(context.Background(), Window{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	total := 0
+	kinds := map[string]bool{}
+	for _, r := range rows {
+		total += r.Citations
+		kinds[r.SourceType] = true
+	}
+	if total != 3 || len(kinds) != 3 {
+		t.Fatalf("rows = %+v", rows)
+	}
+}
+
+func TestFanOutWordsDropsStopwordsAndCounts(t *testing.T) {
+	f := newFixture(t)
+	if _, err := f.db.RecordChat(context.Background(), store.ChatRecord{
+		EvaluationID: f.evalID, PromptID: f.prompts["discovery"], TargetID: f.target,
+		Status: store.ChatOK, Text: "x",
+		FanOut: []string{"best widget tools 2026", "widget tracking software", "the widget market"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	words, err := f.svc.FanOutWords(context.Background(), Window{}, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(words) == 0 || words[0].Term != "widget" || words[0].Count != 3 {
+		t.Fatalf("words = %+v, want widget x3 first", words)
+	}
+	for _, w := range words {
+		if w.Term == "the" || w.Term == "best" || w.Term == "tools" || w.Term == "2026" {
+			t.Errorf("stopword %q survived", w.Term)
+		}
+	}
+}

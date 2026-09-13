@@ -180,6 +180,21 @@ type SourceLinkView struct {
 	SourceType string
 }
 
+// LegendItem is one entry under a multi-series chart.
+type LegendItem struct {
+	Name  string
+	Class string
+	IsOwn bool
+	Value string
+}
+
+// MixLegend is one source class in the citation mix legend.
+type MixLegend struct {
+	Kind  string
+	Count int
+	Share string
+}
+
 // MeasurePage is the overview.
 type MeasurePage struct {
 	Base
@@ -196,13 +211,27 @@ type MeasurePage struct {
 	KPIs        []KPIView
 	Trend       template.HTML
 	TrendPoints int
-	Categories  []KPIView
-	Standings   []StandingView
-	Sources     []SourceView
-	Columns     []GridColumnView
-	Rows        []GridRowView
-	Counts      CountsView
-	Targets     []TargetView
+	// Race is every brand's visibility over time on one chart.
+	Race       template.HTML
+	RaceLegend []LegendItem
+	// Donut is share of voice as parts of a whole.
+	Donut       template.HTML
+	DonutLegend []LegendItem
+	// Engines is visibility by engine, one bar per brand.
+	Engines       template.HTML
+	EnginesLegend []LegendItem
+	// Mix is cited sources by type per day.
+	Mix       template.HTML
+	MixLegend []MixLegend
+	// Cloud is the vocabulary of the engines' own searches.
+	Cloud      []CloudWord
+	Categories []KPIView
+	Standings  []StandingView
+	Sources    []SourceView
+	Columns    []GridColumnView
+	Rows       []GridRowView
+	Counts     CountsView
+	Targets    []TargetView
 }
 
 // WindowOption is one entry in the window switch.
