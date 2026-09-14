@@ -271,7 +271,11 @@ func RaceChart(series []RaceSeries) template.HTML {
 		if e.s.IsOwn {
 			cls += " end-own"
 		}
-		if math.Abs(spread[i]-e.y) > 1 {
+		// A lead line joins a point to a label that had to move. It is
+		// only drawn when the point sits at the right edge of the plot; a
+		// lone point in the middle of an otherwise empty axis would get a
+		// long coloured line to the gutter that reads as a trend.
+		if math.Abs(spread[i]-e.y) > 1 && e.x >= raceW-racePadR-ax.perDay {
 			fmt.Fprintf(&b, `<line class="lead %s" x1="%.1f" y1="%.1f" x2="%.0f" y2="%.1f" vector-effect="non-scaling-stroke"/>`,
 				e.s.Class, e.x+8, e.y, raceW-racePadR+8, spread[i])
 		}
