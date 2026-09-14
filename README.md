@@ -49,6 +49,12 @@ metric definitions, so moving to the hosted product is one command.
 - [Contributing](#contributing)
 - [License](#license)
 
+## See it running
+
+**[demo.limelit.co](https://demo.limelit.co)** is this repository, unmodified,
+tracking a GPU cloud vendor against 21 competitors across six engines. The
+banner names the commit it runs. It is read-only and refreshes itself daily.
+
 ## Status
 
 **Pre-release. v0.1 is being built in the open.**
@@ -514,6 +520,7 @@ internal/export    the whole instance as JSON or CSV, streamed
 internal/upgrade   the one-command move to Limelit Cloud
 internal/mcpserver the MCP tool catalog, on the official go-sdk
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
+deploy/            the container, Litestream, and how the demo is deployed
 docs/              the tool catalog and the provider contract
 ```
 
