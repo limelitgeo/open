@@ -121,7 +121,7 @@ var flashes = map[string]Flash{
 	"limits-saved":      {Kind: "ok", Text: "Run ceiling saved."},
 	"key-saved":         {Kind: "ok", Text: "Key saved on this machine."},
 	"run-started":       {Kind: "ok", Text: "Running. Answers appear as each engine replies; refresh to see them."},
-	"demo-readonly":     {Kind: "info", Text: "This is a read-only demo that updates itself on a schedule. Run your own copy to change anything."},
+	"demo-readonly":     {Kind: "info", Text: "This is a read-only demo. Run your own copy to change anything."},
 	"run-busy":          {Kind: "warn", Text: "A run is already in progress."},
 }
 
@@ -166,6 +166,7 @@ func (a *App) base(r *http.Request, title, current string) (Base, store.Counts, 
 	// cannot press it here.
 	if a.demo {
 		b.CanRun = false
+		b.DemoLive = a.scheduled()
 	}
 	b.Commit, b.CommitURL = commitLink(a.version)
 	if counts.LastChatAt != "" {

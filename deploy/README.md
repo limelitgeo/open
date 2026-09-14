@@ -51,7 +51,7 @@ gcloud run deploy limelit-open-demo \
   --service-account limelit-open-demo@$PROJECT.iam.gserviceaccount.com \
   --allow-unauthenticated --min-instances 1 --max-instances 1 --no-cpu-throttling \
   --memory 512Mi --execution-environment gen2 \
-  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit,LIMELIT_SCHEDULE=daily,LIMELIT_RUNS_PER_DAY=300" \
+  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit-v2,LIMELIT_SCHEDULE=off,LIMELIT_RUNS_PER_DAY=300" \
   --set-secrets "OPENAI_API_KEY=openai-key:latest,ANTHROPIC_API_KEY=anthropic-key:latest,PERPLEXITY_API_KEY=perplexity-key:latest,GOOGLE_API_KEY=gemini-key:latest,SEARCHAPI_KEY=searchapi-key:latest"
 ```
 
@@ -63,12 +63,24 @@ one SQLite file through Litestream, which is corruption.
 
 ## Seeding history
 
-A demo is more useful with history than without, and an instance runs once a
-day, so [`../tools/seed`](../tools/seed) loads a set of already-answered
-prompts on day one. The answers come from the file; the mentions and citations
-are produced by this build's own matcher and classifier over that text, so the
+A demo is more useful with history than without, so
+[`../tools/seed`](../tools/seed) loads a set of already-answered prompts on
+day one. The answers come from the file; the mentions and citations are
+produced by this build's own matcher and classifier over that text, so the
 demo shows what the open core computes and nothing the source system decided.
 Every answer keeps its original timestamp.
+
+**The public demo's schedule is `off`, on purpose.** Its history is a real
+company's data with the brand renamed, and a renamed brand is one the engines
+cannot name: the one live pass that ran measured it at 0 of 234 answers, which
+is not a finding about the market. A demo that runs live needs a brand that
+exists. Until it tracks one, the banner says the instance is read-only and
+does not claim to be measuring (`Base.DemoLive`).
+
+**Editing the replicated database.** Restore it locally, change it, and push
+to a NEW `LITESTREAM_PATH`, then redeploy pointing at that path. Pushing to
+the path a running instance replicates to loses the race: its generation
+syncs every ten seconds and the next restore picks it, not yours.
 
 Push the seeded database to the bucket once, before the first boot, and the
 entrypoint restores it:

@@ -72,3 +72,16 @@ func (a *App) noSetup(next http.HandlerFunc) http.HandlerFunc {
 		http.Redirect(w, r, "/overview", http.StatusSeeOther)
 	}
 }
+
+// scheduled reports whether this instance runs passes on its own. The demo
+// banner claims a schedule only when there is one.
+func (a *App) scheduled() bool {
+	if a.cfg == nil {
+		return false
+	}
+	switch strings.ToLower(strings.TrimSpace(a.cfg.Schedule)) {
+	case "daily", "hourly":
+		return true
+	}
+	return false
+}

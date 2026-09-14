@@ -16,7 +16,7 @@
   <span>
     <strong>Live demo.</strong> This is Limelit Open running unmodified{{if .Commit}}, at commit
     {{if .CommitURL}}<a href="{{.CommitURL}}" target="_blank" rel="noreferrer noopener"><code>{{.Commit}}</code></a>{{else}}<code>{{.Commit}}</code>{{end}}{{end}}.
-    It runs itself on a schedule and is read-only for visitors.
+    {{if .DemoLive}}It runs itself on a schedule and is read-only for visitors.{{else}}It is read-only for visitors.{{end}}
   </span>
   <a class="demo-cta" href="https://github.com/limelitgeo/open#quick-start" target="_blank" rel="noreferrer noopener">Run your own &rarr;</a>
 </div>
@@ -50,7 +50,7 @@
       <div class="btn-row">
         {{if .LastRun}}<span class="badge">last run {{.LastRun}}</span>{{end}}
         <form method="post" action="/run" style="display:inline">
-          <button class="btn btn-primary" type="submit"{{if not .CanRun}} disabled title="{{if .Demo}}Read-only demo. It runs itself on a schedule.{{else}}Add a target and a provider key first{{end}}"{{end}}>Run now</button>
+          <button class="btn btn-primary" type="submit"{{if not .CanRun}} disabled title="{{if .Demo}}Read-only demo.{{if .DemoLive}} It runs itself on a schedule.{{end}}{{else}}Add a target and a provider key first{{end}}"{{end}}>Run now</button>
         </form>
       </div>
     </header>

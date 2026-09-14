@@ -48,6 +48,10 @@ type Base struct {
 	// naming the exact commit it runs, so anyone can check it against the
 	// repository: the demo is the open core, not a fork of it.
 	Demo bool
+	// DemoLive is true when the demo also runs itself on a schedule. The
+	// banner says so only then; a demo showing a fixed history must not
+	// claim to be measuring.
+	DemoLive bool
 	// Commit is the short revision and CommitURL its page on GitHub. Empty
 	// on a dev build with no VCS stamp.
 	Commit    string
