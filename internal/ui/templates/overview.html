@@ -16,7 +16,8 @@
   {{template "empty" .}}
 {{else}}
 
-<section class="kpis" aria-label="Headline numbers">
+<svg class="chart-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="ll-area-own" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="stop-a"/><stop offset="1" class="stop-b"/></linearGradient></defs></svg>
+<section class="kpis kpis-lead" aria-label="Headline numbers">
   {{range .KPIs}}
   <div class="kpi{{if .Emphasis}} kpi-lead{{end}}">
     <div class="kpi-label">
@@ -38,8 +39,10 @@
       <div class="kpi-foot">
         <span class="denom">{{.Denominator}}</span>
         {{if .Delta}}<span class="delta delta-{{.DeltaKind}}">{{.Delta}}</span>{{end}}
+        {{if .Range}}<span class="kpi-range">{{.Range}}</span>{{end}}
       </div>
     {{end}}
+    {{if .Spark}}{{.Spark}}{{end}}
   </div>
   {{end}}
 </section>
@@ -51,10 +54,10 @@
 <section class="card">
   <div class="card-head">
     <h2>The race</h2>
-    <span class="badge">{{len .RaceLegend}} brands &middot; {{.TrendPoints}} {{if eq .TrendPoints 1}}day{{else}}days{{end}}</span>
+    <span class="badge">{{len .RaceLegend}} of {{.RaceBrands}} brands &middot; {{.TrendPoints}} measured {{if eq .TrendPoints 1}}day{{else}}days{{end}} &middot; {{thousands .RaceAnswers}} answers</span>
   </div>
-  <p class="lede">How often each brand is named, over time. Your line is the heavy one{{if .RaceOmitted}}. The {{.RaceOmitted}} brands below the top seven are in the table further down{{end}}.</p>
-  {{.Race}}
+  <p class="lede">How often each brand is named, by day. Values at the right edge are the last measured day. Hollow dots rest on fewer than {{.ThinN}} answers. Shaded spans had no run{{if .RaceOmitted}}. The {{.RaceOmitted}} brands below the top seven are in the table further down{{end}}.</p>
+  <div class="chart-wrap" data-chart="race">{{.Race}}<div class="tip" role="status" hidden></div></div>
   <ul class="legend-row">
     {{range .RaceLegend}}<li class="{{.Class}}{{if .IsOwn}} own{{end}}"><span class="swatch"></span>{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}} <span class="num">{{.Value}}</span></li>{{end}}
   </ul>
@@ -64,18 +67,28 @@
 <div class="split split-3">
   <section class="card">
     <div class="card-head"><h2>Share of voice</h2></div>
-    <p class="lede">Of every time a tracked brand was named, how much was you.</p>
+    <p class="lede">Of every time a tracked brand was named in this window, how much was you.</p>
     <div class="donut-wrap">
       {{.Donut}}
       <ul class="legend-col">
         {{range .DonutLegend}}<li class="{{.Class}}{{if .IsOwn}} own{{end}}"><span class="swatch"></span><span class="legend-name">{{.Name}}</span><span class="num">{{.Value}}</span></li>{{end}}
+        {{with .DonutRest}}
+        <li class="s-rest">
+          <details class="legend-more">
+            <summary><span class="swatch"></span><span class="legend-name">{{.Name}}</span><span class="num">{{.Value}}</span></summary>
+            <ul class="legend-col legend-tail">
+              {{range $.DonutTail}}<li class="s-rest"><span class="swatch"></span><span class="legend-name">{{.Name}}</span><span class="num">{{.Value}}</span></li>{{end}}
+            </ul>
+          </details>
+        </li>
+        {{end}}
       </ul>
     </div>
   </section>
 
   <section class="card span-2">
     <div class="card-head"><h2>By engine</h2></div>
-    <p class="lede">Where each brand wins. One bar per brand, one group per engine. Hatched labels are scraped surfaces.</p>
+    <p class="lede">Where each brand stands on each engine. Your dot is the large one; the number on the right is your share of that engine's answers. Grey dots are the brands outside the top seven. Rows run from your strongest engine to your weakest.</p>
     {{.Engines}}
   </section>
 </div>
@@ -169,7 +182,7 @@
 <div class="split">
   <section class="card">
     <div class="card-head"><h2>Who gets cited</h2></div>
-    <p class="lede">Each bar is one day's citations, split by what kind of site they point at.</p>
+    <p class="lede">Each bar is one day's citations, split by what kind of site they point at. The number on top is your share; the number under the date is how many citations that day had.</p>
     {{if .Mix}}
       <div class="mix-wrap">
         {{.Mix}}

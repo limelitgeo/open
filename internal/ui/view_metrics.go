@@ -52,6 +52,11 @@ type KPIView struct {
 	Count     string
 	Total     string
 	TotalHref string
+	// Spark is the number's own history, drawn under it. Only the lead
+	// card has one today.
+	Spark template.HTML
+	// Range is the spread behind the spark: "11 days, 0 to 72%".
+	Range string
 }
 
 // StandingView is one brand in the ranking.
@@ -217,9 +222,19 @@ type MeasurePage struct {
 	// RaceOmitted is how many tracked brands the race does not draw. Stated
 	// on the page so a capped chart never reads as the whole field.
 	RaceOmitted int
-	// Donut is share of voice as parts of a whole.
+	// RaceBrands is every tracked brand with a point in the window, and
+	// RaceAnswers is how many answers the property's line rests on.
+	RaceBrands  int
+	RaceAnswers int
+	// ThinN is the sample under which a point is drawn hollow, for the copy.
+	ThinN int
+	// Donut is share of voice as parts of a whole. DonutLegend names the
+	// race's brands; DonutRest is the one slice that sums everyone else, and
+	// DonutTail lists who is in it.
 	Donut       template.HTML
 	DonutLegend []LegendItem
+	DonutRest   *LegendItem
+	DonutTail   []LegendItem
 	// Engines is visibility by engine, one bar per brand.
 	Engines       template.HTML
 	EnginesLegend []LegendItem
@@ -284,6 +299,27 @@ func pct(v float64) string {
 	return fmt.Sprintf("%.0f", v)
 }
 
+// thousands writes an integer with separators: 1,297 not 1297. fmt has no
+// verb for it.
+func thousands(n int) string {
+	s := fmt.Sprintf("%d", n)
+	neg := strings.HasPrefix(s, "-")
+	if neg {
+		s = s[1:]
+	}
+	var b strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteByte(',')
+		}
+		b.WriteRune(c)
+	}
+	if neg {
+		return "-" + b.String()
+	}
+	return b.String()
+}
+
 // answersWord keeps the denominator readable at n=1.
 func answersWord(n int) string {
 	if n == 1 {
@@ -304,9 +340,9 @@ func delta(now, before float64, hadPrevious bool) (string, string) {
 	diff := now - before
 	switch {
 	case diff > 0.05:
-		return "+" + pct(diff) + " pts", "up"
+		return "\u25b2 " + pct(diff) + " pts", "up"
 	case diff < -0.05:
-		return "-" + pct(-diff) + " pts", "down"
+		return "\u25bc " + pct(-diff) + " pts", "down"
 	default:
 		return "no change", "flat"
 	}

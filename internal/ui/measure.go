@@ -13,6 +13,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -79,6 +80,7 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 		Windows:    windowOptions("/overview", days),
 		HasData:    ov.Answers > 0,
 		LowN:       ov.LowN,
+		ThinN:      thinN,
 		Answers:    ov.Answers,
 		Counts:     CountsView{Prompts: counts.Prompts, Competitors: counts.Competitors, Targets: counts.Targets, Chats: counts.Chats},
 	}
@@ -132,7 +134,7 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 			Count:       fmt.Sprintf("%d", ov.AnswersWithMentions),
 			Total:       fmt.Sprintf("%d", ov.Answers),
 			TotalHref:   "/chats",
-			Denominator: fmt.Sprintf("%d of %s", ov.AnswersWithMentions, answersWord(ov.Answers)),
+			Denominator: fmt.Sprintf("%s of %s answers", thousands(ov.AnswersWithMentions), thousands(ov.Answers)),
 			Delta:       deltaText, DeltaKind: deltaKind, Emphasis: true,
 			Help: "The share of answers that name you. Branded prompts are left out, and an answer surface that did not render is left out entirely.",
 		},
@@ -173,6 +175,14 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 		points = append(points, TrendPoint{Day: p.Day, Value: p.Visibility, N: p.Answers})
 	}
 	page.Trend, page.TrendPoints = TrendChart(points), len(points)
+	if len(points) >= 3 {
+		lo, hi := points[0].Value, points[0].Value
+		for _, p := range points {
+			lo, hi = math.Min(lo, p.Value), math.Max(hi, p.Value)
+		}
+		page.KPIs[0].Spark = SparkArea(points)
+		page.KPIs[0].Range = fmt.Sprintf("%d days, %s to %s%%", len(points), pct(lo), pct(hi))
+	}
 
 	standings, err := a.metrics.Standings(ctx, window)
 	if err != nil {
@@ -203,17 +213,40 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 	a.write(w, r, "overview", page)
 }
 
-// richCharts fills the competitor race, the donut, the engine bars, the
+// richCharts fills the competitor race, the donut, the engine strips, the
 // citation mix and the fan-out cloud. Every one is drawn from rows the runner
 // wrote; nothing here fills a gap or invents a series.
 func (a *App) richCharts(ctx context.Context, window metrics.Window, page *MeasurePage, standings []metrics.BrandStanding) error {
-	// One stable name set for colour assignment across every chart on the
-	// page, so a brand is the same colour in the race, the donut and the bars.
-	names := make([]string, 0, len(standings))
+	// The race carries the property plus the leading rivals. Twenty lines
+	// is spaghetti; seven reads. The cut is by current visibility in
+	// standings order and it is stated on the page, because a chart that
+	// silently drops series reads as "these are all of them". The same
+	// seven are the donut's named slices and the hued dots on the engine
+	// strips, so one vocabulary of colour runs through the page.
+	const raceRivals = 6
+	inRace := map[string]bool{}
+	var raceNames []string
 	for _, b := range standings {
-		if !b.IsOwn {
-			names = append(names, b.Name)
+		if b.IsOwn {
+			inRace[b.Name] = true
+			continue
 		}
+		if len(raceNames) < raceRivals {
+			inRace[b.Name] = true
+			raceNames = append(raceNames, b.Name)
+		}
+	}
+	// Hues are assigned alphabetically among the drawn rivals, so six brands
+	// get six distinct hues. A brand outside the race is drawn in the field
+	// grey wherever it appears.
+	classOf := func(name string, isOwn bool) string {
+		if isOwn {
+			return "s-own"
+		}
+		if !inRace[name] {
+			return "s-field"
+		}
+		return seriesClass(name, raceNames, false)
 	}
 
 	// The race.
@@ -222,59 +255,71 @@ func (a *App) richCharts(ctx context.Context, window metrics.Window, page *Measu
 		return err
 	}
 	byBrand := map[string]*RaceSeries{}
-	var order []string
 	for _, bd := range brandDays {
 		s, ok := byBrand[bd.Name]
 		if !ok {
-			s = &RaceSeries{Name: bd.Name, IsOwn: bd.IsOwn, Class: seriesClass(bd.Name, names, bd.IsOwn)}
+			s = &RaceSeries{Name: bd.Name, IsOwn: bd.IsOwn, Class: classOf(bd.Name, bd.IsOwn)}
 			byBrand[bd.Name] = s
-			order = append(order, bd.Name)
 		}
 		s.Points = append(s.Points, TrendPoint{Day: bd.Day, Value: bd.Visibility, N: bd.Answers})
 		s.Last = bd.Visibility
 	}
-	// The race carries the property plus the leading competitors. Twenty
-	// lines is spaghetti; eight reads. The cut is by current visibility and
-	// it is stated on the page, because a chart that silently drops series
-	// reads as "these are all of them".
-	const raceMax = 8
-	drawn := map[string]bool{}
-	race := make([]RaceSeries, 0, raceMax)
+	race := make([]RaceSeries, 0, raceRivals+1)
 	for _, b := range standings {
 		s, ok := byBrand[b.Name]
-		if !ok {
+		if !ok || !inRace[b.Name] {
 			continue
 		}
-		if s.IsOwn || len(race) < raceMax-1 || (len(race) < raceMax && !hasOwn(standings)) {
-			race = append(race, *s)
-			drawn[b.Name] = true
+		race = append(race, *s)
+		page.RaceLegend = append(page.RaceLegend, LegendItem{Name: s.Name, Class: s.Class, IsOwn: s.IsOwn, Value: pct(s.Last) + "%"})
+		if s.IsOwn {
+			for _, p := range s.Points {
+				page.RaceAnswers += p.N
+			}
 		}
 	}
-	for _, b := range standings {
-		if s, ok := byBrand[b.Name]; ok && drawn[b.Name] {
-			page.RaceLegend = append(page.RaceLegend, LegendItem{Name: s.Name, Class: s.Class, IsOwn: s.IsOwn, Value: pct(s.Last) + "%"})
-		}
-	}
+	page.RaceBrands = len(byBrand)
 	page.RaceOmitted = len(byBrand) - len(race)
 	page.Race = RaceChart(race)
 
-	// The donut.
+	// The donut. The race's brands are named slices; every other brand
+	// with a share is summed into one "other brands" slice, because at
+	// 2*pi*80 units of ring a 0.3% share is a quarter of a unit long and
+	// draws as nothing while sitting in the legend as if it were there.
 	var (
-		slices   []DonutSlice
-		ownShare float64
-		ownSeen  bool
+		slices []DonutSlice
+		own    DonutOwn
+		rest   DonutSlice
 	)
 	for _, b := range standings {
-		cls := seriesClass(b.Name, names, b.IsOwn)
+		own.Total += b.Mentions
 		if b.IsOwn {
-			ownShare, ownSeen = b.ShareOfVoice, b.Mentions > 0
+			own.Share, own.Mentions, own.HasData = b.ShareOfVoice, b.Mentions, b.Mentions > 0
+		}
+		if inRace[b.Name] {
+			cls := classOf(b.Name, b.IsOwn)
+			if b.ShareOfVoice > 0 {
+				slices = append(slices, DonutSlice{Name: b.Name, IsOwn: b.IsOwn, Class: cls, Share: b.ShareOfVoice})
+			}
+			page.DonutLegend = append(page.DonutLegend, LegendItem{Name: b.Name, Class: cls, IsOwn: b.IsOwn, Value: pct(b.ShareOfVoice) + "%"})
+			continue
 		}
 		if b.ShareOfVoice > 0 {
-			slices = append(slices, DonutSlice{Name: b.Name, IsOwn: b.IsOwn, Class: cls, Share: b.ShareOfVoice})
+			rest.Share += b.ShareOfVoice
+			rest.Count++
+			page.DonutTail = append(page.DonutTail, LegendItem{Name: b.Name, Class: "s-rest", Value: pct(b.ShareOfVoice) + "%"})
 		}
-		page.DonutLegend = append(page.DonutLegend, LegendItem{Name: b.Name, Class: cls, IsOwn: b.IsOwn, Value: pct(b.ShareOfVoice) + "%"})
 	}
-	page.Donut = Donut(slices, ownShare, ownSeen)
+	if rest.Count > 0 {
+		rest.Name = fmt.Sprintf("%d other brands", rest.Count)
+		if rest.Count == 1 {
+			rest.Name = page.DonutTail[0].Name
+		}
+		rest.Class, rest.Rest = "s-rest", true
+		slices = append(slices, rest)
+		page.DonutRest = &LegendItem{Name: rest.Name, Class: "s-rest", Value: pct(rest.Share) + "%"}
+	}
+	page.Donut = Donut(slices, own)
 
 	// Visibility by engine.
 	cells, err := a.metrics.EngineBreakdown(ctx, window)
@@ -292,7 +337,7 @@ func (a *App) richCharts(ctx context.Context, window metrics.Window, page *Measu
 			groups = append(groups, EngineGroup{Engine: c.Engine, Access: c.Access, Answers: c.Answers})
 		}
 		groups[gi].Bars = append(groups[gi].Bars, EngineBar{
-			Name: c.Name, IsOwn: c.IsOwn, Class: seriesClass(c.Name, names, c.IsOwn),
+			Name: c.Name, IsOwn: c.IsOwn, Class: classOf(c.Name, c.IsOwn),
 			Visibility: c.Visibility, Mentions: c.Mentions,
 		})
 	}
@@ -674,13 +719,4 @@ func shortTime(ts string) string {
 		return ts[:16]
 	}
 	return ts
-}
-
-func hasOwn(standings []metrics.BrandStanding) bool {
-	for _, b := range standings {
-		if b.IsOwn {
-			return true
-		}
-	}
-	return false
 }

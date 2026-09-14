@@ -594,7 +594,7 @@ func TestRichChartsNeverEmitAColour(t *testing.T) {
 		{Name: "Acme", IsOwn: true, Class: "s-own", Points: []TrendPoint{{Day: "a", Value: 0, N: 4}, {Day: "b", Value: 25, N: 4}}},
 		{Name: "Rival", Class: "s-1", Points: []TrendPoint{{Day: "a", Value: 50, N: 4}, {Day: "b", Value: 75, N: 4}}},
 	}))
-	donut := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 60}, {Name: "Acme", IsOwn: true, Class: "s-own", Share: 40}}, 40, true))
+	donut := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 60}, {Name: "Acme", IsOwn: true, Class: "s-own", Share: 40}}, DonutOwn{Share: 40, Mentions: 4, Total: 10, HasData: true}))
 	bars := string(EngineBars([]EngineGroup{{Engine: "chatgpt", Access: "api", Answers: 4, Bars: []EngineBar{
 		{Name: "Acme", IsOwn: true, Class: "s-own", Visibility: 0}, {Name: "Rival", Class: "s-1", Visibility: 100},
 	}}}))
@@ -651,7 +651,7 @@ func TestSeriesClassIsStableAcrossFiltering(t *testing.T) {
 }
 
 func TestDonutSaysNeverNamedRatherThanShowingAnEmptyRing(t *testing.T) {
-	out := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 100}}, 0, false))
+	out := string(Donut([]DonutSlice{{Name: "Rival", Class: "s-1", Share: 100}}, DonutOwn{Total: 10}))
 	if !strings.Contains(out, "never named") {
 		t.Error("a property with no mentions must be labelled, not left as a blank centre")
 	}

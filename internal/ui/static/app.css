@@ -73,21 +73,43 @@
   --mark-rival: #e9eaf2;
 
   /* Series colours for competitor charts. Eight hues chosen so the first four
-   * stay furthest apart under protanopia and deuteranopia, assigned to brands
-   * ALPHABETICALLY and never by rank: a brand's colour must not change the
-   * week it overtakes another, or two screenshots stop being comparable.
-   * The property never takes one of these; it is always --brand. */
-  --series-1: #e0851f;
-  --series-2: #2a9d8f;
-  --series-3: #c2185b;
-  --series-4: #7c4dff;
-  --series-5: #3f9142;
-  --series-6: #0288d1;
-  --series-7: #8d6e63;
-  --series-8: #f4511e;
+   * stay furthest apart under protanopia and deuteranopia, tuned a step
+   * quieter than the badges so the property's line is the loudest thing on
+   * the page. They are assigned ALPHABETICALLY among the brands a chart
+   * draws, never by rank, so within one page a brand is one colour on every
+   * chart. Only the top six rivals get a hue; everyone else is drawn in
+   * --chart-field, so a brand crossing that boundary changes from a hue to
+   * grey and nothing else. The property never takes one of these. */
+  --series-1: #c98a2e;
+  --series-2: #2e9a8c;
+  --series-3: #c0466f;
+  --series-4: #7c5cc4;
+  --series-5: #4a9a4e;
+  --series-6: #2f86c2;
+  --series-7: #8f7468;
+  --series-8: #d9633b;
+
+  /* Chart furniture. The property's line, the hairline grid, the baseline,
+   * the field grey for unranked brands, the hover cursor, the shaded span
+   * nobody measured, and the area under the property's line. */
+  --chart-own: #5a5af0;
+  --chart-grid: #eef0f4;
+  --chart-base: #d3d6dd;
+  --chart-field: #c2c6cf;
+  --chart-cursor: #14141c;
+  --plot-gap: #f6f6f9;
+  --area-top: rgb(90 90 240 / 24%);
+  --area-bottom: rgb(90 90 240 / 0%);
+  --own-glow: transparent;
+  --tip-bg: #ffffff;
+  --tip-border: #e6e8ec;
+  --tip-shadow: 0 6px 24px rgb(20 20 28 / 10%), 0 1px 3px rgb(20 20 28 / 6%);
 
   /* Citation source classes carry fixed colours on every surface, so a
-   * social source is the same colour in the mix chart and on a badge. */
+   * social source is the same colour in the mix chart and on a badge. The
+   * one exception is "other", which the mix chart draws in --chart-field so
+   * its large grey block stays quiet behind the classes that mean
+   * something. */
   --src-own: var(--brand);
   --src-competitor: #c2185b;
   --src-social: #e0851f;
@@ -101,6 +123,10 @@
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
+/* Dark follows the system setting. Nothing writes data-theme="dark" yet;
+ * when a stored preference does, this block needs a twin under
+ * :root[data-theme="dark"] with the same tokens, or the toggle will flip the
+ * chrome and leave the charts on the light palette. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
@@ -129,14 +155,27 @@
     --mark-own: #6b5a12;
     --mark-rival: #2a2c38;
 
-    --series-1: #f0a04b;
-    --series-2: #4fc3b0;
-    --series-3: #f06292;
-    --series-4: #b39dff;
-    --series-5: #66bb6a;
-    --series-6: #4fc3f7;
-    --series-7: #bcaaa4;
-    --series-8: #ff8a65;
+    --series-1: #e0a054;
+    --series-2: #56bfb0;
+    --series-3: #e07298;
+    --series-4: #ab98e8;
+    --series-5: #7ec081;
+    --series-6: #62b4e8;
+    --series-7: #bfa89e;
+    --series-8: #ef8a66;
+
+    --chart-own: #9d9dff;
+    --chart-grid: #1f1f28;
+    --chart-base: #35353f;
+    --chart-field: #4a4e5a;
+    --chart-cursor: #f2f2f5;
+    --plot-gap: #131319;
+    --area-top: rgb(157 157 255 / 32%);
+    --area-bottom: rgb(157 157 255 / 0%);
+    --own-glow: rgb(157 157 255 / 38%);
+    --tip-bg: #1f1f27;
+    --tip-border: #35353f;
+    --tip-shadow: 0 6px 24px rgb(0 0 0 / 50%), 0 1px 3px rgb(0 0 0 / 40%);
 
     --src-own: var(--brand-strong);
     --src-competitor: #f06292;
@@ -469,11 +508,16 @@ details.card > summary:hover { color: var(--brand-strong); }
 /* KPIs. The lead card is visually heavier because one number is the point of
    the page and four equal cards say nothing is. */
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+/* The overview's four cards: the lead takes the double column. Other pages
+   (citations by type) have no lead and any number of cards. */
+.kpis-lead { grid-template-columns: 2fr 1fr 1fr 1fr; }
 .kpi {
   background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
   padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
 }
-.kpi-lead { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+/* The lead card is wider and its number larger, and it carries the history
+   under it. That is the hierarchy; it no longer needs a brand-coloured ring. */
+.kpi-lead { border-color: var(--rule); box-shadow: var(--shadow); }
 .kpi-label {
   font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--ink-3); display: flex; align-items: center; gap: 5px;
@@ -486,17 +530,19 @@ details.card > summary:hover { color: var(--brand-strong); }
   font-size: 34px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.05;
   font-variant-numeric: tabular-nums; color: var(--ink);
 }
-.kpi-lead .kpi-value .num { font-size: 42px; }
+.kpi-lead .kpi-value .num { font-size: 44px; letter-spacing: -0.035em; }
 .kpi-value .unit { font-size: 17px; font-weight: 600; color: var(--ink-3); }
 .kpi-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .denom { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.delta {
-  font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 20px;
-  font-variant-numeric: tabular-nums;
-}
-.delta-up { background: var(--pos-bg); color: var(--pos-fg); }
-.delta-down { background: var(--neg-bg); color: var(--neg-fg); }
-.delta-flat { background: var(--bg-2); color: var(--ink-3); }
+.delta { font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.delta-up { color: var(--pos-fg); }
+.delta-down { color: var(--neg-fg); }
+.delta-flat { color: var(--ink-4); }
+.kpi-range { margin-left: auto; font-size: 11px; color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.kpi-spark { display: block; width: 100%; height: 44px; margin-top: 6px; }
+.kpi-spark .spark-area { fill: url(#ll-area-own); }
+.kpi-spark .spark-line { fill: none; stroke: var(--chart-own); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.kpi-spark .spark-line.bridge { stroke-dasharray: 3 5; opacity: 0.6; }
 
 /* The formula, on hover and on keyboard focus. The thing no competitor shows
    and the thing that makes a number checkable. */
@@ -568,9 +614,9 @@ th.grid-col .badge { margin-top: 3px; }
 .cell {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   height: 46px; border-radius: var(--radius-sm); text-decoration: none;
-  font-variant-numeric: tabular-nums; transition: transform 110ms ease, box-shadow 110ms ease;
+  font-variant-numeric: tabular-nums; transition: transform 120ms ease, box-shadow 120ms ease;
 }
-a.cell:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+a.cell:hover { transform: translateY(-1px); box-shadow: var(--tip-shadow); }
 .cell-value { font-size: 13px; font-weight: 650; }
 .cell-sub { font-size: 9.5px; opacity: 0.75; font-weight: 500; }
 /* An empty cell is a prompt that was never asked of that engine, not a zero.
@@ -646,7 +692,9 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 /* Charts. Inline SVG, so they inherit the page's tokens and follow the theme
    without a second palette. */
 .chart { width: 100%; height: auto; display: block; }
-.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart text { font-variant-numeric: tabular-nums; }
+.chart .grid { stroke: var(--chart-grid); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .grid-base { stroke: var(--chart-base); }
 .chart .line { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .chart .area { fill: var(--brand); opacity: 0.1; stroke: none; }
 .chart .dot { fill: var(--brand); stroke: var(--surface); stroke-width: 2; }
@@ -664,6 +712,7 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 
 @media (max-width: 1080px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpi-lead { grid-column: 1 / -1; }
   .split, .split-wide { grid-template-columns: 1fr; }
 }
 @media (max-width: 860px) {
@@ -703,6 +752,7 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 .hm-none {
   background: var(--cell-empty); color: var(--ink-4);
   border: 1px dashed var(--rule-2); cursor: default;
+  box-shadow: inset 0 0 0 1px var(--chart-grid);
 }
 .hm-0 { background: var(--cell-0); color: var(--cell-0-ink); box-shadow: inset 0 0 0 1px var(--cell-ring); }
 .hm-1 { background: var(--cell-1); color: var(--cell-1-ink); }
@@ -750,7 +800,7 @@ tr.row-branded { opacity: 0.72; }
 .kpi-count .of { font-size: 15px; color: var(--ink-3); font-weight: 500; }
 .kpi-count .total { color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; }
 .kpi-count a.total:hover { color: var(--brand-strong); }
-.delta-none { background: var(--bg-2); color: var(--ink-4); font-weight: 500; }
+.delta-none { color: var(--ink-4); font-weight: 500; }
 
 .spark-line { stroke: var(--brand); stroke-width: 1.5; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .spark-dot { fill: var(--brand); }
@@ -758,11 +808,11 @@ tr.row-branded { opacity: 0.72; }
 
 /* ---------------------------------------------------------------------------
    The rich charts. Series colours come from the tokens above; the classes
-   below only bind a class name to a token, so a brand is one colour in the
-   race, the donut and the bars.
+   below bind them to --c so one brand is one colour across the race, the
+   donut and the engine strips. Everything animated is entry motion only,
+   gated on prefers-reduced-motion, and never changes a value.
    --------------------------------------------------------------------------- */
-
-.s-own { --c: var(--brand); }
+.s-own { --c: var(--chart-own); }
 .s-1 { --c: var(--series-1); }
 .s-2 { --c: var(--series-2); }
 .s-3 { --c: var(--series-3); }
@@ -771,57 +821,156 @@ tr.row-branded { opacity: 0.72; }
 .s-6 { --c: var(--series-6); }
 .s-7 { --c: var(--series-7); }
 .s-8 { --c: var(--series-8); }
+.s-rest, .s-field { --c: var(--chart-field); }
 
-/* The race. Competitors at stroke 2, the property at 3.5 and drawn last so it
-   stays on top: the redundant encoding a colourblind reader needs. */
-.chart-race { max-height: 220px; }
-.chart-race .series.line { fill: none; stroke: var(--c); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
-.chart-race .series.dot { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; }
-.chart-race .series-own.line { stroke-width: 3.5; opacity: 1; }
-.chart-race .series-own.dot { stroke-width: 2; }
-.chart .axis-y { font-size: 9px; }
+/* The gradient the areas fill with. The defs SVG is kept in flow but
+   sized to nothing; display:none is the path where gradient resolution gets
+   flaky. */
+.chart-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.chart-defs .stop-a { stop-color: var(--area-top); }
+.chart-defs .stop-b { stop-color: var(--area-bottom); }
 
-/* Legends are real lists, so they select, copy and read aloud. */
+/* The race. */
+.chart-wrap { position: relative; }
+.chart-race .gap-band { fill: var(--plot-gap); }
+.chart-race .tick { stroke: var(--chart-base); stroke-width: 1; }
+.chart-race .axis-y, .chart-race .axis-x, .chart-race .axis-strip { font-size: 10.5px; fill: var(--ink-4); }
+.chart-race .axis-strip { font-size: 9.5px; }
+.chart-race .n-bar { fill: var(--chart-field); opacity: 0.55; }
+.chart-race .n-bar.n-low { fill: var(--warn-fg); opacity: 0.55; }
+.chart-race .series.line { fill: none; stroke: var(--c); stroke-width: 1.25; opacity: 0.45; stroke-linejoin: round; stroke-linecap: round; transition: opacity 160ms ease, stroke-width 160ms ease; }
+.chart-race .rival-lead .series.line { stroke-width: 1.5; opacity: 0.7; }
+.chart-race .series-own.line { stroke-width: 2.25; opacity: 1; filter: drop-shadow(0 0 6px var(--own-glow)); }
+.chart-race .series.line.bridge { stroke-dasharray: 3 5; opacity: 0.4; filter: none; }
+.chart-race .series-own.line.bridge { opacity: 0.7; }
+.chart-race .area-own { fill: url(#ll-area-own); stroke: none; }
+.chart-race .rivals .dot { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; opacity: 0; transition: opacity 120ms ease; }
+.chart-race .rivals .dot.is-on { opacity: 1; }
+.chart-race .own .dot { fill: var(--c); stroke: var(--surface); stroke-width: 2; }
+.chart-race .own .dot.dot-thin { fill: var(--surface); stroke: var(--c); stroke-width: 1.5; }
+.chart-race .rivals .dot.dot-thin { fill: var(--surface); stroke: var(--c); }
+.chart-race .halo { fill: var(--chart-own); opacity: 0.18; }
+.chart-race .lead { stroke: var(--c); stroke-width: 1; opacity: 0.5; }
+.chart-race .end { font-size: 11.5px; fill: var(--c); font-weight: 600; }
+.chart-race .end .end-name { fill: var(--ink-2); font-weight: 500; }
+.chart-race .end-own { font-weight: 700; }
+.chart-race .end-own .end-name { fill: var(--ink); font-weight: 650; }
+.chart-race .cursor { stroke: var(--chart-cursor); stroke-width: 1; opacity: 0; stroke-dasharray: 2 3; }
+.chart-race.is-hover .cursor { opacity: 0.55; }
+.chart-race.is-hover .series.line:not(.series-own) { opacity: 0.3; }
+
+/* The hover card. Built by charts.js from values Go wrote onto the dots. */
+.tip {
+  position: absolute; z-index: 5; pointer-events: none; min-width: 180px; max-width: 260px;
+  background: var(--tip-bg); border: 1px solid var(--tip-border); border-radius: var(--radius-sm);
+  box-shadow: var(--tip-shadow); padding: 8px 10px; font-size: 12px; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.tip-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+.tip-day { font-weight: 650; }
+.tip-n { color: var(--ink-3); font-size: 11px; }
+.tip-n.tip-thin { color: var(--warn-fg); }
+.tip-row { display: flex; align-items: center; gap: 7px; padding: 1.5px 0; color: var(--ink-2); }
+.tip-row .swatch { width: 8px; height: 8px; border-radius: 2px; background: var(--c); flex: none; }
+.tip-row .tip-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tip-row .tip-val { font-weight: 600; color: var(--ink); }
+.tip-row.own { color: var(--ink); font-weight: 600; }
+
+/* The legend under the race is for screen readers and phones; on a wide
+   screen the end labels carry it. */
 .legend-row { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; }
+@media (min-width: 761px) { .chart-wrap[data-chart="race"] + .legend-row { display: none; } }
 .legend-row li, .legend-col li { display: flex; align-items: center; gap: 7px; color: var(--ink-2); }
 .legend-row .num, .legend-col .num { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
 .legend-row li.own, .legend-col li.own { color: var(--ink); font-weight: 600; }
 .swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
 .legend-col { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px; min-width: 0; }
 .legend-col .legend-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legend-more { width: 100%; }
+.legend-more summary { display: flex; align-items: center; gap: 7px; cursor: pointer; list-style: none; }
+.legend-more summary::-webkit-details-marker { display: none; }
+.legend-more summary .legend-name { flex: 1; }
+.legend-more summary::after { content: "+"; color: var(--ink-4); font-weight: 600; margin-left: 4px; }
+.legend-more[open] summary::after { content: "\2013"; }
+.legend-tail { margin: 6px 0 0 17px; gap: 4px; font-size: 11.5px; color: var(--ink-3); }
 
 /* The donut. */
-.donut-wrap { display: flex; align-items: center; gap: 16px; }
-.chart-donut { width: 150px; height: 150px; flex: none; }
+.donut-wrap { display: flex; align-items: center; gap: 18px; }
+.chart-donut { width: 180px; height: 180px; flex: none; }
 .donut-track { stroke: var(--bg-2); }
-.chart-donut .arc { stroke: var(--c); transition: stroke-width 120ms ease; }
-.chart-donut .arc:hover { stroke-width: 26; }
-.donut-value { font-size: 26px; font-weight: 700; fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-.donut-label { font-size: 10px; fill: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.chart-donut .arc { stroke: var(--c); stroke-linecap: butt; transition: stroke-width 140ms ease, opacity 140ms ease; }
+.chart-donut .arc.series-own { stroke-width: 20; }
+.chart-donut:hover .arc { opacity: 0.5; }
+.chart-donut .arc:hover { opacity: 1; stroke-width: 22; }
+.donut-value { font-size: 32px; font-weight: 650; fill: var(--ink); letter-spacing: -0.03em; }
+.donut-label { font-size: 10.5px; fill: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+.donut-denom { font-size: 11px; fill: var(--ink-4); }
 
-/* Visibility by engine. */
-.chart-engines { max-height: 230px; }
-.chart-engines .bar { fill: var(--c); opacity: 0.9; }
-.chart-engines .bar.series-own { opacity: 1; }
-.chart-engines .bar-zero { opacity: 0.45; }
-.chart-engines .axis-sub { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.chart-engines .axis-api { fill: var(--info-fg); }
-.chart-engines .axis-scraped { fill: var(--warn-fg); }
+/* The engine strips. */
+.chart-engines .grid { stroke-width: 1; }
+.chart-engines .track { stroke: var(--chart-base); stroke-width: 1; }
+.chart-engines .axis { font-size: 10px; }
+.chart-engines .eng { font-size: 12.5px; font-weight: 550; fill: var(--ink); }
+.chart-engines .eng-sub { font-size: 10.5px; fill: var(--ink-4); }
+.chart-engines .eng-sub .thin { fill: var(--warn-fg); }
+.chart-engines .access { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.chart-engines .access-api { fill: var(--info-fg); }
+.chart-engines .access-scraped { fill: var(--warn-fg); }
+.chart-engines .pt { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; transition: opacity 120ms ease; }
+.chart-engines .pt-field { fill: var(--chart-field); stroke-width: 1; }
+.chart-engines .pt-own { stroke-width: 2; }
+.chart-engines .pt-zero { fill: var(--surface); stroke: var(--c); stroke-width: 1.5; }
+.chart-engines .pt-own.pt-zero { stroke-dasharray: 2 2; stroke-width: 2; }
+.chart-engines .pt-field.pt-zero { stroke: var(--chart-field); }
+.chart-engines .row-thin .pt { opacity: 0.6; }
+.chart-engines .val { font-size: 13px; font-weight: 650; fill: var(--chart-own); }
+.chart-engines .val-zero { fill: var(--ink-4); }
+.chart-engines .val-sub { font-size: 10.5px; fill: var(--ink-4); }
+.chart-engines .lead-val { font-size: 10.5px; font-weight: 600; fill: var(--c); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.chart-engines .ptlabel { font-size: 11px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; opacity: 0; pointer-events: none; }
+.chart-engines.has-focus .pt { opacity: 0.18; }
+.chart-engines.has-focus .pt.is-on { opacity: 1; }
+.chart-engines.has-focus .ptlabel { opacity: 1; }
 
 /* The citation mix: fixed colour per source class on every surface. */
-.mix-wrap { display: flex; align-items: flex-start; gap: 16px; }
-.chart-mix { max-height: 180px; flex: 1; min-width: 0; }
+.mix-wrap { display: flex; flex-direction: column; gap: 10px; }
+.chart-mix { width: 100%; min-width: 0; }
+.mix-wrap .legend-col { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
+.mix-wrap .legend-col .legend-name { flex: none; }
+.chart-mix .mix { stroke: var(--surface); stroke-width: 1; }
+.chart-mix .col { transition: opacity 140ms ease; }
+.chart-mix:hover .col:not(:hover) { opacity: 0.5; }
+.chart-mix .mix-val { font-size: 10px; font-weight: 650; fill: var(--chart-own); }
+.chart-mix .axis-sub { font-size: 9px; }
 .mix-own { fill: var(--src-own); }
 .mix-competitor { fill: var(--src-competitor); }
 .mix-social { fill: var(--src-social); }
 .mix-informational { fill: var(--src-informational); }
-.mix-other { fill: var(--src-other); }
+.mix-other { fill: var(--chart-field); }
 .mix-legend-own { --c: var(--src-own); }
 .mix-legend-competitor { --c: var(--src-competitor); }
 .mix-legend-social { --c: var(--src-social); }
 .mix-legend-informational { --c: var(--src-informational); }
-.mix-legend-other { --c: var(--src-other); }
+.mix-legend-other { --c: var(--chart-field); }
 .legend-col li[class^="mix-legend"] .legend-name { text-transform: capitalize; }
+
+/* Entry motion. Nothing here changes a value, only when it appears. Under
+   reduced motion everything is static at its final state. pathLength="1"
+   on the drawn paths keeps the dash arithmetic unit-free. */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-race .series-own.line:not(.bridge) { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chart-draw 1100ms cubic-bezier(.2,.7,.2,1) 80ms forwards; }
+  .chart-race .area-own { opacity: 0; animation: chart-in 700ms ease 520ms forwards; }
+  .chart-race .rivals, .chart-race .ends, .chart-race .own .dot, .chart-race .own .bridge, .chart-race .n-strip { opacity: 0; animation: chart-in 600ms ease 760ms forwards; }
+  .chart-race .halo { transform-box: fill-box; transform-origin: center; animation: chart-halo 2600ms ease-out 1500ms infinite; }
+  .kpi-spark .spark-area { opacity: 0; animation: chart-in 600ms ease 400ms forwards; }
+  .chart-donut .arc { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chart-draw calc(var(--t, 1) * 700ms) linear calc(var(--d, 0) * 700ms) forwards; }
+  .chart-engines .pt-own { transform-box: fill-box; transform-origin: center; animation: chart-pop 320ms cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--k, 0) * 60ms + 200ms); }
+}
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+@keyframes chart-in { to { opacity: 1; } }
+@keyframes chart-halo { 0% { transform: scale(.6); opacity: .32; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
+@keyframes chart-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
 .bar-own { background: var(--src-own); }
 .bar-competitor { background: var(--src-competitor); }
 .bar-social { background: var(--src-social); }
@@ -833,7 +982,7 @@ tr.row-branded { opacity: 0.72; }
 .cloud span { display: inline-block; padding: 0 2px; color: var(--ink); cursor: default; transition: color 120ms ease; }
 .cloud span:hover { color: var(--brand-strong); }
 
-.split-3 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+.split-3 { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.85fr); }
 .span-2 { min-width: 0; }
 @media (max-width: 1080px) { .split-3 { grid-template-columns: 1fr; } .donut-wrap { flex-wrap: wrap; } }
 

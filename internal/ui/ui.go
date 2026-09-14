@@ -87,6 +87,7 @@ func StaticHandler() http.Handler {
 
 func funcs() template.FuncMap {
 	return template.FuncMap{
-		"join": strings.Join,
+		"join":      strings.Join,
+		"thousands": thousands,
 	}
 }
