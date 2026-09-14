@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -190,6 +191,14 @@ func cmdServe(ctx context.Context, args []string) error {
 // dependency and a syntax to learn for a choice that is really "how often".
 // Anything else is `limelit run` from the system's own cron, which is also
 // the only way to schedule when the dashboard is not running.
+//
+// The first pass is due when the last one is older than the interval, or
+// when none has ever run. A bare ticker would fire a full interval after the
+// process started, so a host that restarts the process inside that interval
+// (a container platform does, on every deploy) would never run at all; the
+// demo sat on a month-old seed for exactly that reason. A short grace before
+// the first pass lets the server come up first and keeps a restart loop from
+// spending a run per restart.
 func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, db *store.DB, log *slog.Logger) func() {
 	var every time.Duration
 	switch strings.ToLower(strings.TrimSpace(cfg.Schedule)) {
@@ -205,15 +214,17 @@ func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, 
 		return func() {}
 	}
 
-	log.Info("scheduling automatic runs", "every", every)
-	ticker := time.NewTicker(every)
+	last, err := db.LatestEvaluation(ctx)
+	first := firstDue(last, err, every, scheduleGrace, time.Now())
+	log.Info("scheduling automatic runs", "every", every, "first", first.Round(time.Second))
+	timer := time.NewTimer(first)
 	go func() {
-		defer ticker.Stop()
+		defer timer.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-ticker.C:
+			case <-timer.C:
 				ceiling := cfg.Limits.RunsPerDay
 				if stored, err := db.Setting(ctx, "runs_per_day"); err == nil && stored != "" {
 					if n, err := strconv.Atoi(stored); err == nil && n > 0 {
@@ -223,14 +234,40 @@ func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, 
 				res, err := run.Run(ctx, runner.Options{RunsPerDay: ceiling})
 				if err != nil {
 					log.Error("scheduled run failed", "error", err)
-					continue
+				} else {
+					log.Info("scheduled run finished", "evaluation", res.EvaluationID,
+						"completed", res.Completed, "failed", res.Failed)
 				}
-				log.Info("scheduled run finished", "evaluation", res.EvaluationID,
-					"completed", res.Completed, "failed", res.Failed)
+				timer.Reset(every)
 			}
 		}
 	}()
-	return func() { ticker.Stop() }
+	return func() { timer.Stop() }
+}
+
+// scheduleGrace is how long the first scheduled pass waits after start.
+const scheduleGrace = 30 * time.Second
+
+// firstDue is how long to wait before the first scheduled pass: the rest of
+// the interval since the last pass, the grace when that has already elapsed
+// or nothing has run, and the full interval when the last pass cannot be
+// read (a corrupt timestamp should not trigger a run).
+func firstDue(last store.Evaluation, lookup error, every, grace time.Duration, now time.Time) time.Duration {
+	if lookup != nil {
+		if errors.Is(lookup, store.ErrNotFound) {
+			return grace
+		}
+		return every
+	}
+	started, err := time.Parse("2006-01-02 15:04:05", last.StartedAt)
+	if err != nil {
+		return every
+	}
+	wait := started.Add(every).Sub(now)
+	if wait < grace {
+		return grace
+	}
+	return wait
 }
 
 // cmdMCP serves the tool catalog over stdio, which is the shape Claude

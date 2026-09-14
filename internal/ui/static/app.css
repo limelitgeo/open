@@ -676,6 +676,7 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
    shows fake data: every number on the overview comes from a real answer. */
 .empty { text-align: left; }
 .empty h2 { margin: 0 0 6px; }
+.empty p { margin: 0 0 16px; }
 .empty-steps { display: flex; flex-direction: column; gap: 2px; margin: 16px 0 14px; }
 .step-row {
   display: flex; align-items: center; gap: 12px; padding: 11px 12px;

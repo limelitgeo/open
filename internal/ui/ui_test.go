@@ -385,6 +385,55 @@ func TestOverviewTeachesBeforeTheFirstRun(t *testing.T) {
 	}
 }
 
+// TestOverviewWidensAnEmptyDefaultWindow. An install whose runs stopped five
+// weeks ago has history and nothing in the last 30 days. The default must
+// open on the window that has answers, and an explicit narrow choice must
+// say the window is quiet rather than that nothing has ever run.
+func TestOverviewWidensAnEmptyDefaultWindow(t *testing.T) {
+	_, db, h := newApp(t, provider.NewRegistry())
+	seedProperty(t, h)
+	ctx := context.Background()
+	pid, err := db.AddPrompt(ctx, store.Prompt{Text: "best crm", Category: "discovery", Active: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tid, err := db.AddTarget(ctx, store.Target{Spec: "chatgpt:stub", Engine: "chatgpt", Provider: provider.StubName, Access: "api"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	eid, err := db.CreateEvaluation(ctx, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().UTC().AddDate(0, 0, -40).Format("2006-01-02 15:04:05")
+	if _, err := db.RecordChat(ctx, store.ChatRecord{
+		EvaluationID: eid, PromptID: pid, TargetID: tid, Status: "ok", Text: "Acme leads.", Model: "test",
+		Mentions:  []store.Mention{{BrandName: "Acme", BrandKey: "acme"}},
+		CreatedAt: old,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	body := get(t, h, "/overview").Body.String()
+	if strings.Contains(body, "No answers yet") {
+		t.Error("history exists, but the default window says nothing has ever run")
+	}
+	if !strings.Contains(body, `href="/overview?days=90" aria-current="true"`) {
+		t.Error("the default did not widen to the 90-day window that has answers")
+	}
+	if !strings.Contains(body, "kpi-value") {
+		t.Error("the widened window renders no numbers")
+	}
+
+	narrow := get(t, h, "/overview?days=7").Body.String()
+	if !strings.Contains(narrow, "No answers in the last 7 days") {
+		t.Error("an explicit quiet window does not say so")
+	}
+	if strings.Contains(narrow, "No answers yet") || strings.Contains(narrow, "kpi-value") {
+		t.Error("an explicit quiet window was widened or read as a fresh install")
+	}
+}
+
 func TestRunStartsAPassAndReturnsImmediately(t *testing.T) {
 	// A pass takes as long as the slowest engine, so holding the request open
 	// would look like a hung browser.

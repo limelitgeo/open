@@ -13,7 +13,7 @@
 </div>
 
 {{if not .HasData}}
-  {{template "empty" .}}
+  {{if .Counts.Chats}}{{template "quiet" .}}{{else}}{{template "empty" .}}{{end}}
 {{else}}
 
 <svg class="chart-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="ll-area-own" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="stop-a"/><stop offset="1" class="stop-b"/></linearGradient></defs></svg>
@@ -245,6 +245,16 @@
 </div>
 
 {{end}}
+{{end}}
+
+{{define "quiet"}}
+<section class="card empty">
+  <h2>No answers in the last {{.WindowDays}} days</h2>
+  <p class="lede">The last run was {{.LastRun}}. There are {{.Counts.Chats}} answers in history; widen the window to see them, or run now to measure today.</p>
+  <nav class="segmented" aria-label="Time window">
+    {{range .Windows}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
+  </nav>
+</section>
 {{end}}
 
 {{define "empty"}}

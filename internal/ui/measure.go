@@ -26,17 +26,43 @@ import (
 var windowChoices = []int{7, 30, 90}
 
 // windowFrom reads the window off the query string, defaulting to 30 days.
-func windowFrom(r *http.Request) int {
+// The second value is false when the reader did not choose: the caller may
+// then widen an empty default to a window that has answers.
+func windowFrom(r *http.Request) (int, bool) {
 	days, err := strconv.Atoi(r.URL.Query().Get("days"))
 	if err != nil {
-		return 30
+		return 30, false
 	}
 	for _, ok := range windowChoices {
 		if days == ok {
-			return days
+			return days, true
 		}
 	}
-	return 30
+	return 30, false
+}
+
+// widenEmptyDefault picks the window to show when the reader did not choose
+// one and the default has no answers: the narrowest choice that has any.
+//
+// An install whose runs stopped five weeks ago has a month of history and
+// nothing in the last 30 days. Opening on "No answers yet" and the setup
+// steps would be false twice over; opening on the 90-day view with the
+// window switch showing where you are is what the reader needs. An explicit
+// choice is never overridden.
+func (a *App) widenEmptyDefault(ctx context.Context, days int, chosen bool, answers int) int {
+	if chosen || answers > 0 {
+		return days
+	}
+	for _, d := range windowChoices {
+		if d <= days {
+			continue
+		}
+		ov, err := a.metrics.Overview(ctx, metrics.Window{Days: d})
+		if err == nil && ov.Answers > 0 {
+			return d
+		}
+	}
+	return days
 }
 
 func windowOptions(path string, current int) []WindowOption {
@@ -65,13 +91,20 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	days := windowFrom(r)
+	days, chosen := windowFrom(r)
 	window := metrics.Window{Days: days}
 
 	ov, err := a.metrics.Overview(ctx, window)
 	if err != nil {
 		a.fail(w, r, err)
 		return
+	}
+	if wider := a.widenEmptyDefault(ctx, days, chosen, ov.Answers); wider != days {
+		days, window = wider, metrics.Window{Days: wider}
+		if ov, err = a.metrics.Overview(ctx, window); err != nil {
+			a.fail(w, r, err)
+			return
+		}
 	}
 
 	page := MeasurePage{
@@ -672,7 +705,7 @@ func (a *App) citations(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, err)
 		return
 	}
-	days := windowFrom(r)
+	days, _ := windowFrom(r)
 	window := metrics.Window{Days: days}
 
 	sources, err := a.metrics.Sources(ctx, window, 60)
