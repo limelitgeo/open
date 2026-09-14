@@ -136,6 +136,13 @@ var (
 	// ErrRateLimited is a temporary refusal. The runner backs off.
 	ErrRateLimited = errors.New("provider: rate limited")
 
+	// ErrQuota is a vendor account with no credit or quota left. Vendors
+	// send it with the same 429 as a rate limit, but it is a billing state,
+	// not a burst: retrying will not help, and every answer that hour fails
+	// the same way. The demo lost a whole engine to one that read as "rate
+	// limited" 47 times. It is named so the failed rows say what to fix.
+	ErrQuota = errors.New("provider: no credit or quota left")
+
 	// ErrUnsupportedEngine means this provider cannot reach that engine.
 	// Target validation catches this before a run, so seeing it at runtime
 	// means a registration and an implementation disagree.

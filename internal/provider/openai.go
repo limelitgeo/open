@@ -337,6 +337,11 @@ func (p *openAIProvider) post(ctx context.Context, url string, body any) ([]byte
 // openAIStatusError maps an HTTP status onto the typed errors the runner
 // branches on. Everything else keeps the body, trimmed, because OpenAI's own
 // message is usually the most useful thing available.
+//
+// A 429 is two different things. OpenAI sends `insufficient_quota` with the
+// same status as a burst limit, and an exhausted account then fails every
+// request identically; that is ErrQuota, named after the account state the
+// body reports, and not retried.
 func openAIStatusError(status int, body string) error {
 	switch {
 	case status >= 200 && status < 300:
@@ -344,6 +349,19 @@ func openAIStatusError(status int, body string) error {
 	case status == http.StatusUnauthorized, status == http.StatusForbidden:
 		return fmt.Errorf("%w: openai rejected the key", ErrAuth)
 	case status == http.StatusTooManyRequests:
+		var e struct {
+			Error struct {
+				Type string `json:"type"`
+				Code string `json:"code"`
+			} `json:"error"`
+		}
+		if json.Unmarshal([]byte(body), &e) == nil && e.Error.Type == "insufficient_quota" {
+			code := e.Error.Code
+			if code == "" {
+				code = e.Error.Type
+			}
+			return fmt.Errorf("%w: openai (%s)", ErrQuota, code)
+		}
 		return fmt.Errorf("%w: openai", ErrRateLimited)
 	default:
 		return fmt.Errorf("openai: http %d%s", status, truncateBody(body))

@@ -197,7 +197,7 @@ func TestStubReportsUnsupportedEngine(t *testing.T) {
 func TestStubCanReturnTypedErrors(t *testing.T) {
 	// The runner branches on these, so a test needs to be able to produce
 	// each one without a network.
-	for _, want := range []error{ErrAuth, ErrRateLimited, ErrNoAnswerSurface} {
+	for _, want := range []error{ErrAuth, ErrRateLimited, ErrQuota, ErrNoAnswerSurface} {
 		stub := NewStub(StubConfig{Err: want})
 		_, err := stub.Run(context.Background(), Request{Engine: engines.ChatGPT, Prompt: "q"})
 		if !errors.Is(err, want) {

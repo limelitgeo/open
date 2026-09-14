@@ -234,6 +234,32 @@ func TestOpenAIGivesUpAfterTheRetry(t *testing.T) {
 	}
 }
 
+func TestOpenAIReportsAnExhaustedAccountAsQuotaNotRateLimit(t *testing.T) {
+	// OpenAI sends insufficient_quota with the same 429 as a burst limit.
+	// The two need different actions, so they must be different errors, and
+	// an empty account is not worth a second call.
+	var calls int32
+	p, _ := newOpenAIAgainst(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"error":{"message":"You have no credits remaining.","type":"insufficient_quota","param":null,"code":"credit_balance_exhausted"}}`))
+	}))
+
+	_, err := p.Run(context.Background(), Request{Engine: ChatGPTEngine, Prompt: "q"})
+	if !errors.Is(err, ErrQuota) {
+		t.Errorf("error = %v, want ErrQuota", err)
+	}
+	if errors.Is(err, ErrRateLimited) {
+		t.Error("an exhausted account was reported as a rate limit")
+	}
+	if !strings.Contains(err.Error(), "credit_balance_exhausted") {
+		t.Errorf("the error does not carry the vendor's code: %v", err)
+	}
+	if got := atomic.LoadInt32(&calls); got != 1 {
+		t.Errorf("made %d attempts, want 1", got)
+	}
+}
+
 func TestOpenAIDoesNotRetryABadRequest(t *testing.T) {
 	// A 400 will fail again identically, so a second call only spends time.
 	var calls int32
