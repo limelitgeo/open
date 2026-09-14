@@ -201,6 +201,21 @@ func TestRaceMarksThinDaysHollow(t *testing.T) {
 	}
 }
 
+// TestRaceDrawsNoLeadLineFromALonePoint. On a one-day chart the point sits
+// in the middle; a line from it to the label gutter would read as a trend.
+func TestRaceDrawsNoLeadLineFromALonePoint(t *testing.T) {
+	out := string(RaceChart([]RaceSeries{
+		{Name: "Acme", IsOwn: true, Class: "s-own", Points: []TrendPoint{{Day: "2026-09-14", Value: 0, N: 30}}},
+		{Name: "Rival", Class: "s-1", Points: []TrendPoint{{Day: "2026-09-14", Value: 1, N: 30}}, Last: 1},
+	}))
+	if strings.Contains(out, `class="lead `) {
+		t.Error("a lone point grew a lead line")
+	}
+	if !strings.Contains(out, `class="end s-1"`) || !strings.Contains(out, `class="end s-own end-own"`) {
+		t.Error("end labels are missing")
+	}
+}
+
 func TestSparkAreaIsAbsentUnderThreePoints(t *testing.T) {
 	if got := SparkArea([]TrendPoint{{Day: "2026-07-13", Value: 1}, {Day: "2026-07-14", Value: 2}}); got != "" {
 		t.Errorf("two points drew a spark: %s", got)
