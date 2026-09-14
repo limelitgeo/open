@@ -121,10 +121,13 @@ Rules every provider follows:
 - **Citations as the engine gave them.** No normalisation inside the
   provider. `urlnorm` and the citation classifier run afterwards, once, for
   every provider alike.
-- **Errors are typed.** `ErrAuth`, `ErrRateLimited`, `ErrUnsupportedEngine`,
-  `ErrNoAnswerSurface`. The last one matters for scraped Google surfaces: an
-  AI Overview that did not appear for a query is not a miss for the brand, it
-  is an absent surface, and the metrics exclude it from the denominator.
+- **Errors are typed.** `ErrAuth`, `ErrRateLimited`, `ErrQuota`,
+  `ErrUnsupportedEngine`, `ErrNoAnswerSurface`. `ErrQuota` is an account with
+  no credit left; vendors send it with the same 429 as a rate limit, and it is
+  named apart because it is not retried and the fix is billing, not patience.
+  The last one matters for scraped Google surfaces: an AI Overview that did
+  not appear for a query is not a miss for the brand, it is an absent surface,
+  and the metrics exclude it from the denominator.
 - **Testable offline.** Every provider ships with recorded fixtures under
   `testdata/` and a unit test that runs without network or keys. A live test
   behind a build tag is welcome but not required.
