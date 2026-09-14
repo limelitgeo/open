@@ -7,8 +7,6 @@ import (
 	"errors"
 	"testing"
 	"time"
-
-	"github.com/limelitgeo/open/internal/store"
 )
 
 // TestFirstDueCatchesUpAfterARestart. A daily schedule whose last pass was a
@@ -17,23 +15,21 @@ import (
 func TestFirstDueCatchesUpAfterARestart(t *testing.T) {
 	now := time.Date(2026, 9, 14, 21, 0, 0, 0, time.UTC)
 	day, grace := 24*time.Hour, 30*time.Second
-	at := func(t time.Time) store.Evaluation {
-		return store.Evaluation{StartedAt: t.Format("2006-01-02 15:04:05")}
-	}
+	at := func(t time.Time) string { return t.Format("2006-01-02 15:04:05") }
 
 	if got := firstDue(at(now.Add(-30*day)), nil, day, grace, now); got != grace {
-		t.Errorf("a month-old last run waits %v, want the grace", got)
+		t.Errorf("a month-old last answer waits %v, want the grace", got)
 	}
 	if got := firstDue(at(now.Add(-time.Hour)), nil, day, grace, now); got != 23*time.Hour {
 		t.Errorf("an hour-old last run waits %v, want 23h", got)
 	}
-	if got := firstDue(store.Evaluation{}, store.ErrNotFound, day, grace, now); got != grace {
-		t.Errorf("no run yet waits %v, want the grace", got)
+	if got := firstDue("", nil, day, grace, now); got != grace {
+		t.Errorf("no answer yet waits %v, want the grace", got)
 	}
-	if got := firstDue(store.Evaluation{StartedAt: "garbage"}, nil, day, grace, now); got != day {
+	if got := firstDue("garbage", nil, day, grace, now); got != day {
 		t.Errorf("an unreadable timestamp waits %v, want the full interval", got)
 	}
-	if got := firstDue(store.Evaluation{}, errors.New("db closed"), day, grace, now); got != day {
+	if got := firstDue("", errors.New("db closed"), day, grace, now); got != day {
 		t.Errorf("a lookup error waits %v, want the full interval", got)
 	}
 }

@@ -15,7 +15,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -214,8 +213,8 @@ func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, 
 		return func() {}
 	}
 
-	last, err := db.LatestEvaluation(ctx)
-	first := firstDue(last, err, every, scheduleGrace, time.Now())
+	counts, err := db.Counts(ctx)
+	first := firstDue(counts.LastChatAt, err, every, scheduleGrace, time.Now())
 	log.Info("scheduling automatic runs", "every", every, "first", first.Round(time.Second))
 	timer := time.NewTimer(first)
 	go func() {
@@ -249,21 +248,26 @@ func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, 
 const scheduleGrace = 30 * time.Second
 
 // firstDue is how long to wait before the first scheduled pass: the rest of
-// the interval since the last pass, the grace when that has already elapsed
-// or nothing has run, and the full interval when the last pass cannot be
-// read (a corrupt timestamp should not trigger a run).
-func firstDue(last store.Evaluation, lookup error, every, grace time.Duration, now time.Time) time.Duration {
+// the interval since the last answer was recorded, the grace when that has
+// already elapsed or nothing has run, and the full interval when the store
+// cannot be read (an error should not trigger a run).
+//
+// The last answer's time, not the last evaluation's: an import of history
+// writes the answers with the days they were measured and the evaluation
+// rows with the day of the import, and it is the measurement that says
+// whether today is covered.
+func firstDue(lastChatAt string, lookup error, every, grace time.Duration, now time.Time) time.Duration {
 	if lookup != nil {
-		if errors.Is(lookup, store.ErrNotFound) {
-			return grace
-		}
 		return every
 	}
-	started, err := time.Parse("2006-01-02 15:04:05", last.StartedAt)
+	if lastChatAt == "" {
+		return grace
+	}
+	last, err := time.Parse("2006-01-02 15:04:05", lastChatAt)
 	if err != nil {
 		return every
 	}
-	wait := started.Add(every).Sub(now)
+	wait := last.Add(every).Sub(now)
 	if wait < grace {
 		return grace
 	}
