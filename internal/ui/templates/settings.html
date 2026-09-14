@@ -69,6 +69,12 @@
       <a class="btn" href="{{.KeyURL}}" target="_blank" rel="noreferrer noopener">Get a key</a>
     </div>
 
+    {{if $.Demo}}
+      {{/* A public instance never shows its credential surface, not even
+           which variables are set. That would tell a visitor which vendor
+           accounts the operator holds. */}}
+      <p class="hint">Credentials are not shown on a public demo.</p>
+    {{else}}
     <form method="post" action="/settings/keys" class="provider-form">
       <input type="hidden" name="provider" value="{{.Name}}">
       {{range .Credentials}}
@@ -87,6 +93,7 @@
       <input type="hidden" name="provider" value="{{.Name}}">
       <button class="btn btn-ghost" type="submit">Test this key</button>
     </form>
+    {{end}}
     {{end}}
   </div>
   {{end}}

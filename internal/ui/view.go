@@ -44,6 +44,14 @@ type Base struct {
 	// CanRun is false until there is something to run: a prompt, a target,
 	// and a provider that exists in this build. The button says why.
 	CanRun bool
+	// Demo marks a public read-only instance. The chrome shows a banner
+	// naming the exact commit it runs, so anyone can check it against the
+	// repository: the demo is the open core, not a fork of it.
+	Demo bool
+	// Commit is the short revision and CommitURL its page on GitHub. Empty
+	// on a dev build with no VCS stamp.
+	Commit    string
+	CommitURL string
 }
 
 // StatView is one number on the overview.

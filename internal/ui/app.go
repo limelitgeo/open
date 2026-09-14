@@ -53,6 +53,9 @@ type App struct {
 	log      *slog.Logger
 	version  string
 	cfg      *config.Config
+	// demo makes every mutating route refuse and hides the credential
+	// surface. Set from LIMELIT_DEMO at construction.
+	demo bool
 }
 
 // New builds the dashboard handler set. run may be nil, which leaves the Run
@@ -62,7 +65,7 @@ func New(db *store.DB, registry *provider.Registry, keys *secrets.Keyring, run *
 	if err != nil {
 		return nil, err
 	}
-	return &App{db: db, registry: registry, keys: keys, runner: run, metrics: metrics.New(db), views: views, log: log, version: version, cfg: cfg}, nil
+	return &App{db: db, registry: registry, keys: keys, runner: run, metrics: metrics.New(db), views: views, log: log, version: version, cfg: cfg, demo: DemoMode()}, nil
 }
 
 // Routes registers every dashboard route on mux.
@@ -72,33 +75,33 @@ func (a *App) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", a.home)
 	mux.HandleFunc("GET /overview", a.overview)
 	mux.HandleFunc("GET /prompts", a.prompts)
-	mux.HandleFunc("POST /prompts/add", a.addPrompt)
-	mux.HandleFunc("POST /prompts/delete", a.deletePrompt)
+	mux.HandleFunc("POST /prompts/add", a.readOnly(a.addPrompt))
+	mux.HandleFunc("POST /prompts/delete", a.readOnly(a.deletePrompt))
 	mux.HandleFunc("GET /competitors", a.competitors)
-	mux.HandleFunc("POST /competitors/add", a.addCompetitor)
-	mux.HandleFunc("POST /competitors/delete", a.deleteCompetitor)
+	mux.HandleFunc("POST /competitors/add", a.readOnly(a.addCompetitor))
+	mux.HandleFunc("POST /competitors/delete", a.readOnly(a.deleteCompetitor))
 	mux.HandleFunc("GET /chats", a.answers)
 	mux.HandleFunc("GET /chats/{id}", a.answer)
 	mux.HandleFunc("GET /citations", a.citations)
 	mux.HandleFunc("GET /settings", a.settings)
-	mux.HandleFunc("POST /settings/targets/track", a.trackEngine)
-	mux.HandleFunc("POST /settings/targets/add", a.addTarget)
-	mux.HandleFunc("POST /settings/targets/delete", a.deleteTarget)
-	mux.HandleFunc("POST /settings/keys", a.saveKeys)
-	mux.HandleFunc("POST /settings/keys/test", a.testKeys)
-	mux.HandleFunc("POST /settings/limits", a.saveLimits)
+	mux.HandleFunc("POST /settings/targets/track", a.readOnly(a.trackEngine))
+	mux.HandleFunc("POST /settings/targets/add", a.readOnly(a.addTarget))
+	mux.HandleFunc("POST /settings/targets/delete", a.readOnly(a.deleteTarget))
+	mux.HandleFunc("POST /settings/keys", a.readOnly(a.saveKeys))
+	mux.HandleFunc("POST /settings/keys/test", a.readOnly(a.testKeys))
+	mux.HandleFunc("POST /settings/limits", a.readOnly(a.saveLimits))
 	mux.HandleFunc("GET /upgrade", a.upgrade)
-	mux.HandleFunc("POST /run", a.run)
+	mux.HandleFunc("POST /run", a.readOnly(a.run))
 
-	mux.HandleFunc("GET /setup", a.wizardBrand)
-	mux.HandleFunc("POST /setup/brand", a.saveBrand)
-	mux.HandleFunc("GET /setup/competitors", a.wizardCompetitors)
-	mux.HandleFunc("POST /setup/competitors", a.saveCompetitors)
-	mux.HandleFunc("GET /setup/prompts", a.wizardPrompts)
-	mux.HandleFunc("POST /setup/prompts", a.savePrompts)
-	mux.HandleFunc("GET /setup/provider", a.wizardProvider)
-	mux.HandleFunc("POST /setup/provider", a.saveProvider)
-	mux.HandleFunc("POST /setup/finish", a.finishSetup)
+	mux.HandleFunc("GET /setup", a.noSetup(a.wizardBrand))
+	mux.HandleFunc("POST /setup/brand", a.readOnly(a.saveBrand))
+	mux.HandleFunc("GET /setup/competitors", a.noSetup(a.wizardCompetitors))
+	mux.HandleFunc("POST /setup/competitors", a.readOnly(a.saveCompetitors))
+	mux.HandleFunc("GET /setup/prompts", a.noSetup(a.wizardPrompts))
+	mux.HandleFunc("POST /setup/prompts", a.readOnly(a.savePrompts))
+	mux.HandleFunc("GET /setup/provider", a.noSetup(a.wizardProvider))
+	mux.HandleFunc("POST /setup/provider", a.readOnly(a.saveProvider))
+	mux.HandleFunc("POST /setup/finish", a.readOnly(a.finishSetup))
 }
 
 // flashes maps a short code to the message it shows. Keeping the copy here
@@ -118,6 +121,7 @@ var flashes = map[string]Flash{
 	"limits-saved":      {Kind: "ok", Text: "Run ceiling saved."},
 	"key-saved":         {Kind: "ok", Text: "Key saved on this machine."},
 	"run-started":       {Kind: "ok", Text: "Running. Answers appear as each engine replies; refresh to see them."},
+	"demo-readonly":     {Kind: "info", Text: "This is a read-only demo that updates itself on a schedule. Run your own copy to change anything."},
 	"run-busy":          {Kind: "warn", Text: "A run is already in progress."},
 }
 
@@ -155,7 +159,15 @@ func (a *App) base(r *http.Request, title, current string) (Base, store.Counts, 
 		// that exists in this build. Enabling the button without all three
 		// would produce a spinner and no explanation.
 		CanRun: counts.Prompts > 0 && counts.Targets > 0 && len(a.registry.Names()) > 0,
+		Demo:   a.demo,
 	}
+	// In a demo the Run button stays visible and disabled, so a visitor sees
+	// that a run is a thing this software does, and the flash says why they
+	// cannot press it here.
+	if a.demo {
+		b.CanRun = false
+	}
+	b.Commit, b.CommitURL = commitLink(a.version)
 	if counts.LastChatAt != "" {
 		b.LastRun = counts.LastChatAt
 	}
@@ -354,4 +366,20 @@ func (a *App) write(w http.ResponseWriter, r *http.Request, page string, data an
 func (a *App) fail(w http.ResponseWriter, r *http.Request, err error) {
 	a.log.Error("dashboard error", "path", r.URL.Path, "error", err)
 	http.Error(w, "Something went wrong. The server log has the detail.", http.StatusInternalServerError)
+}
+
+// commitLink turns the build version into a short revision and a GitHub URL.
+//
+// The version is either a release tag or a VCS stamp of the form
+// <12-hex>[-dirty]. Only a clean stamp or a tag gets a link: a dirty build is
+// not any commit in the repository, and linking it would claim otherwise.
+func commitLink(version string) (string, string) {
+	v := strings.TrimSpace(version)
+	if v == "" || v == "dev" {
+		return "", ""
+	}
+	if strings.HasSuffix(v, "-dirty") {
+		return v, ""
+	}
+	return v, "https://github.com/limelitgeo/open/commit/" + v
 }

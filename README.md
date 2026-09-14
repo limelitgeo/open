@@ -247,6 +247,18 @@ a small Go interface. See [docs/providers.md](docs/providers.md); the open
 adapter issues are labeled
 [good first issue](https://github.com/limelitgeo/open/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
+## Running a public demo
+
+Set `LIMELIT_DEMO=1` and the same binary becomes a read-only public instance:
+every button that would change or spend anything refuses with an explanation,
+the credential surface is hidden entirely, and the scheduler keeps running so
+history accumulates. A banner names the exact commit the demo is built from
+and links to it, so a visitor can check that the demo is the open core and not
+a fork of it.
+
+Configure the instance first, then set the flag. An unconfigured demo returns a
+plain error rather than a wizard nobody can submit.
+
 ## Configuration
 
 `limelit.yaml` holds what to track. It is meant to be committed and diffed, so
