@@ -132,9 +132,8 @@
         <tr>
           <th class="grid-prompt" scope="col">Prompt</th>
           {{range .Columns}}
-            <th class="grid-col{{if .Scraped}} col-scraped{{end}}" scope="col" title="{{.Spec}}">
+            <th class="grid-col" scope="col" title="{{.Spec}}">
               <span class="col-name">{{.Label}}</span>
-              <span class="badge badge-{{.Access}}">{{.Access}}</span>
             </th>
           {{end}}
           <th class="grid-total" scope="col">All</th>
@@ -150,7 +149,7 @@
           {{range .Cells}}
             <td class="grid-cell">
               {{if .Ran}}
-                <a class="cell {{.Bin}}{{if .Scraped}} cell-scraped{{end}}" href="{{.Href}}" title="{{.Title}}">
+                <a class="cell {{.Bin}}" href="{{.Href}}" title="{{.Title}}">
                   <span class="cell-value">{{.Label}}</span>
                   {{if .Sub}}<span class="cell-sub">{{.Sub}}</span>{{end}}
                 </a>
@@ -174,7 +173,6 @@
   </div>
   <p class="caption legend">
     Each cell is how many of that engine's answers named you, over how many were asked.
-    Hatched columns are scraped consumer surfaces; the rest are vendor APIs. The two are never averaged.
     A dash means that prompt has not been asked of that engine.
   </p>
 </section>

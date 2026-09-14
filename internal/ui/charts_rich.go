@@ -654,7 +654,7 @@ func EngineBars(groups []EngineGroup) template.HTML {
 		fmt.Fprintf(&b, `<g class="%s" style="--k:%d">`, rowCls, ri)
 		fmt.Fprintf(&b, `<line class="track" x1="%.0f" x2="%.0f" y1="%.1f" y2="%.1f"/>`, stripX0, stripX1, cy, cy)
 
-		// Left: the engine, how it was reached, and what the row rests on.
+		// Left: the engine and what the row rests on.
 		label := engineLabel(g.Engine)
 		if len(label) > 20 {
 			label = label[:19] + "."
@@ -666,8 +666,8 @@ func EngineBars(groups []EngineGroup) template.HTML {
 			count += ", thin"
 			countCls = ` class="thin"`
 		}
-		fmt.Fprintf(&b, `<text class="eng-sub" x="%.0f" y="%.1f" text-anchor="end"><tspan class="access access-%s">%s</tspan><tspan dx="5"%s>%s</tspan></text>`,
-			stripLabelX, cy+11, template.HTMLEscapeString(g.Access), template.HTMLEscapeString(g.Access), countCls, count)
+		fmt.Fprintf(&b, `<text class="eng-sub" x="%.0f" y="%.1f" text-anchor="end"><tspan%s>%s</tspan></text>`,
+			stripLabelX, cy+11, countCls, count)
 
 		// Dots in three passes so the property is always on top: the field,
 		// then the hued rivals, then you.

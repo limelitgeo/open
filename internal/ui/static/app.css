@@ -313,8 +313,6 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
   background: var(--bg-2); color: var(--ink-3); border: 1px solid var(--rule);
   white-space: nowrap;
 }
-.badge-api { background: var(--info-bg); color: var(--info-fg); border-color: transparent; }
-.badge-scraped { background: var(--warn-bg); color: var(--warn-fg); border-color: transparent; }
 .badge-branded { background: var(--bg-2); color: var(--ink-3); }
 .badge-own { background: var(--pos-bg); color: var(--pos-fg); border-color: transparent; }
 .badge-competitor { background: var(--neg-bg); color: var(--neg-fg); border-color: transparent; }
@@ -702,8 +700,6 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 .chart .axis { fill: var(--ink-4); font-size: 10px; font-family: var(--sans); }
 .spark { width: 68px; height: 20px; stroke: var(--brand); stroke-width: 1.5; }
 
-.badge-api { background: var(--info-bg); color: var(--info-fg); }
-.badge-scraped { background: var(--warn-bg); color: var(--warn-fg); }
 .badge-own { background: var(--brand-soft); color: var(--brand-strong); }
 .badge-competitor { background: var(--neg-bg); color: var(--neg-fg); }
 .badge-social { background: var(--bg-2); color: var(--ink-2); }
@@ -762,22 +758,6 @@ mark.mark-rival { background: var(--mark-rival); color: var(--ink-2); padding: 0
 .hm-4 { background: var(--cell-4); color: var(--cell-4-ink); }
 .hm-5 { background: var(--cell-5); color: var(--cell-5-ink); }
 
-/* A scraped surface is hatched as well as badged, so the distinction survives
-   a greyscale print and a colourblind reader. currentColor, so the hatch
-   tracks the ink the bin already flipped to. */
-.cell-scraped {
-  background-image: repeating-linear-gradient(
-    45deg, transparent 0 5px, currentColor 5px 6px);
-  background-blend-mode: normal;
-}
-.cell-scraped { position: relative; }
-.cell-scraped::before {
-  content: ""; position: absolute; inset: 0; border-radius: inherit;
-  background: repeating-linear-gradient(45deg, transparent 0 5px, currentColor 5px 6px);
-  opacity: 0.30; pointer-events: none;
-}
-.cell-scraped { background-image: none; }
-th.col-scraped .col-name { text-decoration: underline dotted var(--warn-fg) 2px; text-underline-offset: 3px; }
 
 .col-name { display: block; }
 .grid-total {
@@ -914,9 +894,6 @@ tr.row-branded { opacity: 0.72; }
 .chart-engines .eng { font-size: 12.5px; font-weight: 550; fill: var(--ink); }
 .chart-engines .eng-sub { font-size: 10.5px; fill: var(--ink-4); }
 .chart-engines .eng-sub .thin { fill: var(--warn-fg); }
-.chart-engines .access { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
-.chart-engines .access-api { fill: var(--info-fg); }
-.chart-engines .access-scraped { fill: var(--warn-fg); }
 .chart-engines .pt { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; transition: opacity 120ms ease; }
 .chart-engines .pt-field { fill: var(--chart-field); stroke-width: 1; }
 .chart-engines .pt-own { stroke-width: 2; }

@@ -388,7 +388,9 @@ func TestOverviewTeachesBeforeTheFirstRun(t *testing.T) {
 // TestOverviewWidensAnEmptyDefaultWindow. An install whose runs stopped five
 // weeks ago has history and nothing in the last 30 days. The default must
 // open on the window that has answers, and an explicit narrow choice must
-// say the window is quiet rather than that nothing has ever run.
+// say the window is quiet rather than that nothing has ever run. A default
+// with one measured day widens too: one dot cannot show a trend, and the
+// second day is one click away.
 func TestOverviewWidensAnEmptyDefaultWindow(t *testing.T) {
 	_, db, h := newApp(t, provider.NewRegistry())
 	seedProperty(t, h)
@@ -431,6 +433,26 @@ func TestOverviewWidensAnEmptyDefaultWindow(t *testing.T) {
 	}
 	if strings.Contains(narrow, "No answers yet") || strings.Contains(narrow, "kpi-value") {
 		t.Error("an explicit quiet window was widened or read as a fresh install")
+	}
+
+	// One fresh day inside the default window, a month after the last: the
+	// default still widens to the window that has two measured days.
+	eid2, err := db.CreateEvaluation(ctx, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.RecordChat(ctx, store.ChatRecord{
+		EvaluationID: eid2, PromptID: pid, TargetID: tid, Status: "ok", Text: "Acme leads.", Model: "test",
+		Mentions: []store.Mention{{BrandName: "Acme", BrandKey: "acme"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	body = get(t, h, "/overview").Body.String()
+	if !strings.Contains(body, `href="/overview?days=90" aria-current="true"`) {
+		t.Error("a default with one measured day did not widen to the window with two")
+	}
+	if !strings.Contains(get(t, h, "/overview?days=30").Body.String(), `href="/overview?days=30" aria-current="true"`) {
+		t.Error("an explicit 30-day choice was overridden")
 	}
 }
 

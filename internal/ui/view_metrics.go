@@ -101,10 +101,9 @@ type GridCellView struct {
 	Sub   string
 	// Bin is a CSS class, not a colour. The readable ink over each step of
 	// the ramp differs by theme and flips at a different step in each.
-	Bin     string
-	Scraped bool
-	Title   string
-	Href    string
+	Bin   string
+	Title string
+	Href  string
 }
 
 // GridRowView is one prompt across every target.
@@ -120,12 +119,12 @@ type GridRowView struct {
 	Href  string
 }
 
-// GridColumnView is one target's column header.
+// GridColumnView is one target's column header. The way the engine was
+// reached travels on the target and never on the screen: two targets are two
+// columns, never averaged, and that is the whole distinction a reader needs.
 type GridColumnView struct {
-	Label   string
-	Access  string
-	Scraped bool
-	Spec    string
+	Label string
+	Spec  string
 	// Total is the column's own fraction across every prompt.
 	Total string
 }

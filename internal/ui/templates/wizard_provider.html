@@ -13,7 +13,7 @@
   <div class="provider">
     <div class="provider-head">
       <div>
-        <h3>{{.Label}} <span class="badge badge-{{.Access}}">{{.Access}}</span>{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
+        <h3>{{.Label}}{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
         <div class="hint">{{.Note}} Reaches {{.EngineList}}.</div>
       </div>
       <a class="btn" href="{{.KeyURL}}" target="_blank" rel="noreferrer noopener">Get a key</a>
@@ -38,7 +38,7 @@
   {{end}}
 
   <div class="notice notice-info" style="margin-top:18px">
-    An answer from a model API with web search on is not the same surface a person sees in the product. Both are worth tracking, so every number here carries an <span class="badge badge-api">api</span> or <span class="badge badge-scraped">scraped</span> badge, and the two are never averaged.
+    An answer from a model API with web search on is not the same surface a person sees in the product. Both are worth tracking, so each is its own target, and the two are never averaged.
   </div>
 
   <div class="btn-row">

@@ -11,7 +11,7 @@
     <h2>Engines</h2>
     <span class="badge">{{len .Targets}} tracked</span>
   </div>
-  <p class="hint" style="margin:0 0 16px">An <span class="badge badge-api">api</span> target asks the vendor's model with web search on. A <span class="badge badge-scraped">scraped</span> target fetches the answer a person sees in the product. They measure different things, so they are tracked separately and never averaged.</p>
+  <p class="hint" style="margin:0 0 16px">A target is one engine reached one way: the vendor's model with web search on, or the answer a person sees in the product. They measure different things, so each target is tracked on its own and never averaged with another.</p>
 
   <div class="engine-list">
     {{range $engine := .Engines}}
@@ -28,7 +28,6 @@
       <div class="chips">
         {{range $engine.Targets}}
         <span class="chip">
-          <span class="badge badge-{{.Access}}">{{.Access}}</span>
           <code>{{.Spec}}</code>
           <form method="post" action="/settings/targets/delete">
             <input type="hidden" name="id" value="{{.ID}}">
@@ -63,7 +62,7 @@
   <div class="provider">
     <div class="provider-head">
       <div>
-        <h3>{{.Label}} <span class="badge badge-{{.Access}}">{{.Access}}</span>{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
+        <h3>{{.Label}}{{if not .Available}} <span class="badge">{{.Reason}}</span>{{end}}</h3>
         <div class="hint">{{.Note}} Reaches {{.EngineList}}.</div>
       </div>
       <a class="btn" href="{{.KeyURL}}" target="_blank" rel="noreferrer noopener">Get a key</a>

@@ -41,28 +41,37 @@ func windowFrom(r *http.Request) (int, bool) {
 	return 30, false
 }
 
-// widenEmptyDefault picks the window to show when the reader did not choose
-// one and the default has no answers: the narrowest choice that has any.
+// widenThinDefault picks the window to show when the reader did not choose
+// one and the default cannot show a trend: the narrowest choice with at least
+// two measured days, or failing that with any answers at all.
 //
 // An install whose runs stopped five weeks ago has a month of history and
-// nothing in the last 30 days. Opening on "No answers yet" and the setup
-// steps would be false twice over; opening on the 90-day view with the
-// window switch showing where you are is what the reader needs. An explicit
-// choice is never overridden.
-func (a *App) widenEmptyDefault(ctx context.Context, days int, chosen bool, answers int) int {
-	if chosen || answers > 0 {
+// nothing in the last 30 days; one that ran yesterday for the first time in a
+// month has a single day there. Opening either on the 30-day view would show
+// "No answers yet" or one dot on an empty axis while the history sits one
+// click away. The window switch shows which view is open. An explicit choice
+// is never overridden.
+func (a *App) widenThinDefault(ctx context.Context, days int, chosen bool, measuredDays int) int {
+	if chosen || measuredDays >= 2 {
 		return days
 	}
+	best := days
 	for _, d := range windowChoices {
 		if d <= days {
 			continue
 		}
-		ov, err := a.metrics.Overview(ctx, metrics.Window{Days: d})
-		if err == nil && ov.Answers > 0 {
+		series, err := a.metrics.Series(ctx, metrics.Window{Days: d})
+		if err != nil {
+			continue
+		}
+		if len(series) >= 2 {
 			return d
 		}
+		if len(series) > measuredDays && best == days {
+			best = d
+		}
 	}
-	return days
+	return best
 }
 
 func windowOptions(path string, current int) []WindowOption {
@@ -99,11 +108,18 @@ func (a *App) overview(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, err)
 		return
 	}
-	if wider := a.widenEmptyDefault(ctx, days, chosen, ov.Answers); wider != days {
-		days, window = wider, metrics.Window{Days: wider}
-		if ov, err = a.metrics.Overview(ctx, window); err != nil {
+	if !chosen {
+		series, err := a.metrics.Series(ctx, window)
+		if err != nil {
 			a.fail(w, r, err)
 			return
+		}
+		if wider := a.widenThinDefault(ctx, days, chosen, len(series)); wider != days {
+			days, window = wider, metrics.Window{Days: wider}
+			if ov, err = a.metrics.Overview(ctx, window); err != nil {
+				a.fail(w, r, err)
+				return
+			}
 		}
 	}
 
@@ -481,10 +497,7 @@ func sourceViews(in []metrics.SourceRow) []SourceView {
 func gridViews(m metrics.Matrix) ([]GridColumnView, []GridRowView) {
 	columns := make([]GridColumnView, 0, len(m.Targets))
 	for _, t := range m.Targets {
-		columns = append(columns, GridColumnView{
-			Label: engineLabel(t.Engine), Access: t.Access,
-			Scraped: t.Access == "scraped", Spec: t.Spec,
-		})
+		columns = append(columns, GridColumnView{Label: engineLabel(t.Engine), Spec: t.Spec})
 	}
 
 	colMentions := make([]int, len(m.Targets))
@@ -503,7 +516,7 @@ func gridViews(m metrics.Matrix) ([]GridColumnView, []GridRowView) {
 			cell, ok := r.Cells[t.ID]
 			if !ok || cell.Answers == 0 {
 				row.Cells = append(row.Cells, GridCellView{
-					Ran: false, Bin: cellBin(0, 0), Scraped: t.Access == "scraped",
+					Ran: false, Bin: cellBin(0, 0),
 					Title: engineLabel(t.Engine) + ": not asked yet",
 				})
 				continue
@@ -516,11 +529,10 @@ func gridViews(m metrics.Matrix) ([]GridColumnView, []GridRowView) {
 				sub = "#" + position(cell.MeanPosition)
 			}
 			row.Cells = append(row.Cells, GridCellView{
-				Ran:     true,
-				Label:   fmt.Sprintf("%d/%d", cell.Mentions, cell.Answers),
-				Sub:     sub,
-				Bin:     cellBin(cell.Answers, cell.Visibility),
-				Scraped: t.Access == "scraped",
+				Ran:   true,
+				Label: fmt.Sprintf("%d/%d", cell.Mentions, cell.Answers),
+				Sub:   sub,
+				Bin:   cellBin(cell.Answers, cell.Visibility),
 				Title: fmt.Sprintf("%s: named in %d of %s%s",
 					engineLabel(t.Engine), cell.Mentions, answersWord(cell.Answers), positionSuffix(cell.MeanPosition)),
 				Href: fmt.Sprintf("/chats?prompt=%d&target=%d", r.PromptID, t.ID),

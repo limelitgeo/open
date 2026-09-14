@@ -51,7 +51,7 @@ gcloud run deploy limelit-open-demo \
   --service-account limelit-open-demo@$PROJECT.iam.gserviceaccount.com \
   --allow-unauthenticated --min-instances 1 --max-instances 1 --no-cpu-throttling \
   --memory 512Mi --execution-environment gen2 \
-  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit-v2,LIMELIT_SCHEDULE=off,LIMELIT_RUNS_PER_DAY=300" \
+  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit-v4,LIMELIT_SCHEDULE=off,LIMELIT_RUNS_PER_DAY=300" \
   --set-secrets "OPENAI_API_KEY=openai-key:latest,ANTHROPIC_API_KEY=anthropic-key:latest,PERPLEXITY_API_KEY=perplexity-key:latest,GOOGLE_API_KEY=gemini-key:latest,SEARCHAPI_KEY=searchapi-key:latest"
 ```
 
@@ -69,6 +69,11 @@ day one. The answers come from the file; the mentions and citations are
 produced by this build's own matcher and classifier over that text, so the
 demo shows what the open core computes and nothing the source system decided.
 Every answer keeps its original timestamp.
+
+**The public demo's history starts on 2026-07-19** (owner decision: the
+first week ran daily at a different cadence and read as a dip rather than as
+history) and is refreshed from the source by re-running the seed, most
+recently with the 2026-09-14 pass.
 
 **The public demo's schedule is `off`, on purpose.** Its history is a real
 company's data with the brand renamed, and a renamed brand is one the engines
