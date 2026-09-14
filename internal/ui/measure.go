@@ -233,16 +233,29 @@ func (a *App) richCharts(ctx context.Context, window metrics.Window, page *Measu
 		s.Points = append(s.Points, TrendPoint{Day: bd.Day, Value: bd.Visibility, N: bd.Answers})
 		s.Last = bd.Visibility
 	}
-	race := make([]RaceSeries, 0, len(order))
-	for _, n := range order {
-		race = append(race, *byBrand[n])
-	}
-	// Legend in standings order: leader first, property always shown.
+	// The race carries the property plus the leading competitors. Twenty
+	// lines is spaghetti; eight reads. The cut is by current visibility and
+	// it is stated on the page, because a chart that silently drops series
+	// reads as "these are all of them".
+	const raceMax = 8
+	drawn := map[string]bool{}
+	race := make([]RaceSeries, 0, raceMax)
 	for _, b := range standings {
-		if s, ok := byBrand[b.Name]; ok {
+		s, ok := byBrand[b.Name]
+		if !ok {
+			continue
+		}
+		if s.IsOwn || len(race) < raceMax-1 || (len(race) < raceMax && !hasOwn(standings)) {
+			race = append(race, *s)
+			drawn[b.Name] = true
+		}
+	}
+	for _, b := range standings {
+		if s, ok := byBrand[b.Name]; ok && drawn[b.Name] {
 			page.RaceLegend = append(page.RaceLegend, LegendItem{Name: s.Name, Class: s.Class, IsOwn: s.IsOwn, Value: pct(s.Last) + "%"})
 		}
 	}
+	page.RaceOmitted = len(byBrand) - len(race)
 	page.Race = RaceChart(race)
 
 	// The donut.
@@ -661,4 +674,13 @@ func shortTime(ts string) string {
 		return ts[:16]
 	}
 	return ts
+}
+
+func hasOwn(standings []metrics.BrandStanding) bool {
+	for _, b := range standings {
+		if b.IsOwn {
+			return true
+		}
+	}
+	return false
 }

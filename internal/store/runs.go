@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // Evaluation statuses.
@@ -81,6 +82,12 @@ type ChatRecord struct {
 	// Empty means the provider did not report any, which is not the same as
 	// the engine having searched for nothing.
 	FanOut []string
+	// CreatedAt overrides the timestamp when set, in SQLite datetime form
+	// (YYYY-MM-DD HH:MM:SS). The runner leaves it empty and the row takes
+	// now; an import of history that happened on other days sets it, or
+	// every imported answer would land on the day of the import and the
+	// trend would be one tall bar.
+	CreatedAt string
 }
 
 // CreateEvaluation opens a pass.
@@ -155,10 +162,11 @@ func (db *DB) RecordChat(ctx context.Context, rec ChatRecord) (int64, error) {
 	defer tx.Rollback()
 
 	res, err := tx.ExecContext(ctx, `
-		INSERT INTO chat (evaluation_id, prompt_id, target_id, status, text, model, error, input_tokens, output_tokens, calls)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		INSERT INTO chat (evaluation_id, prompt_id, target_id, status, text, model, error, input_tokens, output_tokens, calls, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, datetime('now')))`,
 		nullableID(rec.EvaluationID), rec.PromptID, rec.TargetID, rec.Status,
-		rec.Text, rec.Model, rec.Error, rec.InputTokens, rec.OutputTokens, rec.Calls)
+		rec.Text, rec.Model, rec.Error, rec.InputTokens, rec.OutputTokens, rec.Calls,
+		nullIfBlank(rec.CreatedAt))
 	if err != nil {
 		return 0, fmt.Errorf("insert chat: %w", err)
 	}
@@ -197,12 +205,12 @@ func (db *DB) RecordChat(ctx context.Context, rec ChatRecord) (int64, error) {
 	if rec.Calls > 0 || rec.InputTokens > 0 || rec.OutputTokens > 0 {
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO usage_day (target_id, day, calls, input_tokens, output_tokens)
-			VALUES (?, date('now'), ?, ?, ?)
+			VALUES (?, date(COALESCE(?, 'now')), ?, ?, ?)
 			ON CONFLICT (target_id, day) DO UPDATE SET
 				calls = calls + excluded.calls,
 				input_tokens = input_tokens + excluded.input_tokens,
 				output_tokens = output_tokens + excluded.output_tokens`,
-			rec.TargetID, rec.Calls, rec.InputTokens, rec.OutputTokens); err != nil {
+			rec.TargetID, nullIfBlank(rec.CreatedAt), rec.Calls, rec.InputTokens, rec.OutputTokens); err != nil {
 			return 0, fmt.Errorf("record usage: %w", err)
 		}
 	}
@@ -268,4 +276,11 @@ func nullableID(id int64) any {
 		return nil
 	}
 	return id
+}
+
+func nullIfBlank(s string) any {
+	if strings.TrimSpace(s) == "" {
+		return nil
+	}
+	return s
 }

@@ -53,7 +53,7 @@
     <h2>The race</h2>
     <span class="badge">{{len .RaceLegend}} brands &middot; {{.TrendPoints}} {{if eq .TrendPoints 1}}day{{else}}days{{end}}</span>
   </div>
-  <p class="lede">How often each brand is named, over time. Your line is the heavy one.</p>
+  <p class="lede">How often each brand is named, over time. Your line is the heavy one{{if .RaceOmitted}}. The {{.RaceOmitted}} brands below the top seven are in the table further down{{end}}.</p>
   {{.Race}}
   <ul class="legend-row">
     {{range .RaceLegend}}<li class="{{.Class}}{{if .IsOwn}} own{{end}}"><span class="swatch"></span>{{.Name}}{{if .IsOwn}} <span class="tag">you</span>{{end}} <span class="num">{{.Value}}</span></li>{{end}}

@@ -214,6 +214,9 @@ type MeasurePage struct {
 	// Race is every brand's visibility over time on one chart.
 	Race       template.HTML
 	RaceLegend []LegendItem
+	// RaceOmitted is how many tracked brands the race does not draw. Stated
+	// on the page so a capped chart never reads as the whole field.
+	RaceOmitted int
 	// Donut is share of voice as parts of a whole.
 	Donut       template.HTML
 	DonutLegend []LegendItem
