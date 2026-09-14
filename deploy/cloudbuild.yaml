@@ -1,0 +1,24 @@
+# Builds the image from a clean checkout and stamps it with the commit, so the
+# demo banner can name and link the exact code it runs.
+#
+#   gcloud builds submit --config deploy/cloudbuild.yaml \
+#     --substitutions _VERSION=$(git rev-parse --short=12 HEAD)
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg
+      - VERSION=${_VERSION}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/limelit/limelit-open:${_VERSION}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/limelit/limelit-open:latest
+      - .
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/limelit/limelit-open:${_VERSION}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/limelit/limelit-open:latest
+substitutions:
+  _VERSION: dev
+  _REGION: us-central1
+options:
+  logging: CLOUD_LOGGING_ONLY
