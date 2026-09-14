@@ -1,0 +1,15 @@
+# Litestream replicates the SQLite file to a bucket continuously and restores
+# it on boot. The bucket comes from the environment so one image serves any
+# deployment.
+dbs:
+  - path: /data/limelit.db
+    replicas:
+      - type: gcs
+        bucket: ${LITESTREAM_BUCKET}
+        path: ${LITESTREAM_PATH}
+        # How often a change is shipped. Ten seconds bounds what a sudden
+        # container replacement can lose.
+        sync-interval: 10s
+        # Snapshots keep restore fast; retention keeps the bucket small.
+        snapshot-interval: 6h
+        retention: 168h
