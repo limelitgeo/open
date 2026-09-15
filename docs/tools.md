@@ -60,6 +60,10 @@ per target, and `n` (the number of chats the metric rests on).
 
 ## Metrics
 
+Every number these tools return is defined in [methodology.md](methodology.md):
+the denominators, the `branded` and `no_answer_surface` exclusions, and the
+test that enforces each rule.
+
 | Tool | Cloud | Arguments | Notes |
 |---|---|---|---|
 | `get_overview_kpis` | same | `days` (1..90) | Visibility %, citation share %, competitor and prompt counts, competitor ranking, top cited sources |

@@ -196,30 +196,68 @@ Limelit Open takes the other side of it:
 
 ## Quick start
 
-### Docker
+Ten minutes from nothing to a first number, in four steps. You need Go 1.25
+or newer, or Docker; nothing else.
 
-```bash
-docker run -p 1515:1515 -v limelit:/data ghcr.io/limelitgeo/open
-```
+### 1. Install and start
 
-### Binary
-
-Download from [Releases](https://github.com/limelitgeo/open/releases), or
-build from source with Go 1.25 or newer:
+With Go:
 
 ```bash
 go install github.com/limelitgeo/open/cmd/limelit@latest
 limelit serve
 ```
 
-Then open <http://localhost:1515>.
+Or as a container, built from this repository (the same binary, with
+Litestream for durable storage on hosts that replace containers):
+
+```bash
+git clone https://github.com/limelitgeo/open && cd open
+docker build -t limelit-open .
+docker run -p 1515:8080 -v limelit:/data limelit-open
+```
+
+Then open <http://localhost:1515>. The database is one SQLite file in
+`./data` (or the `limelit` volume); back it up by copying it.
+
+> Prebuilt binaries and a published image are tracked in
+> [#25](https://github.com/limelitgeo/open/issues/25) and land with v0.1.
+> Until then, the two commands above are the install.
+
+### 2. Set up in the browser
 
 The setup wizard asks for your brand name, domain, category and up to five
-competitors, fills a starter set of prompts, and takes one provider key.
-Press Run. Nothing is spent before that.
+competitors, fills a starter set of prompts, and takes one provider key. The
+quickest key is OpenAI's, which reaches ChatGPT; Settings lists every other
+provider with a link to where its key comes from. Nothing is spent before you
+press Run.
 
-> Docker images and release binaries land with v0.1. Until then, build from
-> source.
+### 3. Press Run
+
+One pass asks every prompt of every tracked engine. Answers appear on the
+Overview as each engine replies, usually inside a minute. Every number shows
+`n`, the answers it rests on, and under 20 says so.
+
+### 4. Connect Claude
+
+Add this to Claude Desktop's or Claude Code's MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "limelit": { "command": "limelit", "args": ["mcp"] }
+  }
+}
+```
+
+Then ask: "How visible is my brand across AI engines this week, and which
+prompts am I losing?" The tools are the same ones the dashboard reads, so the
+assistant's number is the screen's number.
+
+From here, [Configuration](#configuration) covers the file and the
+environment, [Connect Claude (MCP)](#connect-claude-mcp) the remote endpoint
+and the tool catalog, and [docs/methodology.md](docs/methodology.md) what
+every number means.
 
 ### Commands
 
@@ -374,7 +412,9 @@ limelit run --target chatgpt:openai:online
 
 ## How the numbers are computed
 
-Nothing here is a black box, so here is the whole method.
+Nothing here is a black box. This is the short version; the full method,
+with every formula, every exclusion and the test that enforces each one, is
+[docs/methodology.md](docs/methodology.md).
 
 1. **You define the brands.** Your property (name, aliases, domain) and your
    competitors (name and domain; the domain is the identity key).
@@ -587,7 +627,7 @@ internal/upgrade   the one-command move to Limelit Cloud
 internal/mcpserver the MCP tool catalog, on the official go-sdk
 internal/httpx     HTTP surface: dashboard, JSON API, MCP over HTTP
 deploy/            the container, Litestream, and how the demo is deployed
-docs/              the tool catalog and the provider contract
+docs/              the tool catalog, the provider contract, the methodology
 ```
 
 ## Contributing
@@ -596,11 +636,12 @@ Issues are labeled by area, and the provider adapters are deliberately small
 and self-contained. Start with
 [good first issue](https://github.com/limelitgeo/open/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
-Two rules worth knowing before a pull request:
+[CONTRIBUTING.md](CONTRIBUTING.md) has the rules and the walk-through for
+adding a provider. The three worth knowing before a pull request:
 
 - Original code only. Do not copy code in from other projects.
-- Every provider ships with recorded fixtures and tests that run with no
-  network and no keys.
+- Tests run offline. Every provider ships with recorded fixtures and tests
+  that need no network and no keys.
 - Sign off your commits with `git commit -s`. That is the
   [Developer Certificate of Origin](https://developercertificate.org/): you
   are stating that you wrote the patch, or have the right to submit it under
