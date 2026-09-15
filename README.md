@@ -17,6 +17,21 @@
   <a href="https://limelit.co"><img alt="Limelit Cloud" src="https://img.shields.io/badge/hosted-limelit.co-111.svg"></a>
 </p>
 
+<p align="center">
+  <a href="https://demo.limelit.co"><img alt="The race: every tracked brand's visibility by day, with a hover card for one measured day" src="docs/screenshots/race.png" width="880"></a>
+</p>
+
+<p align="center">
+  <a href="https://demo.limelit.co"><img alt="Visibility by engine: every brand as a dot on a shared 0 to 100 track, one row per engine" src="docs/screenshots/by-engine.png" width="435"></a>
+  <a href="https://demo.limelit.co"><img alt="Share of voice donut with the seven leading brands named and the rest grouped" src="docs/screenshots/share-of-voice.png" width="435"></a>
+</p>
+
+<p align="center">
+  <strong>Live: <a href="https://demo.limelit.co">demo.limelit.co</a></strong> runs this repository unmodified. Read-only; the banner names the commit.
+  <br />
+  <sub>More screens below: the prompt by engine grid, the ranking, citations by source type, top cited sites, and visibility by question type.</sub>
+</p>
+
 ---
 
 Also known as **AEO** (Answer Engine Optimization), **GEO** (Generative Engine
@@ -32,6 +47,7 @@ metric definitions, so moving to the hosted product is one command.
 ## Contents
 
 - [Status](#status)
+- [Screenshots](#screenshots)
 - [Why this exists](#why-this-exists)
 - [Features](#features)
 - [Quick start](#quick-start)
@@ -53,7 +69,9 @@ metric definitions, so moving to the hosted product is one command.
 
 **[demo.limelit.co](https://demo.limelit.co)** is this repository, unmodified,
 tracking a GPU cloud vendor against 21 competitors across six engines. The
-banner names the commit it runs. It is read-only and refreshes itself daily.
+banner names the commit it runs. It is read-only. The history is a real
+company's data with the brand renamed to NorthWind, so the numbers are real
+measurements and the engines' answers are the ones they actually gave.
 
 ## Status
 
@@ -103,6 +121,39 @@ Everything marked *planned* below is tracked in
 [issues](https://github.com/limelitgeo/open/issues) under the
 [v0.1 milestone](https://github.com/limelitgeo/open/milestone/1). Watch
 releases to hear when it ships.
+
+## Screenshots
+
+All taken from [demo.limelit.co](https://demo.limelit.co). Every number
+carries the sample it rests on, and every chart is server-rendered SVG that
+reads without JavaScript; hover adds detail, it never adds a value.
+
+<table>
+  <tr>
+    <td width="50%"><a href="docs/screenshots/grid.png"><img alt="Every prompt, every engine: a grid of fractions, worst prompts first, each cell a link to the answers behind it" src="docs/screenshots/grid.png"></a></td>
+    <td width="50%"><a href="docs/screenshots/standings.png"><img alt="Where you stand: every tracked brand ranked by how often it is named, with share of voice and average position" src="docs/screenshots/standings.png"></a></td>
+  </tr>
+  <tr>
+    <td><sub><strong>Every prompt, every engine.</strong> A fraction per cell, worst first. A dash is a prompt never asked of that engine, not a zero.</sub></td>
+    <td><sub><strong>Where you stand.</strong> The ranking, with the mention and answer counts each rate rests on.</sub></td>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/who-gets-cited.png"><img alt="Who gets cited: one 100 percent stacked bar per measured day, split by source type, your share printed above each" src="docs/screenshots/who-gets-cited.png"></a></td>
+    <td><a href="docs/screenshots/top-cited-sites.png"><img alt="Top cited sites, each classified as own, competitor, social, informational or other" src="docs/screenshots/top-cited-sites.png"></a></td>
+  </tr>
+  <tr>
+    <td><sub><strong>Who gets cited.</strong> Each bar is one measured day's citations by source type; the number on top is your share.</sub></td>
+    <td><sub><strong>Top cited sites.</strong> The pages the engines trust, classified. These are the pages you have to appear on or displace.</sub></td>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/by-question-type.png"><img alt="Visibility by question type: self-service, governed, GPU-first, sovereign-ready, multi-tenant, each with its own denominator" src="docs/screenshots/by-question-type.png"></a></td>
+    <td><a href="docs/screenshots/race.png"><img alt="The race with a hover card listing every brand's value on one measured day" src="docs/screenshots/race.png"></a></td>
+  </tr>
+  <tr>
+    <td><sub><strong>By question type.</strong> A question that names a rival lists rivals by construction, so each type is scored on its own.</sub></td>
+    <td><sub><strong>The race.</strong> Calendar-proportional: a span nobody measured is shaded, never curved across. Hollow dots rest on thin samples.</sub></td>
+  </tr>
+</table>
 
 ## Why this exists
 
@@ -257,10 +308,11 @@ adapter issues are labeled
 
 Set `LIMELIT_DEMO=1` and the same binary becomes a read-only public instance:
 every button that would change or spend anything refuses with an explanation,
-the credential surface is hidden entirely, and the scheduler keeps running so
-history accumulates. A banner names the exact commit the demo is built from
-and links to it, so a visitor can check that the demo is the open core and not
-a fork of it.
+the credential surface is hidden entirely, and the scheduler, if one is
+configured, keeps running so history accumulates. A banner names the exact
+commit the demo is built from and links to it, so a visitor can check that the
+demo is the open core and not a fork of it. [deploy/](deploy/README.md) is how
+demo.limelit.co is built and run.
 
 Configure the instance first, then set the flag. An unconfigured demo returns a
 plain error rather than a wizard nobody can submit.
@@ -498,6 +550,11 @@ make test    # go test ./...
 make lint    # gofmt + go vet
 make run     # build, then serve on :1515
 ```
+
+The screenshots in [docs/screenshots](docs/screenshots) are taken from
+demo.limelit.co at a 1440px viewport. When a chart or table changes shape,
+retake the ones it appears in; a README that shows a screen the binary no
+longer draws is worse than one with no pictures.
 
 Layout:
 
