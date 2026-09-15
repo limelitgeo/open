@@ -82,6 +82,13 @@ is not a finding about the market. A demo that runs live needs a brand that
 exists. Until it tracks one, the banner says the instance is read-only and
 does not claim to be measuring (`Base.DemoLive`).
 
+The env var becomes `limelit.yaml`, and a schedule saved in Settings wins
+over the file. That cannot happen on the demo because every Settings write is
+refused in demo mode, but a seeded database must not carry a `schedule` row
+in its `settings` table either, or it would override the deploy's `off`.
+Check with `sqlite3 limelit.db "SELECT key FROM settings"` before pushing a
+replica.
+
 **Editing the replicated database.** Restore it locally, change it, and push
 to a NEW `LITESTREAM_PATH`, then redeploy pointing at that path. Pushing to
 the path a running instance replicates to loses the race: its generation

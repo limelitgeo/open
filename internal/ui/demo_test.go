@@ -108,7 +108,7 @@ func TestDemoRefusalActuallyChangedNothing(t *testing.T) {
 // TestDemoHidesTheCredentialSurface. Not masked, absent: which variables are
 // set would tell a visitor which vendor accounts the operator holds.
 func TestDemoHidesTheCredentialSurface(t *testing.T) {
-	_, h := demoApp(t)
+	app, h := demoApp(t)
 	body := get(t, h, "/settings").Body.String()
 	for _, leak := range []string{`action="/settings/keys"`, `type="password"`, "set in the environment", "saved, paste to replace", "Test this key",
 		"Generate token", "Rotate token", "Forget token", "/mcp/rotate", "not set"} {
@@ -118,6 +118,23 @@ func TestDemoHidesTheCredentialSurface(t *testing.T) {
 	}
 	if !strings.Contains(body, "not shown on a public demo") {
 		t.Error("the settings page does not say why credentials are absent")
+	}
+	// A target's last error is the operator's, not the visitor's: the demo
+	// shows that a call failed and when, never what the vendor said.
+	targetID, err := app.db.AddTarget(context.Background(), store.Target{Spec: "chatgpt:stub", Engine: "chatgpt", Provider: "stub", Access: "api"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	prompts, _ := app.db.Prompts(context.Background(), false)
+	if _, err := app.db.RecordChat(context.Background(), store.ChatRecord{TargetID: targetID, PromptID: prompts[0].ID, Status: "failed", Error: "openai: account sk-live-... has no credit"}); err != nil {
+		t.Fatal(err)
+	}
+	body = get(t, h, "/settings").Body.String()
+	if strings.Contains(body, "has no credit") || strings.Contains(body, "sk-live") {
+		t.Error("demo settings renders a vendor error message")
+	}
+	if !strings.Contains(body, "last failure") {
+		t.Error("demo settings hides that a call failed at all")
 	}
 	// The upgrade form asks for a Cloud key, so it is absent too.
 	upgrade := get(t, h, "/upgrade").Body.String()

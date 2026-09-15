@@ -57,7 +57,14 @@ func (a *App) buildSettings(r *http.Request, base Base) (SettingsPage, error) {
 	byEngine := map[string][]TargetView{}
 	var flat []TargetView
 	for _, t := range stored {
-		v := TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access, Enabled: t.Enabled, Health: healthLine(health[t.ID])}
+		h := health[t.ID]
+		if a.demo {
+			// A vendor's error text is the operator's business: it can name
+			// an account state or quote a request. The demo keeps the timing
+			// and drops the message.
+			h.LastError = ""
+		}
+		v := TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access, Enabled: t.Enabled, Health: healthLine(h)}
 		if e, ok := engines.Lookup(t.Engine); ok {
 			v.EngineLabel = e.Label
 		}
