@@ -51,7 +51,7 @@ gcloud run deploy limelit-open-demo \
   --service-account limelit-open-demo@$PROJECT.iam.gserviceaccount.com \
   --allow-unauthenticated --min-instances 1 --max-instances 1 --no-cpu-throttling \
   --memory 512Mi --execution-environment gen2 \
-  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit-v4,LIMELIT_SCHEDULE=off,LIMELIT_RUNS_PER_DAY=300" \
+  --set-env-vars "LIMELIT_DEMO=1,LITESTREAM_BUCKET=limelit-open-demo,LITESTREAM_PATH=limelit-v5,LIMELIT_SCHEDULE=off,LIMELIT_RUNS_PER_DAY=300" \
   --set-secrets "OPENAI_API_KEY=openai-key:latest,ANTHROPIC_API_KEY=anthropic-key:latest,PERPLEXITY_API_KEY=perplexity-key:latest,GOOGLE_API_KEY=gemini-key:latest,SEARCHAPI_KEY=searchapi-key:latest"
 ```
 
