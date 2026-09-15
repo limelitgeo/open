@@ -277,6 +277,61 @@ func (db *DB) DeleteTarget(ctx context.Context, id int64) error {
 	return err
 }
 
+// SetTargetEnabled pauses or resumes a target. A paused target is skipped by
+// the runner and keeps every answer it has recorded, which is the difference
+// between it and DeleteTarget: pausing is how a user stops paying for an
+// engine for a while without losing its history.
+func (db *DB) SetTargetEnabled(ctx context.Context, id int64, enabled bool) error {
+	res, err := db.ExecContext(ctx, `UPDATE target SET enabled = ? WHERE id = ?`, boolToInt(enabled), id)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err == nil && n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// TargetHealth is when a target last answered and last failed, derived from
+// its recorded chats rather than kept as a column, so it cannot drift from
+// the evidence it summarises.
+type TargetHealth struct {
+	TargetID int64
+	// LastOK is the newest answer with status ok, "" when there is none.
+	LastOK string
+	// LastFailed is the newest failed call, "" when there is none, and
+	// LastError is the message it recorded.
+	LastFailed string
+	LastError  string
+}
+
+// TargetHealths returns the health of every target that has ever been
+// called, keyed by target id. A target absent from the map has never run.
+func (db *DB) TargetHealths(ctx context.Context) (map[int64]TargetHealth, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT target_id,
+		       COALESCE(MAX(CASE WHEN status = 'ok' THEN created_at END), ''),
+		       COALESCE(MAX(CASE WHEN status = 'failed' THEN created_at END), ''),
+		       COALESCE((SELECT f.error FROM chat f
+		                 WHERE f.target_id = chat.target_id AND f.status = 'failed'
+		                 ORDER BY f.created_at DESC, f.id DESC LIMIT 1), '')
+		FROM chat
+		GROUP BY target_id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[int64]TargetHealth{}
+	for rows.Next() {
+		var h TargetHealth
+		if err := rows.Scan(&h.TargetID, &h.LastOK, &h.LastFailed, &h.LastError); err != nil {
+			return nil, err
+		}
+		out[h.TargetID] = h
+	}
+	return out, rows.Err()
+}
+
 // Setting reads one setting, returning "" when unset.
 func (db *DB) Setting(ctx context.Context, key string) (string, error) {
 	var v string
@@ -294,6 +349,23 @@ func (db *DB) SetSetting(ctx context.Context, key, value string) error {
 		ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')`,
 		key, value)
 	return err
+}
+
+// DeleteSetting removes one setting. Deleting a key that was never set is
+// not an error: the state the caller wanted is the state there is.
+func (db *DB) DeleteSetting(ctx context.Context, key string) error {
+	_, err := db.ExecContext(ctx, `DELETE FROM settings WHERE key = ?`, key)
+	return err
+}
+
+// SettingUpdatedAt reports when a setting was last written, "" when unset.
+func (db *DB) SettingUpdatedAt(ctx context.Context, key string) (string, error) {
+	var at string
+	err := db.QueryRowContext(ctx, `SELECT updated_at FROM settings WHERE key = ?`, key).Scan(&at)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	return at, err
 }
 
 // Counts is the cheap summary the shell needs on every page.

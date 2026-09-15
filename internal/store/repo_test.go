@@ -5,6 +5,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -208,5 +209,103 @@ func TestCountsAndRunsToday(t *testing.T) {
 	mustExec(t, db, `INSERT INTO chat (prompt_id, target_id, status, created_at) VALUES (1, 1, 'ok', datetime('now', '-2 days'))`)
 	if n, _ := db.RunsToday(ctx); n != 1 {
 		t.Errorf("RunsToday counted an older chat: %d", n)
+	}
+}
+
+func TestPausingATargetKeepsItsHistory(t *testing.T) {
+	// Pause is the middle ground the runner needed: stop paying for an
+	// engine without deleting what it already said. Delete cascades the
+	// chats; pause must not.
+	db := openTemp(t)
+	ctx := context.Background()
+
+	id, err := db.AddTarget(ctx, Target{Spec: "chatgpt:openai:online", Engine: "chatgpt", Provider: "openai", Online: true, Access: "api"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mustExec(t, db, `INSERT INTO prompt (id, text, active) VALUES (1, 'q', 1)`)
+	mustExec(t, db, `INSERT INTO chat (prompt_id, target_id, status) VALUES (1, ?, 'ok')`, id)
+
+	if err := db.SetTargetEnabled(ctx, id, false); err != nil {
+		t.Fatal(err)
+	}
+	if enabled, _ := db.Targets(ctx, true); len(enabled) != 0 {
+		t.Errorf("a paused target is still offered to the runner: %+v", enabled)
+	}
+	all, _ := db.Targets(ctx, false)
+	if len(all) != 1 || all[0].Enabled {
+		t.Errorf("paused target = %+v", all)
+	}
+	if c, _ := db.Counts(ctx); c.Chats != 1 {
+		t.Errorf("pausing changed the chat count to %d", c.Chats)
+	}
+
+	if err := db.SetTargetEnabled(ctx, id, true); err != nil {
+		t.Fatal(err)
+	}
+	if enabled, _ := db.Targets(ctx, true); len(enabled) != 1 {
+		t.Error("resuming did not put the target back")
+	}
+	if err := db.SetTargetEnabled(ctx, 999, true); !errors.Is(err, ErrNotFound) {
+		t.Errorf("pausing a target that does not exist = %v, want ErrNotFound", err)
+	}
+}
+
+func TestTargetHealthIsDerivedFromChats(t *testing.T) {
+	db := openTemp(t)
+	ctx := context.Background()
+
+	mustExec(t, db, `INSERT INTO prompt (id, text, active) VALUES (1, 'q', 1)`)
+	mustExec(t, db, `INSERT INTO target (id, spec, engine, provider, access) VALUES
+		(1, 'chatgpt:openai', 'chatgpt', 'openai', 'api'),
+		(2, 'claude:anthropic', 'claude', 'anthropic', 'api'),
+		(3, 'gemini:google', 'gemini', 'google', 'api')`)
+	mustExec(t, db, `INSERT INTO chat (prompt_id, target_id, status, error, created_at) VALUES
+		(1, 1, 'ok', '', '2026-09-01 10:00:00'),
+		(1, 1, 'failed', 'older failure', '2026-09-02 10:00:00'),
+		(1, 1, 'failed', 'no credit or quota left', '2026-09-03 10:00:00'),
+		(1, 1, 'ok', '', '2026-09-04 10:00:00'),
+		(1, 2, 'failed', 'credentials rejected', '2026-09-05 10:00:00')`)
+
+	health, err := db.TargetHealths(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	one := health[1]
+	if one.LastOK != "2026-09-04 10:00:00" {
+		t.Errorf("target 1 last ok = %q", one.LastOK)
+	}
+	if one.LastFailed != "2026-09-03 10:00:00" || one.LastError != "no credit or quota left" {
+		t.Errorf("target 1 last failure = %q %q, want the newest failure and its message", one.LastFailed, one.LastError)
+	}
+	two := health[2]
+	if two.LastOK != "" || two.LastError != "credentials rejected" {
+		t.Errorf("target 2 = %+v, want no ok and the auth failure", two)
+	}
+	if _, ever := health[3]; ever {
+		t.Error("a target that never ran has a health row")
+	}
+}
+
+func TestDeleteSettingForgets(t *testing.T) {
+	db := openTemp(t)
+	ctx := context.Background()
+	if err := db.SetSetting(ctx, "k", "v"); err != nil {
+		t.Fatal(err)
+	}
+	if at, _ := db.SettingUpdatedAt(ctx, "k"); at == "" {
+		t.Error("no updated_at for a written setting")
+	}
+	if err := db.DeleteSetting(ctx, "k"); err != nil {
+		t.Fatal(err)
+	}
+	if v, _ := db.Setting(ctx, "k"); v != "" {
+		t.Errorf("setting survived deletion: %q", v)
+	}
+	if at, _ := db.SettingUpdatedAt(ctx, "k"); at != "" {
+		t.Errorf("updated_at survived deletion: %q", at)
+	}
+	if err := db.DeleteSetting(ctx, "k"); err != nil {
+		t.Errorf("deleting twice = %v, want no error", err)
 	}
 }
