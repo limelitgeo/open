@@ -304,7 +304,7 @@ func TestHTTPRefusesWithoutAToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := Handler(srv, "", nil)
+	h := Handler(srv, StaticToken(""), nil)
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodPost, "/mcp", nil))
 
@@ -321,7 +321,7 @@ func TestHTTPRequiresTheRightToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := Handler(srv, "secret", nil)
+	h := Handler(srv, StaticToken("secret"), nil)
 
 	for _, header := range []string{"", "Bearer wrong", "secret", "Basic secret", "Bearer "} {
 		res := httptest.NewRecorder()
@@ -560,5 +560,45 @@ func TestUpgradeToolNamesTheBoundaryHonestly(t *testing.T) {
 	// it as Cloud-only.
 	if strings.Contains(joined, "fan-out capture") {
 		t.Error("the list claims fan-out capture is Cloud-only; the open core captures it")
+	}
+}
+
+func TestHTTPTokenSourceIsReadPerRequest(t *testing.T) {
+	// Rotating the token in Settings must take effect on the next request.
+	// A handler that copied the token at construction would keep honouring
+	// the old one after the screen said it was gone.
+	srv, err := New(Deps{DB: openEmpty(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	current := ""
+	h := Handler(srv, func() string { return current }, nil)
+
+	try := func(bearer string) int {
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
+		if bearer != "" {
+			req.Header.Set("Authorization", "Bearer "+bearer)
+		}
+		h.ServeHTTP(res, req)
+		return res.Code
+	}
+	if got := try("first"); got != http.StatusServiceUnavailable {
+		t.Fatalf("with no token yet = %d, want 503", got)
+	}
+	current = "first"
+	if got := try("first"); got == http.StatusUnauthorized || got == http.StatusServiceUnavailable {
+		t.Fatalf("the generated token was refused: %d", got)
+	}
+	current = "second"
+	if got := try("first"); got != http.StatusUnauthorized {
+		t.Errorf("the rotated-away token still works: %d", got)
+	}
+	if got := try("second"); got == http.StatusUnauthorized || got == http.StatusServiceUnavailable {
+		t.Errorf("the new token was refused: %d", got)
+	}
+	current = ""
+	if got := try("second"); got != http.StatusServiceUnavailable {
+		t.Errorf("after forgetting the token = %d, want 503", got)
 	}
 }

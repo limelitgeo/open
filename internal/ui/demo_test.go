@@ -59,8 +59,10 @@ func TestDemoRefusesEveryMutatingRoute(t *testing.T) {
 		"/prompts/add", "/prompts/delete",
 		"/competitors/add", "/competitors/delete",
 		"/settings/targets/track", "/settings/targets/add", "/settings/targets/delete",
-		"/settings/keys", "/settings/keys/test", "/settings/limits",
-		"/run",
+		"/settings/targets/pause", "/settings/targets/resume",
+		"/settings/keys", "/settings/keys/test", "/settings/keys/forget", "/settings/limits",
+		"/settings/schedule", "/settings/mcp/rotate", "/settings/mcp/forget",
+		"/run", "/upgrade",
 		"/setup/brand", "/setup/competitors", "/setup/prompts", "/setup/provider", "/setup/finish",
 	} {
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(url.Values{"text": {"x"}}.Encode()))
@@ -108,13 +110,19 @@ func TestDemoRefusalActuallyChangedNothing(t *testing.T) {
 func TestDemoHidesTheCredentialSurface(t *testing.T) {
 	_, h := demoApp(t)
 	body := get(t, h, "/settings").Body.String()
-	for _, leak := range []string{`action="/settings/keys"`, `type="password"`, "set in the environment", "saved, paste to replace", "Test this key"} {
+	for _, leak := range []string{`action="/settings/keys"`, `type="password"`, "set in the environment", "saved, paste to replace", "Test this key",
+		"Generate token", "Rotate token", "Forget token", "/mcp/rotate", "not set"} {
 		if strings.Contains(body, leak) {
 			t.Errorf("demo settings renders %q", leak)
 		}
 	}
 	if !strings.Contains(body, "not shown on a public demo") {
 		t.Error("the settings page does not say why credentials are absent")
+	}
+	// The upgrade form asks for a Cloud key, so it is absent too.
+	upgrade := get(t, h, "/upgrade").Body.String()
+	if strings.Contains(upgrade, `type="password"`) || strings.Contains(upgrade, `action="/upgrade"`) {
+		t.Error("demo renders the upgrade form")
 	}
 }
 

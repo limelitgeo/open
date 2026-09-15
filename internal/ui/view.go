@@ -72,6 +72,12 @@ type TargetView struct {
 	EngineLabel string
 	Access      string
 	Chats       int
+	// Enabled is false for a paused target: kept, with its history, but
+	// skipped by the runner until it is resumed.
+	Enabled bool
+	// Health is one line on when the target last answered and last failed,
+	// derived from its chats. "never run" before the first pass.
+	Health string
 }
 
 // PromptView is one row in the prompts table.
@@ -159,26 +165,77 @@ type ProviderKeyCard struct {
 	Note        string
 	KeyURL      string
 	Credentials []CredentialView
-	Available   bool
-	Reason      string
+	// AnySaved is true when at least one credential is stored here, which
+	// is when Forget has something to do.
+	AnySaved  bool
+	Available bool
+	Reason    string
 }
 
-// SettingsPage is targets, keys and limits.
+// MCPView is the state of MCP over HTTP: whether a bearer token is in force
+// and where it comes from. The token itself appears exactly once, in the
+// response to the request that generated it, and never again.
+type MCPView struct {
+	// Status is "not set", "set in the environment" or "saved here".
+	Status  string
+	FromEnv bool
+	Saved   bool
+	// SavedAt is when the stored token was generated, for a user deciding
+	// whether to rotate it.
+	SavedAt string
+	// NewToken is set only on the page that answers a generate or rotate,
+	// and Snippet is the client configuration carrying it.
+	NewToken string
+	// URL is the endpoint as this request reached it.
+	URL string
+	// TokenEnv names the variable that overrides the stored token.
+	TokenEnv string
+}
+
+// SettingsPage is targets, keys, limits, the schedule and the MCP token.
 type SettingsPage struct {
 	Base
-	Engines       []EngineCard
-	Providers     []ProviderKeyCard
-	Targets       []TargetView
-	EngineList    string
-	ProviderNames string
-	RunsPerDay    int
-	RunsToday     int
+	Engines   []EngineCard
+	Providers []ProviderKeyCard
+	Targets   []TargetView
+	// Tracked and Paused split Targets the way the sidebar count does, so
+	// the two never disagree on the page.
+	Tracked, Paused int
+	EngineList      string
+	ProviderNames   string
+	RunsPerDay      int
+	RunsToday       int
+	// KeyResults carries the outcome of a save, test or forget, keyed by
+	// provider name, so it renders inside that provider's card rather than
+	// as a page-level flash the user has to connect to a field.
+	KeyResults map[string]*Flash
+	// Schedule is the mode in force: daily, hourly or off.
+	Schedule string
+	// NextRun says when the next automatic pass is due, "" when off.
+	NextRun string
+	MCP     MCPView
 }
 
-// UpgradePage is the honest boundary with the hosted product.
+// UpgradePage is the honest boundary with the hosted product, and the form
+// that moves an instance across it.
 type UpgradePage struct {
 	Base
 	CloudFeatures []string
+	// KeyFromEnv is true when LIMELIT_CLOUD_KEY is set, so the form can say
+	// the key is already known rather than asking for it again.
+	KeyFromEnv bool
+	// Prompts, Competitors and Chats are what would move.
+	Prompts, Competitors, Chats int
+	// Error is the upgrade's own message when the last attempt failed.
+	Error string
+	// Result is set after a successful upload.
+	Result *UpgradeResult
+}
+
+// UpgradeResult is what Cloud reported back, shaped for the page.
+type UpgradeResult struct {
+	Prompts, Competitors, Chats, Mentions, Citations, Skipped int
+	WorkspaceURL, MCPURL                                      string
 }
 
 // WizardBase is the chrome for the setup flow.

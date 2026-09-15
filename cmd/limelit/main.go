@@ -172,8 +172,7 @@ func cmdServe(ctx context.Context, args []string) error {
 		return err
 	}
 
-	stopSchedule := startSchedule(ctx, cfg, run, db, log)
-	defer stopSchedule()
+	startSchedule(ctx, dash, run, db, log)
 
 	srv := httpx.New(*addr, db, log, buildVersion(), dash)
 	log.Info("listening", "addr", srv.Addr(), "database", db.Path(), "version", buildVersion())
@@ -184,12 +183,17 @@ func cmdServe(ctx context.Context, args []string) error {
 	return nil
 }
 
-// startSchedule runs a pass on an interval.
+// startSchedule runs a pass on an interval, and re-reads the interval.
 //
 // Two intervals rather than a cron expression, because cron would mean a
 // dependency and a syntax to learn for a choice that is really "how often".
 // Anything else is `limelit run` from the system's own cron, which is also
 // the only way to schedule when the dashboard is not running.
+//
+// The mode comes from a function, not a value, because Settings can change
+// it while the server runs. The loop wakes at least every schedulePoll to ask
+// again, so daily to off or off to hourly takes effect within a minute and
+// the screen never describes a schedule the process is not keeping.
 //
 // The first pass is due when the last one is older than the interval, or
 // when none has ever run. A bare ticker would fire a full interval after the
@@ -198,54 +202,99 @@ func cmdServe(ctx context.Context, args []string) error {
 // demo sat on a month-old seed for exactly that reason. A short grace before
 // the first pass lets the server come up first and keeps a restart loop from
 // spending a run per restart.
-func startSchedule(ctx context.Context, cfg *config.Config, run *runner.Runner, db *store.DB, log *slog.Logger) func() {
-	var every time.Duration
-	switch strings.ToLower(strings.TrimSpace(cfg.Schedule)) {
-	case "daily":
-		every = 24 * time.Hour
-	case "hourly":
-		every = time.Hour
-	case "", "off":
-		return func() {}
-	default:
-		log.Warn("unknown schedule, nothing will run automatically",
-			"schedule", cfg.Schedule, "supported", "daily, hourly, off")
-		return func() {}
-	}
-
-	counts, err := db.Counts(ctx)
-	first := firstDue(counts.LastChatAt, err, every, scheduleGrace, time.Now())
-	log.Info("scheduling automatic runs", "every", every, "first", first.Round(time.Second))
-	timer := time.NewTimer(first)
+func startSchedule(ctx context.Context, settings scheduleSettings, run *runner.Runner, db *store.DB, log *slog.Logger) {
 	go func() {
-		defer timer.Stop()
+		var lastAttempt time.Time
+		announced := ""
 		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-timer.C:
-				ceiling := cfg.Limits.RunsPerDay
-				if stored, err := db.Setting(ctx, "runs_per_day"); err == nil && stored != "" {
-					if n, err := strconv.Atoi(stored); err == nil && n > 0 {
-						ceiling = n
+			m := settings.ScheduleMode(ctx)
+			every, ok := config.ScheduleInterval(m)
+			if !ok {
+				if announced != m {
+					if config.ValidSchedule(m) {
+						log.Info("automatic runs are off", "schedule", m)
+					} else {
+						log.Warn("unknown schedule, nothing will run automatically",
+							"schedule", m, "supported", strings.Join(config.ScheduleModes, ", "))
 					}
+					announced = m
 				}
-				res, err := run.Run(ctx, runner.Options{RunsPerDay: ceiling})
-				if err != nil {
-					log.Error("scheduled run failed", "error", err)
-				} else {
-					log.Info("scheduled run finished", "evaluation", res.EvaluationID,
-						"completed", res.Completed, "failed", res.Failed)
+				if !sleep(ctx, schedulePoll) {
+					return
 				}
-				timer.Reset(every)
+				continue
+			}
+
+			counts, err := db.Counts(ctx)
+			wait := nextDue(counts.LastChatAt, err, lastAttempt, every, scheduleGrace, time.Now())
+			if announced != m {
+				log.Info("scheduling automatic runs", "every", every, "next", wait.Round(time.Second))
+				announced = m
+			}
+			if wait > schedulePoll {
+				// Not due yet. Sleep a poll and ask the setting again rather
+				// than committing to a wait the user may change.
+				if !sleep(ctx, schedulePoll) {
+					return
+				}
+				continue
+			}
+			if !sleep(ctx, wait) {
+				return
+			}
+			lastAttempt = time.Now()
+
+			res, err := run.Run(ctx, runner.Options{RunsPerDay: settings.RunsPerDay(ctx)})
+			if err != nil {
+				log.Error("scheduled run failed", "error", err)
+			} else {
+				log.Info("scheduled run finished", "evaluation", res.EvaluationID,
+					"completed", res.Completed, "failed", res.Failed)
 			}
 		}
 	}()
-	return func() { timer.Stop() }
+}
+
+// scheduleSettings is what the scheduler reads on every wake: the cadence
+// and the ceiling, each resolved Settings first, then limelit.yaml, then the
+// default. The dashboard implements it, so the two agree by construction.
+type scheduleSettings interface {
+	ScheduleMode(context.Context) string
+	RunsPerDay(context.Context) int
+}
+
+// sleep waits d or until ctx ends, reporting whether to carry on.
+func sleep(ctx context.Context, d time.Duration) bool {
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return false
+	case <-timer.C:
+		return true
+	}
 }
 
 // scheduleGrace is how long the first scheduled pass waits after start.
 const scheduleGrace = 30 * time.Second
+
+// schedulePoll is how often the scheduler re-reads the schedule setting.
+const schedulePoll = time.Minute
+
+// nextDue is how long until the next pass: firstDue's answer, pushed out so
+// that at least one interval separates two attempts by this process. Without
+// the second rule a pass that recorded nothing (nothing to run, every call
+// failed before a row was written) would leave the last answer old, firstDue
+// would say "due now" again, and the loop would retry every grace period.
+func nextDue(lastChatAt string, lookup error, lastAttempt time.Time, every, grace time.Duration, now time.Time) time.Duration {
+	wait := firstDue(lastChatAt, lookup, every, grace, now)
+	if !lastAttempt.IsZero() {
+		if w := lastAttempt.Add(every).Sub(now); w > wait {
+			wait = w
+		}
+	}
+	return wait
+}
 
 // firstDue is how long to wait before the first scheduled pass: the rest of
 // the interval since the last answer was recorded, the grace when that has

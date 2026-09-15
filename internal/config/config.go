@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -128,3 +129,48 @@ func DatabasePath() string { return filepath.Join(DataDir(), "limelit.db") }
 // store is consulted by the caller only when this returns "", so an exported
 // variable always wins over a stored value.
 func Credential(name string) string { return strings.TrimSpace(os.Getenv(name)) }
+
+// Schedule modes. Two intervals rather than a cron expression, because cron
+// would mean a dependency and a syntax to learn for a choice that is really
+// "how often". Anything else is `limelit run` from the system's own cron.
+const (
+	ScheduleOff    = "off"
+	ScheduleDaily  = "daily"
+	ScheduleHourly = "hourly"
+)
+
+// ScheduleModes lists the accepted values, in the order a form shows them.
+var ScheduleModes = []string{ScheduleDaily, ScheduleHourly, ScheduleOff}
+
+// ScheduleInterval turns a schedule mode into how often a pass runs. ok is
+// false for off and for anything unrecognised, which the caller treats the
+// same way: nothing runs on its own.
+func ScheduleInterval(mode string) (every time.Duration, ok bool) {
+	switch NormalizeSchedule(mode) {
+	case ScheduleDaily:
+		return 24 * time.Hour, true
+	case ScheduleHourly:
+		return time.Hour, true
+	}
+	return 0, false
+}
+
+// NormalizeSchedule lower-cases and trims a mode, mapping "" to off.
+func NormalizeSchedule(mode string) string {
+	m := strings.ToLower(strings.TrimSpace(mode))
+	if m == "" {
+		return ScheduleOff
+	}
+	return m
+}
+
+// ValidSchedule reports whether mode is one this binary accepts.
+func ValidSchedule(mode string) bool {
+	m := NormalizeSchedule(mode)
+	for _, known := range ScheduleModes {
+		if m == known {
+			return true
+		}
+	}
+	return false
+}

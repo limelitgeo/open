@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLoadMissingFileIsNotAnError(t *testing.T) {
@@ -127,5 +128,22 @@ func TestCredentialTrimsAndReadsEnv(t *testing.T) {
 	}
 	if got := Credential("LIMELIT_NO_SUCH_VAR"); got != "" {
 		t.Errorf("Credential for an unset var = %q, want empty", got)
+	}
+}
+
+func TestScheduleIntervalKnowsThreeModes(t *testing.T) {
+	for mode, want := range map[string]time.Duration{"daily": 24 * time.Hour, "Hourly ": time.Hour} {
+		got, ok := ScheduleInterval(mode)
+		if !ok || got != want {
+			t.Errorf("ScheduleInterval(%q) = %v, %v", mode, got, ok)
+		}
+	}
+	for _, mode := range []string{"off", "", "weekly", "0 3 * * *"} {
+		if _, ok := ScheduleInterval(mode); ok {
+			t.Errorf("ScheduleInterval(%q) claims to run", mode)
+		}
+	}
+	if !ValidSchedule("off") || !ValidSchedule("") || ValidSchedule("weekly") {
+		t.Error("ValidSchedule disagrees with the accepted list")
 	}
 }

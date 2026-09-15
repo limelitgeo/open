@@ -1,12 +1,9 @@
 // Copyright 2026 Limelit. Licensed under the Apache License, Version 2.0.
 // See the LICENSE file in the repository root for the full terms.
 
-// Package httpx is the HTTP surface: the dashboard, the JSON API and the MCP
-// endpoint all hang off one mux so a number is served the same way whoever
-// asks for it.
-//
-// In this scaffold only /healthz is real. The UI (#20 to #23), the JSON API
-// and the MCP endpoint (#18) land on this same router.
+// Package httpx is the HTTP surface: the dashboard, the health check and the
+// MCP endpoint all hang off one mux so a number is served the same way
+// whoever asks for it.
 package httpx
 
 import (
@@ -45,10 +42,16 @@ func New(addr string, db *store.DB, log *slog.Logger, version string, dash *ui.A
 
 	// MCP over streamable HTTP, for a client that connects to a running
 	// instance instead of launching one. It refuses every request until a
-	// token is set, which is why it can be mounted unconditionally.
+	// token is set, which is why it can be mounted unconditionally. The
+	// token is read per request: the environment, else the one generated in
+	// Settings, which is how a rotation takes effect without a restart.
+	token := mcpserver.StaticToken(os.Getenv(mcpserver.TokenEnv))
+	if dash != nil {
+		token = dash.MCPToken
+	}
 	if srv, err := New_(db); err == nil {
-		mux.Handle("/mcp", mcpserver.Handler(srv, os.Getenv(mcpserver.TokenEnv), log))
-		mux.Handle("/mcp/", mcpserver.Handler(srv, os.Getenv(mcpserver.TokenEnv), log))
+		mux.Handle("/mcp", mcpserver.Handler(srv, token, log))
+		mux.Handle("/mcp/", mcpserver.Handler(srv, token, log))
 	} else if log != nil {
 		log.Error("the MCP endpoint could not be built", "error", err)
 	}

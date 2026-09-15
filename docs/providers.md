@@ -208,7 +208,12 @@ OLOSTEP_API_KEY
 
 The Settings screen writes the same values to the settings store, encrypted
 at rest with a key derived from `LIMELIT_SECRET`. Environment wins when both
-are set.
+are set, and the field says so. Saving a key tests it at once with the
+provider's `Test` call and reports the provider's own error under the field;
+a rejected key stays saved so an account problem can be fixed on the vendor's
+side, and Forget removes it. `schedule` and `runs_per_day` can be changed in
+Settings too; a stored value wins over the file and the scheduler re-reads it
+within a minute.
 
 ## The `runs_per_day` guard
 

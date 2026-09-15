@@ -25,7 +25,11 @@ import (
 const (
 	settingCategory   = "category"
 	settingRunsPerDay = "runs_per_day"
-	credentialPrefix  = credentials.Prefix
+	settingSchedule   = "schedule"
+	// settingMCPToken holds the HTTP bearer token, sealed with the same
+	// keyring as a provider credential. It is a credential.
+	settingMCPToken  = "mcp_token"
+	credentialPrefix = credentials.Prefix
 )
 
 // cloudFeatures is the hosted-only list. It is the same list as the README's,
@@ -87,10 +91,17 @@ func (a *App) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /settings/targets/track", a.readOnly(a.trackEngine))
 	mux.HandleFunc("POST /settings/targets/add", a.readOnly(a.addTarget))
 	mux.HandleFunc("POST /settings/targets/delete", a.readOnly(a.deleteTarget))
+	mux.HandleFunc("POST /settings/targets/pause", a.readOnly(a.setTargetEnabled(false)))
+	mux.HandleFunc("POST /settings/targets/resume", a.readOnly(a.setTargetEnabled(true)))
 	mux.HandleFunc("POST /settings/keys", a.readOnly(a.saveKeys))
 	mux.HandleFunc("POST /settings/keys/test", a.readOnly(a.testKeys))
+	mux.HandleFunc("POST /settings/keys/forget", a.readOnly(a.forgetKeys))
 	mux.HandleFunc("POST /settings/limits", a.readOnly(a.saveLimits))
+	mux.HandleFunc("POST /settings/schedule", a.readOnly(a.saveSchedule))
+	mux.HandleFunc("POST /settings/mcp/rotate", a.readOnly(a.rotateMCPToken))
+	mux.HandleFunc("POST /settings/mcp/forget", a.readOnly(a.forgetMCPToken))
 	mux.HandleFunc("GET /upgrade", a.upgrade)
+	mux.HandleFunc("POST /upgrade", a.readOnly(a.runUpgrade))
 	mux.HandleFunc("POST /run", a.readOnly(a.run))
 
 	mux.HandleFunc("GET /setup", a.noSetup(a.wizardBrand))
@@ -117,9 +128,14 @@ var flashes = map[string]Flash{
 	"competitor-nodom":  {Kind: "error", Text: "A competitor needs a domain: it is how the same company is recognised across citations."},
 	"competitor-remove": {Kind: "ok", Text: "Competitor removed. Answers already recorded keep their mentions."},
 	"target-added":      {Kind: "ok", Text: "Target added."},
-	"target-removed":    {Kind: "ok", Text: "Target removed."},
+	"target-kept":       {Kind: "info", Text: "That target is already tracked."},
+	"target-removed":    {Kind: "ok", Text: "Target removed, with its answers."},
+	"target-paused":     {Kind: "ok", Text: "Target paused. Its answers are kept and the next run skips it."},
+	"target-resumed":    {Kind: "ok", Text: "Target resumed. The next run includes it."},
 	"limits-saved":      {Kind: "ok", Text: "Run ceiling saved."},
+	"schedule-saved":    {Kind: "ok", Text: "Schedule saved. It takes effect within a minute, no restart needed."},
 	"key-saved":         {Kind: "ok", Text: "Key saved on this machine."},
+	"token-forgotten":   {Kind: "ok", Text: "Token forgotten. MCP over HTTP refuses every request until a new one is generated."},
 	"run-started":       {Kind: "ok", Text: "Running. Answers appear as each engine replies; refresh to see them."},
 	"demo-readonly":     {Kind: "info", Text: "This is a read-only demo. Run your own copy to change anything."},
 	"run-busy":          {Kind: "warn", Text: "A run is already in progress."},
@@ -166,7 +182,7 @@ func (a *App) base(r *http.Request, title, current string) (Base, store.Counts, 
 	// cannot press it here.
 	if a.demo {
 		b.CanRun = false
-		b.DemoLive = a.scheduled()
+		b.DemoLive = a.scheduled(ctx)
 	}
 	b.Commit, b.CommitURL = commitLink(a.version)
 	if counts.LastChatAt != "" {
@@ -309,19 +325,6 @@ func (a *App) deleteCompetitor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/competitors?flash=competitor-remove", http.StatusSeeOther)
-}
-
-func (a *App) upgrade(w http.ResponseWriter, r *http.Request) {
-	if !a.configured(r.Context()) {
-		http.Redirect(w, r, "/setup", http.StatusSeeOther)
-		return
-	}
-	base, _, err := a.base(r, "Limelit Cloud", "upgrade")
-	if err != nil {
-		a.fail(w, r, err)
-		return
-	}
-	a.write(w, r, "upgrade", UpgradePage{Base: base, CloudFeatures: cloudFeatures})
 }
 
 // run starts one evaluation and returns immediately. A pass takes as long as

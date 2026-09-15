@@ -158,8 +158,13 @@ func TestSavedKeyIsEncryptedAtRest(t *testing.T) {
 	rec := post(t, h, "/settings/keys", url.Values{
 		"provider": {"openrouter"}, "cred_OPENROUTER_API_KEY": {key},
 	})
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("saving a key = %d", rec.Code)
+	// Save is save-then-test, answered on the page rather than by redirect,
+	// so the vendor's verdict lands under the field that was just filled.
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "accepted the key") {
+		t.Fatalf("saving a key = %d, notice %s", rec.Code, flashOf(rec.Body.String()))
+	}
+	if strings.Contains(rec.Body.String(), key) {
+		t.Error("the response to saving a key echoed it")
 	}
 
 	stored, err := db.Setting(context.Background(), credentialPrefix+"OPENROUTER_API_KEY")

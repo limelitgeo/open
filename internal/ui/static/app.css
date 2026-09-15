@@ -442,6 +442,29 @@ fieldset { border: none; margin: 0; padding: 0; }
 }
 .chip-x:hover { color: var(--neg-fg); }
 
+.targets { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.target {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--surface); border: 1px solid var(--rule-2);
+  border-radius: var(--radius-sm); padding: 6px 6px 6px 10px; font-size: 12px;
+}
+.target-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.target-main code { font-size: 11.5px; color: var(--ink-2); }
+.target-health { margin-top: 0; }
+.target-off { border-style: dashed; }
+.target-off code { color: var(--ink-4); }
+.target-actions { display: flex; align-items: center; gap: 2px; flex: none; }
+.target-actions form { display: inline-flex; }
+.btn-sm { font-size: 12px; padding: 3px 9px; }
+
+.notice-inline { margin: 0 0 10px; }
+.token {
+  margin: 8px 0 0; padding: 8px 10px; border-radius: var(--radius-sm);
+  background: var(--bg-2); color: var(--ink); font-size: 12px;
+  white-space: pre-wrap; word-break: break-all; font-family: var(--mono);
+}
+.token code { font-size: inherit; }
+
 .track-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .track-row .btn { font-size: 12.5px; padding: 5px 10px; }
 .track-row .badge { margin-left: 5px; }

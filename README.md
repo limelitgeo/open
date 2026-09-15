@@ -248,10 +248,12 @@ Claude Desktop or Claude Code:
 ```
 
 Remote clients point at `limelit serve` and its streamable HTTP endpoint at
-`/mcp`. Set `LIMELIT_MCP_TOKEN` and send it as `Authorization: Bearer <token>`.
-Until that variable is set the endpoint refuses every request: an open MCP
-endpoint would hand anyone who can reach the port every answer you have
-stored.
+`/mcp`, sending a bearer token as `Authorization: Bearer <token>`. Generate
+the token in Settings (it is shown once and stored encrypted; Rotate and
+Forget take effect on the next request, no restart), or set
+`LIMELIT_MCP_TOKEN`, which wins over a generated one. Until a token exists the
+endpoint refuses every request: an open MCP endpoint would hand anyone who
+can reach the port every answer you have stored.
 
 Then ask things like:
 
@@ -357,6 +359,12 @@ OLOSTEP_API_KEY
 `LIMELIT_DATA_DIR` sets where the SQLite database lives (default `./data`).
 `LIMELIT_SECRET` is the key that encrypts credentials pasted into the
 dashboard; leave it unset and one is generated beside the database.
+
+Everything under `limits` and `schedule` can also be changed in Settings while
+the server runs; a value saved there wins over the file, and the scheduler
+picks up a change within a minute. Settings also pauses and resumes a target
+(its answers stay, the runner skips it) and shows when each target last
+answered and last failed.
 
 For any schedule more specific than daily or hourly, use your own cron:
 
@@ -468,7 +476,8 @@ limelit upgrade --key <your Limelit Cloud API key>
 ```
 
 It uploads your property, competitors, prompts, answers, mentions, citations
-and fan-out, then prints the Cloud MCP endpoint to point your client at.
+and fan-out, then prints the Cloud MCP endpoint to point your client at. The
+Limelit Cloud page in the dashboard runs the same move from a form.
 
 - **Nothing is deleted here.** The instance keeps everything, so a failed
   import is recoverable and leaving again is a command.

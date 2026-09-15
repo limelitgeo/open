@@ -2,14 +2,14 @@
 <div class="page-head">
   <div>
     <h1>Settings</h1>
-    <p class="lede">Pick the engines you want tracked, connect the provider that reaches them, and set a ceiling on how much runs in a day.</p>
+    <p class="lede">Pick the engines you want tracked, connect the provider that reaches them, decide how often a pass runs, and set a ceiling on how much runs in a day.</p>
   </div>
 </div>
 
 <div class="card">
   <div class="card-head">
     <h2>Engines</h2>
-    <span class="badge">{{len .Targets}} tracked</span>
+    <span class="badge">{{.Tracked}} tracked{{if .Paused}}, {{.Paused}} paused{{end}}</span>
   </div>
   <p class="hint" style="margin:0 0 16px">A target is one engine reached one way: the vendor's model with web search on, or the answer a person sees in the product. They measure different things, so each target is tracked on its own and never averaged with another.</p>
 
@@ -25,15 +25,32 @@
       </div>
 
       {{if $engine.Targets}}
-      <div class="chips">
+      <div class="targets">
         {{range $engine.Targets}}
-        <span class="chip">
-          <code>{{.Spec}}</code>
-          <form method="post" action="/settings/targets/delete">
-            <input type="hidden" name="id" value="{{.ID}}">
-            <button class="chip-x" type="submit" title="Stop tracking this target" aria-label="Stop tracking {{.Spec}}">&times;</button>
-          </form>
-        </span>
+        <div class="target{{if not .Enabled}} target-off{{end}}">
+          <div class="target-main">
+            <code>{{.Spec}}</code>
+            {{if not .Enabled}}<span class="badge">paused</span>{{end}}
+            <span class="hint target-health">{{.Health}}</span>
+          </div>
+          <div class="target-actions">
+            {{if .Enabled}}
+            <form method="post" action="/settings/targets/pause">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="btn btn-ghost btn-sm" type="submit" title="Keep its answers, skip it on the next run">Pause</button>
+            </form>
+            {{else}}
+            <form method="post" action="/settings/targets/resume">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="btn btn-sm" type="submit" title="Include it on the next run">Resume</button>
+            </form>
+            {{end}}
+            <form method="post" action="/settings/targets/delete">
+              <input type="hidden" name="id" value="{{.ID}}">
+              <button class="chip-x" type="submit" title="Remove this target and its answers" aria-label="Remove {{.Spec}}">&times;</button>
+            </form>
+          </div>
+        </div>
         {{end}}
       </div>
       {{end}}
@@ -74,6 +91,7 @@
            accounts the operator holds. */}}
       <p class="hint">Credentials are not shown on a public demo.</p>
     {{else}}
+    {{with index $.KeyResults .Name}}<div class="notice notice-{{.Kind}} notice-inline" role="status">{{.Text}}</div>{{end}}
     <form method="post" action="/settings/keys" class="provider-form">
       <input type="hidden" name="provider" value="{{.Name}}">
       {{range .Credentials}}
@@ -85,17 +103,42 @@
         <span class="hint">{{.Status}}</span>
       </div>
       {{end}}
-      <button class="btn" type="submit">Save</button>
+      {{if .Available}}<button class="btn" type="submit" title="Saves, then checks the key with the vendor">Save and test</button>{{else}}<button class="btn" type="submit">Save</button>{{end}}
     </form>
-    {{if .Available}}
-    <form method="post" action="/settings/keys/test" style="margin-top:8px">
-      <input type="hidden" name="provider" value="{{.Name}}">
-      <button class="btn btn-ghost" type="submit">Test this key</button>
-    </form>
-    {{end}}
+    <div class="btn-row" style="margin-top:8px">
+      {{if .Available}}
+      <form method="post" action="/settings/keys/test">
+        <input type="hidden" name="provider" value="{{.Name}}">
+        <button class="btn btn-ghost" type="submit">Test this key</button>
+      </form>
+      {{end}}
+      {{if .AnySaved}}
+      <form method="post" action="/settings/keys/forget">
+        <input type="hidden" name="provider" value="{{.Name}}">
+        <button class="btn btn-ghost" type="submit" title="Remove the saved key from this machine">Forget saved key</button>
+      </form>
+      {{end}}
+    </div>
     {{end}}
   </div>
   {{end}}
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>Schedule</h2></div>
+  <form method="post" action="/settings/schedule">
+    <div class="field" style="max-width:220px">
+      <label for="schedule">Run a pass</label>
+      <select id="schedule" name="schedule">
+        <option value="daily"{{if eq .Schedule "daily"}} selected{{end}}>daily</option>
+        <option value="hourly"{{if eq .Schedule "hourly"}} selected{{end}}>hourly</option>
+        <option value="off"{{if eq .Schedule "off"}} selected{{end}}>off</option>
+      </select>
+      {{if .NextRun}}<div class="hint">{{.NextRun}}</div>{{end}}
+    </div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn" type="submit">Save</button></div>
+  </form>
+  <p class="hint">A pass asks every active prompt of every tracked target, up to the ceiling below. It runs inside <code>limelit serve</code>, so the server has to be up; for anything finer than daily or hourly, run <code>limelit run</code> from your own cron.</p>
 </div>
 
 <div class="card">
@@ -109,6 +152,41 @@
     <div class="btn-row" style="margin-top:14px"><button class="btn" type="submit">Save</button></div>
   </form>
   <p class="hint">A ceiling on surprise, not a budget. Nothing here converts anything to money.</p>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>MCP over HTTP</h2>
+    {{if not .Demo}}<span class="badge">{{.MCP.Status}}</span>{{end}}
+  </div>
+  {{if .Demo}}
+  <p class="hint">The token surface is not shown on a public demo.</p>
+  {{else}}
+  <p class="hint" style="margin:0 0 12px">An MCP client that connects to this running instance sends a bearer token with every request. Without one the endpoint refuses everything. <code>limelit mcp</code> over stdio needs no token.</p>
+
+  {{if .MCP.NewToken}}
+  <div class="notice notice-ok" role="status">
+    <strong>Copy this token now.</strong> It is stored encrypted and this is the only time it is shown.
+    <pre class="token"><code>{{.MCP.NewToken}}</code></pre>
+    <div class="hint" style="margin-top:8px">Client configuration:</div>
+    <pre class="token"><code>{"mcpServers":{"limelit":{"url":"{{.MCP.URL}}","headers":{"Authorization":"Bearer {{.MCP.NewToken}}"}}}}</code></pre>
+  </div>
+  {{else if .MCP.FromEnv}}
+  <p class="hint">The token comes from <code>{{.MCP.TokenEnv}}</code> in the environment, which always wins over one saved here. Change it there and restart.</p>
+  {{else}}
+  <div class="btn-row">
+    <form method="post" action="/settings/mcp/rotate">
+      <button class="btn" type="submit">{{if .MCP.Saved}}Rotate token{{else}}Generate token{{end}}</button>
+    </form>
+    {{if .MCP.Saved}}
+    <form method="post" action="/settings/mcp/forget">
+      <button class="btn btn-ghost" type="submit" title="Close the HTTP endpoint">Forget token</button>
+    </form>
+    {{end}}
+  </div>
+  {{if .MCP.Saved}}<p class="hint">Generated {{.MCP.SavedAt}}. Rotating replaces it on the next request, no restart needed. Endpoint: <code>{{.MCP.URL}}</code>.</p>{{end}}
+  {{end}}
+  {{end}}
 </div>
 
 <details class="card">

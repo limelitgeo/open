@@ -14,9 +14,12 @@ package ui
 // the scheduler is the whole reason the demo has data.
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/limelitgeo/open/internal/config"
 )
 
 // DemoEnv turns demo mode on. Any non-empty value.
@@ -75,13 +78,7 @@ func (a *App) noSetup(next http.HandlerFunc) http.HandlerFunc {
 
 // scheduled reports whether this instance runs passes on its own. The demo
 // banner claims a schedule only when there is one.
-func (a *App) scheduled() bool {
-	if a.cfg == nil {
-		return false
-	}
-	switch strings.ToLower(strings.TrimSpace(a.cfg.Schedule)) {
-	case "daily", "hourly":
-		return true
-	}
-	return false
+func (a *App) scheduled(ctx context.Context) bool {
+	_, ok := config.ScheduleInterval(a.ScheduleMode(ctx))
+	return ok
 }

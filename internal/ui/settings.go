@@ -5,14 +5,20 @@ package ui
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/limelitgeo/open/internal/config"
 	"github.com/limelitgeo/open/internal/credentials"
 	"github.com/limelitgeo/open/internal/engines"
+	"github.com/limelitgeo/open/internal/mcpserver"
 	"github.com/limelitgeo/open/internal/provider"
 	"github.com/limelitgeo/open/internal/store"
 	"github.com/limelitgeo/open/internal/target"
@@ -35,7 +41,15 @@ func (a *App) buildSettings(r *http.Request, base Base) (SettingsPage, error) {
 	if err != nil {
 		return SettingsPage{}, err
 	}
+	health, err := a.db.TargetHealths(ctx)
+	if err != nil {
+		return SettingsPage{}, err
+	}
 	today, err := a.db.RunsToday(ctx)
+	if err != nil {
+		return SettingsPage{}, err
+	}
+	counts, err := a.db.Counts(ctx)
 	if err != nil {
 		return SettingsPage{}, err
 	}
@@ -43,21 +57,37 @@ func (a *App) buildSettings(r *http.Request, base Base) (SettingsPage, error) {
 	byEngine := map[string][]TargetView{}
 	var flat []TargetView
 	for _, t := range stored {
-		v := TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access}
+		v := TargetView{ID: t.ID, Spec: t.Spec, Access: t.Access, Enabled: t.Enabled, Health: healthLine(health[t.ID])}
 		if e, ok := engines.Lookup(t.Engine); ok {
 			v.EngineLabel = e.Label
 		}
 		byEngine[t.Engine] = append(byEngine[t.Engine], v)
 		flat = append(flat, v)
 	}
+	var tracked, paused int
+	for _, v := range flat {
+		if v.Enabled {
+			tracked++
+		} else {
+			paused++
+		}
+	}
 
+	mode := a.ScheduleMode(ctx)
 	page := SettingsPage{
 		Base:          base,
 		Targets:       flat,
+		Tracked:       tracked,
+		Paused:        paused,
 		EngineList:    strings.Join(engines.IDs(), ", "),
 		ProviderNames: strings.Join(a.registry.Names(), ", "),
 		RunsPerDay:    a.runsPerDay(ctx),
 		RunsToday:     today,
+		Schedule:      mode,
+		NextRun:       nextRunLine(mode, counts.LastChatAt, time.Now().UTC()),
+	}
+	if !a.demo {
+		page.MCP = a.mcpView(r)
 	}
 
 	for _, e := range engines.All() {
@@ -117,7 +147,9 @@ func (a *App) providerCards(ctx context.Context) []ProviderKeyCard {
 			card.Reason = "not built yet"
 		}
 		for _, name := range c.Credentials {
-			card.Credentials = append(card.Credentials, a.credentialView(ctx, name))
+			view := a.credentialView(ctx, name)
+			card.AnySaved = card.AnySaved || view.Saved
+			card.Credentials = append(card.Credentials, view)
 		}
 		out = append(out, card)
 	}
@@ -126,12 +158,13 @@ func (a *App) providerCards(ctx context.Context) []ProviderKeyCard {
 
 func (a *App) credentialView(ctx context.Context, name string) CredentialView {
 	v := CredentialView{Name: name, Status: credNotSet}
-	if config.Credential(name) != "" {
-		v.FromEnv, v.Status = true, credEnv
-		return v
-	}
+	// Saved is reported even when the environment wins, so a stored value
+	// that can no longer take effect can still be forgotten.
 	if stored, err := a.db.Setting(ctx, credentialPrefix+name); err == nil && stored != "" {
 		v.Saved, v.Status = true, credSaved
+	}
+	if config.Credential(name) != "" {
+		v.FromEnv, v.Status = true, credEnv
 	}
 	return v
 }
@@ -168,6 +201,31 @@ func (a *App) settingsWithFlash(w http.ResponseWriter, r *http.Request, flash Fl
 		a.fail(w, r, err)
 		return
 	}
+	a.write(w, r, "settings", page)
+}
+
+// settingsWithKeyResult re-renders settings with one provider's outcome shown
+// inside that provider's card. A saved key that the vendor then rejects is
+// the moment the user is looking at the field, so the answer goes there.
+func (a *App) settingsWithKeyResult(w http.ResponseWriter, r *http.Request, name string, result Flash) {
+	a.settingsWith(w, r, func(p *SettingsPage) {
+		p.KeyResults = map[string]*Flash{name: &result}
+	})
+}
+
+// settingsWith renders settings after letting the caller adjust the page.
+func (a *App) settingsWith(w http.ResponseWriter, r *http.Request, adjust func(*SettingsPage)) {
+	base, _, err := a.base(r, "Settings", "settings")
+	if err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	page, err := a.buildSettings(r, base)
+	if err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	adjust(&page)
 	a.write(w, r, "settings", page)
 }
 
@@ -209,6 +267,22 @@ func (a *App) addTargetSpec(w http.ResponseWriter, r *http.Request, spec string)
 		return
 	}
 	access, _ := parsed.Access(a.registry)
+	// AddTarget re-enables a spec that is already stored, so the flash has
+	// to say which of the three things happened: a paused target came back,
+	// a tracked one was left alone, or a new one was added.
+	flash := "target-added"
+	if existing, err := a.db.Targets(r.Context(), false); err == nil {
+		for _, t := range existing {
+			if t.Spec != parsed.String() {
+				continue
+			}
+			if t.Enabled {
+				flash = "target-kept"
+			} else {
+				flash = "target-resumed"
+			}
+		}
+	}
 	if _, err := a.db.AddTarget(r.Context(), store.Target{
 		Spec: parsed.String(), Engine: parsed.Engine, Provider: parsed.Provider,
 		Model: parsed.Model, Online: parsed.Online, Access: string(access),
@@ -216,7 +290,7 @@ func (a *App) addTargetSpec(w http.ResponseWriter, r *http.Request, spec string)
 		a.fail(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/settings?flash=target-added", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?flash="+flash, http.StatusSeeOther)
 }
 
 func (a *App) deleteTarget(w http.ResponseWriter, r *http.Request) {
@@ -226,6 +300,67 @@ func (a *App) deleteTarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/settings?flash=target-removed", http.StatusSeeOther)
+}
+
+// setTargetEnabled is Pause and Resume. Pausing keeps the target and every
+// answer it recorded; only the runner stops asking it.
+func (a *App) setTargetEnabled(enabled bool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+		err := a.db.SetTargetEnabled(r.Context(), id, enabled)
+		if errors.Is(err, store.ErrNotFound) {
+			http.Redirect(w, r, "/settings", http.StatusSeeOther)
+			return
+		}
+		if err != nil {
+			a.fail(w, r, err)
+			return
+		}
+		flash := "target-paused"
+		if enabled {
+			flash = "target-resumed"
+		}
+		http.Redirect(w, r, "/settings?flash="+flash, http.StatusSeeOther)
+	}
+}
+
+// healthLine is one sentence on a target's recent record: when it last
+// answered, and when and why it last failed if that is more recent.
+func healthLine(h store.TargetHealth) string {
+	if h.LastOK == "" && h.LastFailed == "" {
+		return "never run"
+	}
+	var parts []string
+	if h.LastOK != "" {
+		parts = append(parts, "last answer "+shortStamp(h.LastOK))
+	} else {
+		parts = append(parts, "no answer yet")
+	}
+	if h.LastFailed != "" && h.LastFailed >= h.LastOK {
+		fail := "last failure " + shortStamp(h.LastFailed)
+		if msg := strings.TrimSpace(h.LastError); msg != "" {
+			fail += ": " + clip(msg, 90)
+		}
+		parts = append(parts, fail)
+	}
+	return strings.Join(parts, "; ")
+}
+
+// shortStamp renders a store timestamp ("2006-01-02 15:04:05", UTC) as a day
+// and time a person can read at a glance.
+func shortStamp(stamp string) string {
+	t, err := time.Parse("2006-01-02 15:04:05", stamp)
+	if err != nil {
+		return stamp
+	}
+	return t.Format("Jan 2, 15:04") + " UTC"
+}
+
+func clip(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return strings.TrimSpace(s[:n]) + "..."
 }
 
 // saveKeys stores the credentials for one provider, encrypted.
@@ -246,10 +381,55 @@ func (a *App) saveKeys(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if saved == 0 {
-		a.settingsWithFlash(w, r, Flash{Kind: "warn", Text: "Nothing was saved: the field was empty."})
+		a.settingsWithKeyResult(w, r, name, Flash{Kind: "warn", Text: "Nothing was saved: the field was empty."})
 		return
 	}
-	http.Redirect(w, r, "/settings?flash=key-saved", http.StatusSeeOther)
+	// Saved, now proved. A key that the vendor rejects is reported here,
+	// under the field, rather than at the next run when nobody is watching.
+	// It stays saved either way: the usual cause of a rejection is an
+	// account problem the user fixes on the vendor's side, and Forget is one
+	// click away if the key itself was wrong.
+	if _, built := a.registry.Lookup(name); !built {
+		a.settingsWithKeyResult(w, r, name, Flash{Kind: "ok",
+			Text: "Saved. " + entry.Label + " is not built into this binary yet, so the key could not be tested."})
+		return
+	}
+	if err := a.proveKey(r.Context(), name); err != nil {
+		a.settingsWithKeyResult(w, r, name, Flash{Kind: "error", Text: "Saved, but " + entry.Label + " did not accept the key: " + err.Error()})
+		return
+	}
+	a.settingsWithKeyResult(w, r, name, Flash{Kind: "ok", Text: "Saved. " + entry.Label + " accepted the key."})
+}
+
+// forgetKeys removes a provider's stored credentials. An environment value is
+// untouched: it is not this page's to remove, and the card says so.
+func (a *App) forgetKeys(w http.ResponseWriter, r *http.Request) {
+	name := strings.TrimSpace(r.FormValue("provider"))
+	entry, ok := provider.CatalogEntryFor(name)
+	if !ok {
+		http.Redirect(w, r, "/settings", http.StatusSeeOther)
+		return
+	}
+	for _, cred := range entry.Credentials {
+		if err := a.db.DeleteSetting(r.Context(), credentialPrefix+cred); err != nil {
+			a.fail(w, r, err)
+			return
+		}
+	}
+	a.settingsWithKeyResult(w, r, name, Flash{Kind: "ok", Text: "Forgotten. " + entry.Label + " has no saved key on this machine."})
+}
+
+// proveKey presses the provider's cheapest authenticated call with the
+// credentials a run would use. The error is the provider's own typed one.
+func (a *App) proveKey(ctx context.Context, name string) error {
+	if missing := a.registry.MissingCredentials(name, a.credentials(ctx)); len(missing) > 0 {
+		return errors.New(strings.Join(missing, " and ") + " is not set yet.")
+	}
+	p, err := a.registry.New(name, a.credentials(ctx))
+	if err != nil {
+		return err
+	}
+	return p.Test(ctx)
 }
 
 // storeCredentials seals and stores whatever fields the form carried for one
@@ -289,22 +469,15 @@ func (a *App) testKeys(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/settings", http.StatusSeeOther)
 		return
 	}
-	ctx := r.Context()
-
-	if missing := a.registry.MissingCredentials(name, a.credentials(ctx)); len(missing) > 0 {
-		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: strings.Join(missing, " and ") + " is not set yet."})
+	if missing := a.registry.MissingCredentials(name, a.credentials(r.Context())); len(missing) > 0 {
+		a.settingsWithKeyResult(w, r, name, Flash{Kind: "error", Text: strings.Join(missing, " and ") + " is not set yet."})
 		return
 	}
-	p, err := a.registry.New(name, a.credentials(ctx))
-	if err != nil {
-		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: entry.Label + " did not accept the key: " + err.Error()})
+	if err := a.proveKey(r.Context(), name); err != nil {
+		a.settingsWithKeyResult(w, r, name, Flash{Kind: "error", Text: entry.Label + " did not accept the key: " + err.Error()})
 		return
 	}
-	if err := p.Test(ctx); err != nil {
-		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: entry.Label + " did not accept the key: " + err.Error()})
-		return
-	}
-	a.settingsWithFlash(w, r, Flash{Kind: "ok", Text: entry.Label + " accepted the key."})
+	a.settingsWithKeyResult(w, r, name, Flash{Kind: "ok", Text: entry.Label + " accepted the key."})
 }
 
 func (a *App) saveLimits(w http.ResponseWriter, r *http.Request) {
@@ -320,6 +493,10 @@ func (a *App) saveLimits(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/settings?flash=limits-saved", http.StatusSeeOther)
 }
 
+// RunsPerDay is the ceiling in force: Settings, else limelit.yaml, else the
+// default. Exported for the scheduler.
+func (a *App) RunsPerDay(ctx context.Context) int { return a.runsPerDay(ctx) }
+
 func (a *App) runsPerDay(ctx context.Context) int {
 	if v, err := a.db.Setting(ctx, settingRunsPerDay); err == nil && v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 {
@@ -330,4 +507,139 @@ func (a *App) runsPerDay(ctx context.Context) int {
 		return a.cfg.Limits.RunsPerDay
 	}
 	return config.DefaultRunsPerDay
+}
+
+// saveSchedule stores the cadence. The scheduler re-reads it, so the change
+// takes effect within a minute and without a restart.
+func (a *App) saveSchedule(w http.ResponseWriter, r *http.Request) {
+	mode := config.NormalizeSchedule(r.FormValue("schedule"))
+	if !config.ValidSchedule(mode) {
+		a.settingsWithFlash(w, r, Flash{Kind: "error", Text: "The schedule has to be daily, hourly or off."})
+		return
+	}
+	if err := a.db.SetSetting(r.Context(), settingSchedule, mode); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/settings?flash=schedule-saved", http.StatusSeeOther)
+}
+
+// ScheduleMode is the cadence in force: what Settings stored, else what
+// limelit.yaml says, else off. Exported because the scheduler in cmd/limelit
+// reads it on every wake, so a change made here is picked up without a
+// restart.
+func (a *App) ScheduleMode(ctx context.Context) string {
+	if v, err := a.db.Setting(ctx, settingSchedule); err == nil && v != "" {
+		return config.NormalizeSchedule(v)
+	}
+	if a.cfg != nil {
+		return config.NormalizeSchedule(a.cfg.Schedule)
+	}
+	return config.ScheduleOff
+}
+
+// nextRunLine says when the next automatic pass is due, from the last
+// recorded answer plus the interval, which is the same rule the scheduler
+// uses. "" when nothing runs on its own.
+func nextRunLine(mode, lastChatAt string, now time.Time) string {
+	every, ok := config.ScheduleInterval(mode)
+	if !ok {
+		return ""
+	}
+	last, err := time.Parse("2006-01-02 15:04:05", lastChatAt)
+	if lastChatAt == "" || err != nil {
+		return "The first pass runs shortly after the server starts."
+	}
+	due := last.Add(every)
+	if !due.After(now) {
+		return "A pass is due now and starts within a minute while the server is running."
+	}
+	return "Next pass around " + shortStamp(due.UTC().Format("2006-01-02 15:04:05")) + ", while the server is running."
+}
+
+// mcpView reports the bearer token's status without the token.
+func (a *App) mcpView(r *http.Request) MCPView {
+	v := MCPView{Status: credNotSet, URL: mcpURL(r), TokenEnv: mcpserver.TokenEnv}
+	if strings.TrimSpace(os.Getenv(mcpserver.TokenEnv)) != "" {
+		v.FromEnv, v.Status = true, credEnv
+		return v
+	}
+	ctx := r.Context()
+	if sealed, err := a.db.Setting(ctx, settingMCPToken); err == nil && sealed != "" {
+		v.Saved, v.Status = true, credSaved
+		if at, err := a.db.SettingUpdatedAt(ctx, settingMCPToken); err == nil && at != "" {
+			v.SavedAt = shortStamp(at)
+		}
+	}
+	return v
+}
+
+// mcpURL is the endpoint as this request reached it, so the snippet a user
+// copies points at the address they are already using.
+func mcpURL(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
+		scheme = "https"
+	}
+	host := r.Host
+	if host == "" {
+		host = "localhost:1515"
+	}
+	return scheme + "://" + host + "/mcp"
+}
+
+// MCPToken is the bearer token MCP over HTTP checks on every request: the
+// environment when set, else the token generated in Settings, else "" which
+// keeps the endpoint closed. Exported for the HTTP server.
+func (a *App) MCPToken() string {
+	if v := strings.TrimSpace(os.Getenv(mcpserver.TokenEnv)); v != "" {
+		return v
+	}
+	sealed, err := a.db.Setting(context.Background(), settingMCPToken)
+	if err != nil || sealed == "" {
+		return ""
+	}
+	token, err := a.keys.Unseal(sealed)
+	if err != nil {
+		a.log.Error("the stored MCP token could not be decrypted", "error", err)
+		return ""
+	}
+	return token
+}
+
+// rotateMCPToken generates a token, or replaces the one stored. The value is
+// shown on the page that answers this request and nowhere else afterwards:
+// it is stored sealed, and there is no route that reads it back.
+func (a *App) rotateMCPToken(w http.ResponseWriter, r *http.Request) {
+	if strings.TrimSpace(os.Getenv(mcpserver.TokenEnv)) != "" {
+		a.settingsWithFlash(w, r, Flash{Kind: "warn", Text: "The token is set in the environment (" + mcpserver.TokenEnv + "), so it is changed there, not here."})
+		return
+	}
+	raw := make([]byte, 24)
+	if _, err := rand.Read(raw); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	token := hex.EncodeToString(raw)
+	sealed, err := a.keys.Seal(token)
+	if err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	if err := a.db.SetSetting(r.Context(), settingMCPToken, sealed); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	a.settingsWith(w, r, func(p *SettingsPage) {
+		p.MCP.NewToken = token
+	})
+}
+
+// forgetMCPToken closes the HTTP endpoint again.
+func (a *App) forgetMCPToken(w http.ResponseWriter, r *http.Request) {
+	if err := a.db.DeleteSetting(r.Context(), settingMCPToken); err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/settings?flash=token-forgotten", http.StatusSeeOther)
 }
