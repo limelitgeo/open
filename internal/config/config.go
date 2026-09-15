@@ -130,9 +130,8 @@ func DatabasePath() string { return filepath.Join(DataDir(), "limelit.db") }
 // variable always wins over a stored value.
 func Credential(name string) string { return strings.TrimSpace(os.Getenv(name)) }
 
-// Schedule modes. Two intervals rather than a cron expression, because cron
-// would mean a dependency and a syntax to learn for a choice that is really
-// "how often". Anything else is `limelit run` from the system's own cron.
+// Schedule modes. Two intervals and off, nothing finer: the choice is really
+// "how often", and two answers cover it without a syntax to learn.
 const (
 	ScheduleOff    = "off"
 	ScheduleDaily  = "daily"

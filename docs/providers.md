@@ -193,8 +193,7 @@ targets:
 limits:
   runs_per_day: 200
 
-schedule: daily   # daily, hourly, or off. Anything else: use your own cron
-                  # with `limelit run`
+schedule: daily   # daily, hourly, or off
 ```
 
 Credentials:

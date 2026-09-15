@@ -7,7 +7,7 @@
 //
 //	limelit serve     UI + JSON API + MCP over HTTP + scheduler
 //	limelit mcp       MCP over stdio, for a local Claude
-//	limelit run       one evaluation pass, for cron
+//	limelit run       one evaluation pass, then exit
 //	limelit export    JSON or CSV of everything
 //	limelit upgrade   move to Limelit Cloud
 //	limelit version   version and commit
@@ -55,7 +55,7 @@ Usage:
 Commands:
   serve     run the dashboard, JSON API, MCP endpoint and scheduler
   mcp       run the MCP server over stdio (for Claude Desktop / Claude Code)
-  run       run one evaluation pass and exit (for cron)
+  run       run one evaluation pass and exit
   export    write everything this instance knows to stdout
   upgrade   move this instance to Limelit Cloud
   version   print version and build info
@@ -185,10 +185,9 @@ func cmdServe(ctx context.Context, args []string) error {
 
 // startSchedule runs a pass on an interval, and re-reads the interval.
 //
-// Two intervals rather than a cron expression, because cron would mean a
-// dependency and a syntax to learn for a choice that is really "how often".
-// Anything else is `limelit run` from the system's own cron, which is also
-// the only way to schedule when the dashboard is not running.
+// Two intervals and off, nothing finer: the choice is really "how often",
+// and two answers cover it without a syntax to learn. `limelit run` does one
+// pass on demand.
 //
 // The mode comes from a function, not a value, because Settings can change
 // it while the server runs. The loop wakes at least every schedulePoll to ask
@@ -346,8 +345,8 @@ func cmdMCP(ctx context.Context, args []string) error {
 	return srv.Run(ctx, &mcp.StdioTransport{})
 }
 
-// cmdRun executes one evaluation pass and exits, which is the shape a system
-// cron wants.
+// cmdRun executes one evaluation pass and exits: a manual check, or one
+// target on its own.
 func cmdRun(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	targetSpec := fs.String("target", "", "run only this target (engine:provider[:model][:online])")
@@ -391,7 +390,7 @@ func cmdRun(ctx context.Context, args []string) error {
 	fmt.Printf("evaluation %d: %d of %d answers, %d failed, in %s\n",
 		res.EvaluationID, res.Completed, res.Planned, res.Failed, res.Duration.Round(time.Second))
 	if res.Failed > 0 {
-		// A cron job whose provider key expired should not report success.
+		// A pass whose provider key expired should not report success.
 		return fmt.Errorf("%d of %d answers failed", res.Failed, res.Planned)
 	}
 	return nil

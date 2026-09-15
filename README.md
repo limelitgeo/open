@@ -101,8 +101,9 @@ What works today, verified against a live instance:
 - **MCP.** `limelit mcp` over stdio, or streamable HTTP with a bearer token.
   Twelve tools on Limelit Cloud's names, so a conversation written against this
   server keeps working after an upgrade.
-- **Scheduling.** Daily or hourly inside `limelit serve`, or `limelit run` from
-  your own cron, with a hard `runs_per_day` ceiling checked before any spend.
+- **Scheduling.** Daily or hourly inside `limelit serve`, or `limelit run` for
+  one pass on demand, with a hard `runs_per_day` ceiling checked before any
+  spend.
 
 - **Export.** `limelit export` writes the whole instance as one JSON document
   or a directory of CSVs, streaming, with a `--since` filter that reaches the
@@ -187,7 +188,7 @@ Limelit Open takes the other side of it:
 | **MCP server**: stdio and streamable HTTP, so Claude can read your visibility data and answer in plain language | **working** |
 | **Dashboard**: embedded in the binary, no Node, no separate frontend to deploy | **working** |
 | **Evaluation runner**: every active prompt against every enabled target, with usage counters and a hard `runs_per_day` ceiling | **working** |
-| **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` from your own cron | **working** |
+| **Scheduler**: daily or hourly in `limelit serve`, or `limelit run` for one pass on demand | **working** |
 | **Export**: JSON or CSV of everything, the same payload the Cloud upgrade sends | **working** |
 | **One-command upgrade**: move your property, prompts and history to Limelit Cloud | **working** |
 | **Query fan-out**: the searches an engine actually ran on the way to its answer, which are often not the question you asked | **working** |
@@ -264,7 +265,7 @@ every number means.
 ```
 limelit serve     dashboard, JSON API, MCP over HTTP, and the scheduler
 limelit mcp       MCP over stdio, for Claude Desktop and Claude Code
-limelit run       one evaluation pass, then exit (for cron)
+limelit run       one evaluation pass, then exit
 limelit export    write everything this instance knows to stdout
 limelit upgrade   move this instance to Limelit Cloud
 limelit version   version and build info
@@ -404,7 +405,7 @@ picks up a change within a minute. Settings also pauses and resumes a target
 (its answers stay, the runner skips it) and shows when each target last
 answered and last failed.
 
-For any schedule more specific than daily or hourly, use your own cron:
+One pass on demand, or one target on its own:
 
 ```bash
 limelit run --target chatgpt:openai:online
