@@ -50,6 +50,15 @@ those.
 reached is a property of the target, shown where targets are configured. Two
 targets on one engine are two columns, never an average.
 
+## Picking up an issue
+
+- **Comment to ask, and a maintainer assigns you.** The issue is yours once
+  you are assigned, not when you comment.
+- **One open issue per person** until your first PR merges. After that, ask
+  for the next one.
+- **No draft PR after 7 days and the issue goes back to open**, so someone
+  else can take it. Say so in the issue if you need longer.
+
 ## Before you push
 
 CI on this repository is not currently running, so the local gate is the
